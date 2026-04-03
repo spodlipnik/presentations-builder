@@ -57,7 +57,25 @@ If the user confirms they have placed files there, read and analyze them to gene
 
 ### 6. Check dependencies
 
-Verify `poppler-utils` is installed by running:
+#### 6a. Required Claude Code plugins
+
+Talk Builder depends on the official Anthropic document generation skills. Check if they are installed and guide the user if not:
+
+**PPTX skill** (for presentation generation):
+- Required for `/talk-slides`
+- Install via: `/plugin` → select `claude-plugins-official` marketplace → install `pptx`
+
+**DOCX skill** (for document generation):
+- Required for `/talk-study-doc` and `/talk-script`
+- Install via: `/plugin` → select `claude-plugins-official` marketplace → install `docx`
+
+Tell the user:
+"Talk Builder needs the official PPTX and DOCX skills from Anthropic to generate presentation and document files. Please install them from the `claude-plugins-official` marketplace using `/plugin` if you haven't already."
+
+#### 6b. System dependencies
+
+**poppler-utils** (for image extraction from PDFs):
+Verify installed by running:
 
 ```bash
 which pdfimages && which pdftoppm
@@ -65,6 +83,26 @@ which pdfimages && which pdftoppm
 
 If not found, tell the user:
 "Talk Builder needs poppler-utils for extracting images from PDFs. Install with: `brew install poppler`"
+
+**Node.js** (required by PPTX and DOCX skills):
+Verify installed by running:
+
+```bash
+which node && node --version
+```
+
+If not found, tell the user:
+"The PPTX and DOCX skills require Node.js. Install with: `brew install node`"
+
+**LibreOffice** (optional, for visual QA of generated presentations):
+Verify installed by running:
+
+```bash
+which soffice
+```
+
+If not found, tell the user:
+"LibreOffice is optional but recommended for visual QA of generated presentations. Install with: `brew install --cask libreoffice`"
 
 ### 7. Generate config.yaml
 
