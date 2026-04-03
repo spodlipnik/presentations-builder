@@ -17,6 +17,19 @@ Generate a comprehensive speaker script with two sections: a preparation table a
 - Use conversational, natural language — short sentences, no jargon unless necessary
 - The script must feel like natural speech, not written text
 
+## Generation Method
+
+**Requires:** The official `docx` skill from `claude-plugins-official` must be installed.
+
+Use the **docx-js approach** described in the official `docx` skill to create the document programmatically. Refer to the `docx` skill's `docx-js.md` reference for the full API.
+
+Key generation instructions:
+- Install docx if not available: `npm install -g docx`
+- Write a Node.js script that creates the document using the docx library
+- Tables must use `WidthType.DXA` (not PERCENTAGE) for cross-platform compatibility
+- Use the `docx` skill's guidance for formatting, tables, and page setup
+- After creation, validate with the `docx` skill's validation tools if available
+
 ## Output: speaker-script.docx
 
 ### Section 1: Preparation Table

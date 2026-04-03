@@ -33,6 +33,16 @@ The PPTX is a FIRST DRAFT. The user will fine-tune in Keynote. Focus on:
 
 ### Step 2: Generate PPTX
 
+**Requires:** The official `pptx` skill from `claude-plugins-official` must be installed.
+
+Use the **PptxGenJS approach** described in the official `pptx` skill to create the presentation from scratch. Refer to the `pptx` skill's `pptxgenjs.md` reference for the full API.
+
+Key generation instructions:
+- Install PptxGenJS if not available: `npm install -g pptxgenjs`
+- Write a Node.js script that creates the presentation programmatically
+- Apply the user's fonts, colors, and background from `config.yaml` / `talk.yaml`
+- Use the `pptx` skill's design guidance for layout, spacing, and visual hierarchy
+
 Create `presentation.pptx` following `narrative.md` slide by slide:
 
 For each slide:
@@ -43,13 +53,21 @@ For each slide:
 - Follow one-slide-one-message principle
 - Apply slide-design-guide principles (glance test, minimal text, visual evidence)
 
-### Step 3: Insert fixed slides
+### Step 3: Visual QA (optional but recommended)
+
+If LibreOffice is available, follow the `pptx` skill's QA workflow:
+1. Convert PPTX to PDF via `soffice`
+2. Convert PDF to per-slide JPGs via `pdftoppm`
+3. Visually inspect each slide
+4. Fix any issues found
+
+### Step 4: Insert fixed slides
 
 If `talk.yaml` specifies fixed slides (disclosures, contact, acknowledgments):
 - Read corresponding files from the user's `fixed-slides/` directory
 - Insert at appropriate positions (disclosures near start, contact at end)
 
-### Step 4: Present for review
+### Step 5: Present for review
 
 Tell the user:
 "PPTX generated at `presentation.pptx`. This is a first draft — open it in Keynote to:

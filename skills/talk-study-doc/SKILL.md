@@ -15,6 +15,18 @@ Generate two DOCX documents for the speaker to study and review the topic in dep
 - ALL content must be in the language specified in config/talk.yaml
 - Every claim must include its reference — do not invent citations
 
+## Generation Method
+
+**Requires:** The official `docx` skill from `claude-plugins-official` must be installed.
+
+Use the **docx-js approach** described in the official `docx` skill to create both documents programmatically. Refer to the `docx` skill's `docx-js.md` reference for the full API.
+
+Key generation instructions:
+- Install docx if not available: `npm install -g docx`
+- Write a Node.js script that creates each document using the docx library
+- Use the `docx` skill's guidance for document structure, tables, formatting, and page setup
+- After creation, validate with the `docx` skill's validation tools if available
+
 ## Output 1: study-document.docx
 
 An exhaustive document covering the topic in depth. Structure:
