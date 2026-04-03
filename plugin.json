@@ -1,0 +1,10 @@
+{
+  "name": "talk-builder",
+  "description": "Multi-skill plugin for building academic and medical presentations with storytelling, from research to PPTX and speaker scripts",
+  "version": "0.1.0",
+  "author": {
+    "name": "Sebastian Podlipnik"
+  },
+  "license": "MIT",
+  "keywords": ["presentations", "academic", "medical", "storytelling", "slides", "pptx", "speaker-script"]
+}

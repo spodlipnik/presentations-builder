@@ -1,0 +1,26 @@
+# Talk Builder — Personal Configuration
+# Copy this file to your assets directory as config.yaml
+# Run /talk-setup to generate this interactively
+
+assets_path: "~/Documents/talk-builder"   # Path chosen during /talk-setup
+
+style:
+  fonts:
+    title: "Montserrat Bold"
+    body: "Open Sans"
+  colors:
+    primary: "#1A365D"
+    accent: "#E53E3E"
+    background: "#FFFFFF"
+  language: "en"
+  narrative_style: "conversational"
+  complexity_default: "moderate"
+
+style_analysis:
+  # Generated automatically by /talk-setup when analyzing example slides
+  layout: ""
+  title_style: ""
+  color_usage: ""
+  typography: ""
+  visual_density: ""
+  notes: ""
