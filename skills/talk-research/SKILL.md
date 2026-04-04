@@ -187,25 +187,44 @@ Don't catalog every single element — only those relevant to the talk's narrati
 **Citation:** Author et al. "Full title." Journal, Year;Vol(Issue):Pages.
 **DOI:** xxx | **PMID:** xxx
 
-**Study Design:** [type, N patients, population, center(s), treatment, duration]
+**Study Design:** [type, N patients, population, center(s), treatment, duration, follow-up]
 
 **Key Findings:**
 [Paragraph-form narrative covering main results with exact numbers —
 sample sizes, effect sizes, p-values, CIs, HRs. Not just "significant 
-difference" but the actual numbers.]
+difference" but the actual numbers. Include primary and secondary endpoints.]
+
+**What this means in plain language:**
+[Translate the numbers into something the speaker can say out loud. 
+"HR 0.58 means that for every 2 patients who die without probiotics, 
+roughly 1 survives with them." This helps the speaker visceralize data 
+for the audience without oversimplifying.]
 
 **Mechanism/Rationale:**
-[What the authors propose as explanation. Important for the speaker 
-to understand WHY, not just WHAT.]
+[What the authors propose as explanation. The biological or clinical 
+reasoning. Important for the speaker to understand WHY, not just WHAT.]
+
+**Key quotes from the paper:**
+[2-3 exact sentences from the paper that the speaker could cite directly.
+Choose quotes that capture the most important insight or the most 
+impactful phrasing. Include page numbers.]
+
+**Connections to other papers in this research:**
+[How this paper relates to others in the evidence base. Does it confirm, 
+contradict, or extend another study? "Confirms Gopalakrishnan 2018 
+findings in a European cohort" or "Contradicts Spencer 2021 — but in 
+humans vs mice, which explains the difference."]
 
 **Limitations:**
-[What the authors acknowledge. What a specialist in the audience 
-might challenge.]
+[What the authors themselves acknowledge. What a specialist in the 
+audience might challenge. Known methodological weaknesses.]
 
-**Impact:** [citation count if notable, how it influenced the field]
+**Impact:** [citation count if notable, how it influenced the field, 
+what studies it spawned or enabled]
 
 **Relevance to YOUR talk:**
-[How this paper specifically serves your core message and narrative]
+[How this paper specifically serves your core message and narrative.
+Which slide or narrative section it belongs to.]
 
 **Visual Elements:**
 [Catalog of figures/tables/illustrations as described above]
