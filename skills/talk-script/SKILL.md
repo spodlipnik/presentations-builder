@@ -1,6 +1,11 @@
 ---
 name: talk-script
 description: Use when generating the speaker script for a presentation — slide-by-slide delivery guide with preparation table and teleprompter format in Markdown. Triggers when /talk detects study-document.md exists but no speaker-script.md.
+disable-model-invocation: true
+allowed-tools:
+  - Read
+  - Write
+  - Glob
 ---
 
 # Talk Builder — Speaker Script
@@ -9,7 +14,7 @@ Generate a comprehensive speaker script in Markdown with two sections: a prepara
 
 ## Important
 
-- Read `references/teleprompter-format.md` in this skill's directory for formatting rules
+- Read `${CLAUDE_SKILL_DIR}/references/teleprompter-format.md` for formatting rules
 - Read `narrative.md` for slide structure, content, and connectors
 - Read `vision.md` for emotional intent
 - Read `talk.yaml` for language preference
@@ -44,7 +49,7 @@ A Markdown table with one row per slide:
 
 ### Section 2: Teleprompter
 
-Full delivery script formatted according to `references/teleprompter-format.md`:
+Full delivery script formatted according to `${CLAUDE_SKILL_DIR}/references/teleprompter-format.md`:
 
 - Short lines (5-7 words)
 - `[PAUSE]` markers
