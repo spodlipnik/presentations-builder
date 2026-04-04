@@ -1,0 +1,18 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "missing=\"\"; which pdftoppm >/dev/null 2>&1 || missing=\"$missing\n  - poppler (brew install poppler) — required for PDF image extraction\"; which node >/dev/null 2>&1 || missing=\"$missing\n  - Node.js (brew install node) — required for PPTX generation\"; if [ -n \"$missing\" ]; then printf '{\"result\": \"warn\", \"message\": \"Talk Builder: missing system dependencies:%s\"}' \"$missing\"; fi"
+          },
+          {
+            "type": "command",
+            "command": "diff -q \"${CLAUDE_PLUGIN_ROOT}/assets/package.json\" \"${CLAUDE_PLUGIN_DATA}/package.json\" >/dev/null 2>&1 || (cp \"${CLAUDE_PLUGIN_ROOT}/assets/package.json\" \"${CLAUDE_PLUGIN_DATA}/\" && cd \"${CLAUDE_PLUGIN_DATA}\" && npm install --silent) || rm -f \"${CLAUDE_PLUGIN_DATA}/package.json\""
+          }
+        ]
+      }
+    ]
+  }
+}
