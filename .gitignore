@@ -1,4 +1,3 @@
 config.yaml
-assets/example-slides/*
-assets/fixed-slides/*
-!assets/README.md
+.DS_Store
+docs/superpowers/
