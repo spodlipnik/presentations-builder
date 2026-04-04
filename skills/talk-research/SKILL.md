@@ -96,6 +96,7 @@ Use PubMed and Consensus (or WebSearch as fallback). For each result, show:
    Key finding: [one sentence]
    Relevance: [how it connects to the vision]
    Priority: [ESSENTIAL / SUPPORTING / OPTIONAL]
+   Full-text: [Open Access / Requires download]
 
 2. [Title] — Author et al., Journal (Year) [IF: X.X]
    ...
@@ -110,16 +111,56 @@ Prioritize by evidence quality (meta-analyses > RCTs > cohort > case series) AND
 
 Ask: "Which of these do you want to include? I've marked my recommendations — the ESSENTIAL ones I'd keep no matter what."
 
-### Step 4: Read user PDFs
+### Step 4: Obtain full-text PDFs
 
-Check `pdfs/` for files. If present:
-- Read each PDF
-- Extract key findings, methodology, conclusions
-- Connect findings to the vision — explain how each paper serves the narrative
+After the user selects papers, try to obtain full-text for each:
 
-Tell the user: "I've read [N] PDFs from your pdfs/ folder. Here's what I found relevant to your vision..."
+1. **Try PubMed full-text** — use `mcp__claude_ai_PubMed__get_full_text_article` for open access papers
+2. **Check for PDFs already in `pdfs/`** — the user may have pre-loaded some
+3. **List papers still missing** — provide a clear download checklist:
 
-### Step 5: Consolidate research.md
+```
+Papers obtained (full-text available):
+  ✓ Gopalakrishnan 2018 — via PubMed Central
+  ✓ Smith 2023 — already in pdfs/
+
+Papers you need to download:
+  ✗ Routy 2023 (Nature Medicine) — DOI: 10.1038/xxx
+  ✗ Davar 2021 (Science) — DOI: 10.1126/xxx
+  
+  Download these and place them in: [working directory]/pdfs/
+```
+
+### Step 5: Manual search pause (Scopus / Google Scholar)
+
+After the automated search, explicitly offer the user time to complement:
+
+"I've found [N] papers via PubMed/Consensus. Before I deep-read everything, this is a good moment to:
+
+- **Search Scopus or Google Scholar** for papers I might have missed (especially recent publications, conference abstracts, or papers in journals not fully indexed in PubMed)
+- **Add your own publications** if relevant
+- **Add papers from colleagues** or recommendations you've received
+
+Take your time — when you've added any extra PDFs to `pdfs/`, just tell me 'ready' and I'll read everything together."
+
+**Wait for the user to come back.** Do not proceed until they confirm. They might need minutes or hours to search Scopus — that's fine.
+
+### Step 6: Deep-read all PDFs
+
+Once the user confirms all PDFs are in place, read EVERY PDF in `pdfs/`:
+
+For each paper, extract:
+- **Exact numbers** — sample sizes, effect sizes, p-values, confidence intervals, hazard ratios
+- **Methodology** — study design, population, follow-up duration
+- **Key conclusions** — in the authors' own words
+- **Relevant figures** — identify figures that could be used in the presentation (mark page numbers and describe content for the assets phase)
+- **Limitations** — what the authors themselves acknowledge
+
+This deep reading is critical — abstracts alone lead to imprecise claims. The full text gives you the exact data the speaker needs to be credible in front of specialists.
+
+Present a summary per paper: "I've read [N] papers. Here's what I found in each..."
+
+### Step 7: Consolidate research.md
 
 Write `research.md` organized by narrative role, not by topic taxonomy:
 
@@ -152,15 +193,23 @@ Evidence quality: [meta-analysis / multiple RCTs / emerging]
 - [What skeptics would say, with sources]
 - [Known limitations of the evidence]
 
+## Figures for Slides (from PDFs)
+| Paper | Page | Description | Relevance |
+|---|---|---|---|
+| [Author Year] | p.4 | [Kaplan-Meier survival curve] | [STAR moment slide] |
+| [Author Year] | p.7 | [Forest plot of meta-analysis] | [Evidence summary slide] |
+
+This table feeds into the `/talk-assets` phase for extraction.
+
 ## Gaps Identified
 - [Areas where more evidence is needed or could strengthen the talk]
 
 ## References
-1. Author et al. "Title." Journal, Year. DOI: xxx / PMID: xxx
+1. Author et al. "Title." Journal, Year;Vol(Issue):Pages. DOI: xxx / PMID: xxx
 2. ...
 ```
 
-### Step 6: Calibrate scope
+### Step 8: Calibrate scope
 
 Guide the user on how much evidence is enough:
 - **10-min talk:** 3-5 key references are plenty
@@ -170,14 +219,15 @@ Guide the user on how much evidence is enough:
 
 These are references that directly appear in or support the narrative — not every paper you read. More is not better. Say: "You have [N] references for a [X]-minute talk. That's [sufficient / a bit light / more than enough]. Want to search for more or are we solid?"
 
-### Step 7: Review together
+### Step 9: Review together
 
 Present the consolidated research. Ask:
 - "Does this evidence support your core message?"
 - "Are there gaps that weaken your argument?"
 - "Any specific aspect you want to dig deeper into?"
+- "Are there enough figures identified for the slides?"
 
-### Step 8: Iterate
+### Step 10: Iterate
 
 If the user wants more:
 - Run additional targeted searches
@@ -186,13 +236,14 @@ If the user wants more:
 
 Continue until the user confirms the evidence base is solid.
 
-### Step 9: Reference verification
+### Step 11: Reference verification
 
 Before finalizing, verify:
 - Every claim has a source with DOI or PMID
-- No fabricated citations — if in doubt, flag it
-- Key statistics are accurately transcribed from sources
-- References section is complete and consistently formatted
+- No fabricated citations — if in doubt, flag it as `[UNVERIFIED]`
+- Key statistics are accurately transcribed from full-text sources (not abstracts)
+- References section is complete with journal, volume, issue, pages
+- Figures table is complete for the assets phase
 
 ## After completion
 
