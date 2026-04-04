@@ -9,91 +9,112 @@ allowed-tools:
 
 # Talk Builder — Vision & Personal Angle
 
-Interactive conversation to capture the speaker's personal vision for the presentation. This is NOT about content — it's about intent, emotion, and differentiation.
+This is the most important phase of Talk Builder. Every great talk starts with a clear personal vision — not a list of slides, but a sense of *why this talk matters* and *what makes it yours*. This phase captures that through a brief creative conversation.
+
+This is NOT about content or evidence (that comes in the research phase). It's about intent, emotion, and what makes the speaker's perspective unique.
 
 ## Important
 
-This phase is conversational and open-ended. Ask one question at a time. Listen actively and probe deeper when the user shares something interesting. The goal is to uncover what makes THIS talk unique — not just another review of the topic.
+- Read `talk.yaml` to understand the topic, audience, and duration.
+- Read `${user_config.assets_path}/config.yaml` for the user's language preference.
+- Use the user's language throughout.
+- Ask one question at a time. Be conversational — react to what the user says, don't just move to the next question mechanically.
+- When the user gives a generic answer, gently push for specificity. The difference between a forgettable talk and a memorable one is in the specifics.
+- Adapt your examples to the user's topic. If they're talking about melanoma, don't give examples about cardiology.
 
-Read `talk.yaml` first to understand the topic, audience, and duration.
+## The Conversation (one question at a time)
 
-## Questions (one at a time, conversational)
+### 1. Core message — the anchor
 
-### 1. Core message
-"If the audience remembers only ONE thing from your talk, what should it be?"
+"If your audience remembers only ONE thing a week after your talk, what should that be?"
 
-Probe deeper if the answer is too generic: "That's a good start, but every talk on this topic could say that. What is YOUR unique angle?"
+This is the hardest question and the most important. Most speakers answer with something too broad ("AI is useful in dermatology"). Your job is to help them sharpen it into something specific and memorable.
 
-### 2. Approach / angle
-"What angle do you want to take?"
-- Clinical focus — practical, applicable tomorrow
-- Research-driven — new data, cutting edge
-- Provocative — challenge conventional thinking
-- Inspirational — motivate change
-- Educational — build understanding step by step
-- Other
+If the answer is generic, probe: "That's true, but any talk on this topic could say that. What's YOUR take? What have you seen or experienced that gives you a different perspective?"
 
-### 3. Story thread
-"Is there a personal story, patient case, or anecdote you want to use as the narrative thread?"
+Keep probing until you get something specific and personal. This might take 2-3 exchanges — that's fine.
 
-If yes: ask for details. This will become the backbone of the presentation (Patient Story Bookend or Nested Loop pattern).
+### 2. Angle — how you'll approach it
 
-If no: suggest options based on the topic — "Sometimes a compelling case from the literature can serve the same purpose. We can find one during the research phase."
+"There are many ways to talk about [topic]. Which feels most like you?"
+- **Clinical** — "here's what you can use tomorrow in your practice"
+- **Research-driven** — "here's what the new data is telling us"
+- **Provocative** — "here's why what we've been doing is wrong"
+- **Inspirational** — "here's what's possible and why it matters"
+- **Educational** — "let me build your understanding step by step"
 
-### 4. Emotional intent
-"What emotions do you want to generate in the audience?"
-- Curiosity — "I need to learn more about this"
-- Urgency — "We need to act now"
-- Hope — "This can get better"
-- Surprise — "I didn't expect that"
-- Empathy — "I feel connected to this"
-- Confidence — "I can do this"
-- Other (specify)
+Contextualize the options with the user's topic. For example, if the topic is AI in dermoscopy: "Clinical would mean showing how to integrate AI tools into your clinic workflow. Provocative might challenge the assumption that dermatologists don't need AI assistance."
 
-### 5. Specific ideas
-"Do you already have ideas for specific slides, moments, or visuals you want to include?"
+### 3. Story thread — the emotional backbone
 
-Capture everything — even rough ideas. These become seeds for the narrative phase.
+Every memorable talk has a narrative thread — something human that connects the data to meaning. This is what separates a presentation from a lecture.
 
-### 6. Anti-goals
-"What do you NOT want this talk to be?"
+"Is there a story you want to weave through the talk? It could be:"
+- A patient case that changed how you think about this
+- A personal moment of realization or failure
+- A journey of discovery (yours or someone else's)
+- A before/after transformation
 
-Examples: "Not another guidelines review", "Not death by bullet points", "Not purely academic with no clinical relevance"
+If the user has a story, ask for details — who, what happened, why it matters to them.
 
-### 7. Differentiation
-"What will make your talk different from every other talk on this topic?"
+If they don't have one: "That's okay — sometimes the research itself tells a compelling story. We can look for one during the research phase. But think about it — the best talks almost always have a human moment."
 
-This is the most important question. Push the user to be specific.
+### 4. Emotional intent — what the audience should feel
+
+This question can feel unusual to academics, so frame it concretely:
+
+"Think about the moment right after your talk ends, before the questions start. What's the feeling in the room?"
+- **Curiosity** — they're pulling out their phones to look up what you mentioned
+- **Urgency** — they feel they need to change something in their practice
+- **Hope** — they see a better future for their patients
+- **Surprise** — something you showed them challenged their assumptions
+- **Confidence** — they feel equipped to do something they couldn't before
+
+The user can pick one primary emotion and optionally a secondary one.
+
+### 5. The edges — ideas, boundaries, and what makes it yours
+
+Combine the remaining questions into one open exploration. This prevents survey fatigue while capturing important nuance:
+
+"A few final things to shape the vision:"
+
+a) "Do you already have specific ideas for the talk? Slides you've imagined, a moment you want to create, a visual that's in your head?"
+
+b) "What should this talk absolutely NOT be?" (Examples from their context: "not another guidelines review", "not a sales pitch for an AI product", "not boring statistics without clinical meaning")
+
+c) "What will make YOUR talk different from every other talk on [topic]?" Push for specificity — this is where the talk's identity crystallizes.
+
+These can flow naturally in one conversation turn. The user doesn't have to answer all three if something doesn't resonate.
 
 ## Output
 
-Generate `vision.md` in the current working directory. Structure:
+Generate `vision.md` in the current working directory. Write it as a cohesive document that captures the spirit of the conversation, not just a form with filled blanks:
 
 ```markdown
 # Vision — [Talk Topic]
 
 ## Core Message
-[The one thing the audience must remember]
+[The one thing the audience must remember — sharp, specific, personal]
 
 ## Angle
-[The approach/perspective]
+[The approach/perspective and why it fits this speaker]
 
 ## Story Thread
-[The narrative backbone — patient case, personal story, or research journey]
+[The narrative backbone — patient case, personal story, or research journey. Include enough detail to build on later. If none yet, note that one will be found during research.]
 
 ## Emotional Arc
-[What emotions to generate and when]
+[Primary emotion to generate and why. How it connects to the core message.]
 
 ## Specific Ideas
-[Any slides, moments, visuals the speaker already envisions]
+[Any slides, moments, visuals the speaker already envisions. Skip if none.]
 
 ## Anti-Goals
-[What this talk must NOT be]
+[What this talk must NOT be — specific, based on what the user said]
 
 ## Differentiation
-[What makes this talk unique]
+[What makes this talk unique — the specific perspective, experience, or insight that no other speaker would bring to this topic]
 ```
 
 ## After completion
 
-Tell the user: "Vision captured! Next phase: Research — finding the evidence to support your narrative. Continue with /talk or /talk-research."
+Tell the user: "Vision captured! This will guide every decision from here — which papers to include, how to structure the narrative, and what emotional arc to build. Next phase: Research. Continue with /talk or /talk-builder:talk-research."
