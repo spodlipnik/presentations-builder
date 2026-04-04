@@ -1,6 +1,6 @@
 ---
 name: talk-narrative
-description: Use when building the slide structure and storytelling arc for a presentation. Creates narrative.md with slide-by-slide plan including timing, connectors, and storytelling elements. Triggers when /talk detects assets ready but no narrative.md.
+description: Use when building the slide structure and storytelling arc for a presentation. Creates narrative.md with slide-by-slide plan including timing, connectors, and storytelling elements. Triggers when /talk detects research.md exists but no narrative.md.
 disable-model-invocation: true
 allowed-tools:
   - Read
@@ -10,14 +10,18 @@ allowed-tools:
 
 # Talk Builder — Narrative Structure & Storytelling
 
-Build the complete slide-by-slide structure with storytelling arc, connectors, and timing. This is the heart of Talk Builder — where evidence becomes narrative.
+Build the complete slide-by-slide structure with storytelling arc, visual design, speaker text, and timing. This is the heart of Talk Builder — where evidence becomes a story that moves people.
+
+The goal is NOT to organize information into slides. It's to design an emotional journey that happens to use slides as a medium. Every slide is a beat in a story — it should make the audience feel something, not just know something.
 
 ## Important
 
 - MUST read `${CLAUDE_PLUGIN_ROOT}/references/storytelling-guide.md` before starting
 - MUST read `${CLAUDE_PLUGIN_ROOT}/references/slide-design-guide.md` for slide design principles
 - MUST read `${CLAUDE_PLUGIN_ROOT}/references/pacing-guide.md` to select the timing template
-- Read `talk.yaml`, `vision.md`, `research.md`, and `images/image-map.md`
+- Read `talk.yaml`, `vision.md`, and `research.md` (including the Visual Elements Catalog and comprehensive paper summaries)
+- Read `${user_config.assets_path}/config.yaml` for style preferences (colors, fonts, language)
+- **Language priority:** Use the language the user writes in. Fall back to config.language for ambiguous messages.
 - The narrative must serve the user's vision and emotional intent, not just present facts
 - This is ITERATIVE — present the structure and refine until the user approves
 
@@ -38,6 +42,8 @@ Map the Sparkline rhythm:
 - Plan at least 3-4 oscillations between "what is" and "what could be"
 - Place the STAR moment at approximately 2/3 of the talk
 
+Look for a **narrative thread** — a repeating pattern, a recurring character, a question that evolves. The strongest talks have a thread that the audience tracks unconsciously. Examples from the storytelling guide: patient story bookend, progressive revelation, the "rule of three" with a twist.
+
 ### Step 3: Design opening
 
 Based on the user's vision, propose 2-3 opening options from `${CLAUDE_PLUGIN_ROOT}/references/storytelling-guide.md`:
@@ -46,55 +52,61 @@ Based on the user's vision, propose 2-3 opening options from `${CLAUDE_PLUGIN_RO
 - Provocative question
 - Contrarian statement
 
-Let the user choose.
+Let the user choose. The opening sets everything — it defines the emotional contract with the audience.
 
 ### Step 4: Design closing
 
 Propose 2-3 closing options that match the opening:
-- Callback close (return to opening story)
+- Callback close (return to opening story/number)
 - Vision of the future
 - Call to action
 - Patient quote
 
-The closing MUST connect to the opening for narrative completeness.
+The closing MUST connect to the opening for narrative completeness. The audience should feel the circle close.
 
 ### Step 5: Build slide-by-slide structure
 
-Create each slide with:
-- **Number and title** (assertion-evidence format — full sentence, not topic phrase)
-- **Content** — what appears on the slide (visual, data, image reference)
-- **Speaker intent** — what the speaker aims to convey
-- **Image** — reference to file in `images/` or `[GENERATE]` or `[SPEAKER ADDS IN KEYNOTE]`
-- **Bridge** — the narrative connector to the next slide (from storytelling-guide.md connector types)
+This is the most detailed step. For EACH slide, specify:
+
+- **Number and title** — assertion-evidence format (full sentence, not topic phrase). The title IS the takeaway.
+- **Visual design** — background (dark/light), layout (full, split, two-column), label/section marker, typography size/weight for key elements
+- **Content** — what appears on the slide: text, data, image reference. Reference specific files from research.md's Visual Elements Catalog when available.
+- **Speaker text** — NOT just "what to convey" but actual draft dialogue. Write it as the speaker would say it on stage: conversational, with emotional cues (pause), (slow down), (eye contact), (dramatic). Include exact data points with numbers. This becomes the raw material for the speaker script phase.
+- **Image** — reference to specific file from Visual Elements Catalog, or `[GENERATE]` for assets to create, or `[SPEAKER ADDS IN KEYNOTE]` for clinical photos only the speaker has
 - **Timing** — estimated seconds for this slide
-- **Sparkline position** — is this a "what is" or "what could be" moment?
+- **Sparkline position** — "what is" (IS) or "what could be" (CB) or STAR
+- **Bridge to next** — the exact transition sentence or question. Must feel natural, not mechanical. Vary bridge types throughout (narrative, rhetorical question, contrast, callback, dramatic pause).
 
-### Step 6: Generate data visualizations
+**Design principles for each slide:**
+- One message per slide — if you need two messages, make two slides
+- Assertion-evidence titles on all content slides (exception: dramatic/emotional slides)
+- Dark backgrounds for emotional/dramatic moments, light for evidence/data
+- Big numbers deserve their own slide — don't bury "65% ORR" in a bullet list
+- Empty or near-empty slides are powerful for pauses and transitions
+- Split layouts work well for image + text combinations
 
-For any slide that would benefit from a data visualization (bar chart, survival curve, forest plot, comparison chart, clinical algorithm flowchart, etc.):
+### Step 6: Plan attention reset (for talks > 10 min)
 
-1. Identify the data from `research.md` that needs visual representation
-2. Generate an SVG file with **transparent background**
-3. Write the SVG directly — no external libraries needed for most charts. For complex visualizations, use a Node.js script with d3.
-4. Save to `images/[VIZ]-description.svg`
-5. Add to `images/image-map.md` with status "Generated"
-
-The user can convert SVG to PNG for Keynote if needed, or use SVG directly.
-
-Only generate visualizations that the narrative identifies as necessary — do not create them speculatively.
+At approximately the 10-minute mark, plan a deliberate attention reset — a moment that breaks the pattern and re-engages the audience. This could be:
+- A surprising connection between two seemingly unrelated topics
+- A shift in tone (from data to personal, from clinical to philosophical)
+- A visual surprise (blank slide, dramatic image, huge number)
 
 ### Step 7: Apply quality checks
 
 Before presenting to user, verify:
-- [ ] Rule of Three: no more than 3 key messages
+- [ ] Rule of Three: no more than 3 key messages for the entire talk
 - [ ] One message per slide
 - [ ] Assertion-evidence titles on all content slides
 - [ ] Attention reset planned every 10 minutes (for talks > 10 min)
 - [ ] STAR moment placed at ~2/3
-- [ ] Opening and closing are connected
-- [ ] Every Bridge connector is specific (not "Next, we'll discuss...")
-- [ ] Total timing fits within duration (with buffer)
+- [ ] Opening and closing are connected (callback)
+- [ ] Every bridge connector is specific and varied (not all "Next, we'll discuss...")
+- [ ] Total timing fits within duration (with 1-2 min buffer)
 - [ ] Sparkline has at least 3 oscillations
+- [ ] Speaker text includes emotional cues, not just content
+- [ ] Visual design specified for every slide (dark/light, layout)
+- [ ] All image references point to real files from research.md catalog or are marked [GENERATE]
 
 ### Step 8: Present and iterate
 
@@ -102,7 +114,8 @@ Show the complete narrative structure to the user. Ask:
 - "Does this flow feel right?"
 - "Is the emotional arc what you envisioned?"
 - "Any slides to add, remove, or reorder?"
-- "Are the connectors natural?"
+- "Are the transitions natural?"
+- "Do the speaker texts capture how you'd actually talk?"
 
 Iterate until the user approves.
 
@@ -115,42 +128,49 @@ Generate `narrative.md`:
 
 ## Meta
 - Duration: [X] minutes
+- Total slides: [N]
 - Key messages: [1, 2, 3]
 - Opening technique: [type]
 - Closing technique: [type]
 - STAR moment: Slide [N] — [description]
+- Attention reset: ~min [X], [description]
+- Narrative thread: [description of the repeating pattern/story]
 
-## Slide Structure
+## Narrative Thread
+[2-3 sentences describing the thread that runs through the talk — the repeating pattern, the evolving question, the character arc]
 
-### Slide 1: [Title — Opening]
-- **Type:** Opening
-- **Content:** [what appears on screen]
-- **Speaker intent:** [what to convey]
-- **Image:** [reference or none]
+## [SECTION NAME] (slides N-M, ~X:XX)
+
+### Slide N: [Assertion-evidence title]
+- **Background:** [dark/light]
+- **Layout:** [full / split / two-column]
+- **Label:** [section marker if any]
+- **Content:** [what appears on screen — text, data, visual description]
+- **Image:** [images/filename.png or [GENERATE]-description or [SPEAKER ADDS]]
+- **Speaker:** "[Full draft dialogue with (emotional cues). Include exact numbers and data points. Write as natural speech, not notes.]"
+- **Ref:** [Author Year — for the speaker to cite on stage]
 - **Timing:** [seconds]
-- **Sparkline:** [what is / what could be]
-- **Bridge to next:** "[connector text]"
+- **Sparkline:** [IS / CB / STAR]
+- **Bridge:** "[exact transition sentence/question to next slide]"
 
-### Slide 2: [Assertion-evidence title]
-- **Type:** Context
-- **Content:** [visual/data description]
-- **Speaker intent:** [what to convey]
-- **Image:** [images/file.png]
-- **Timing:** [seconds]
-- **Sparkline:** [what is]
-- **Bridge to next:** "[connector text]"
+### Slide N+1: ...
 
-...
+---
 
-### Slide N: [Title — Closing]
-- **Type:** Closing
-- **Content:** [what appears on screen]
-- **Speaker intent:** [callback to opening / call to action]
-- **Image:** [reference or none]
-- **Timing:** [seconds]
-- **Sparkline:** [new bliss]
+## Timing Summary
+
+| Section | Slides | Time |
+|---------|--------|------|
+| [Section 1] | 1-4 | ~X:XX |
+| [Section 2] | 5-10 | ~X:XX |
+| ... | ... | ... |
+| **TOTAL** | **N slides** | **~XX:XX** |
+
+## Sparkline Map
+
+[Visual representation of the emotional rhythm across all slides, showing IS/CB oscillations and STAR moment position]
 ```
 
 ## After completion
 
-Tell the user: "Narrative approved! Next phase: Study Document — building the comprehensive reference document. Continue with /talk or /talk-study-doc."
+Tell the user: "Narrative approved! Next phase: Assets — creating and extracting the visual elements for each slide. Continue with /talk or /talk-builder:talk-assets."
