@@ -1,11 +1,11 @@
 ---
 name: talk-script
-description: Use when generating the speaker script for a presentation — slide-by-slide delivery guide with preparation table and teleprompter format. Triggers when /talk detects study documents exist but no speaker-script.docx.
+description: Use when generating the speaker script for a presentation — slide-by-slide delivery guide with preparation table and teleprompter format in Markdown. Triggers when /talk detects study-document.md exists but no speaker-script.md.
 ---
 
 # Talk Builder — Speaker Script
 
-Generate a comprehensive speaker script with two sections: a preparation table and a teleprompter-formatted delivery script.
+Generate a comprehensive speaker script in Markdown with two sections: a preparation table and a teleprompter-formatted delivery script.
 
 ## Important
 
@@ -17,29 +17,18 @@ Generate a comprehensive speaker script with two sections: a preparation table a
 - Use conversational, natural language — short sentences, no jargon unless necessary
 - The script must feel like natural speech, not written text
 
-## Generation Method
-
-**Requires:** The official `docx` skill from `claude-plugins-official` must be installed.
-
-Use the **docx-js approach** described in the official `docx` skill to create the document programmatically. Refer to the `docx` skill's `docx-js.md` reference for the full API.
-
-Key generation instructions:
-- Install docx if not available: `npm install -g docx`
-- Write a Node.js script that creates the document using the docx library
-- Tables must use `WidthType.DXA` (not PERCENTAGE) for cross-platform compatibility
-- Use the `docx` skill's guidance for formatting, tables, and page setup
-- After creation, validate with the `docx` skill's validation tools if available
-
-## Output: speaker-script.docx
+## Output: speaker-script.md
 
 ### Section 1: Preparation Table
 
-A table with one row per slide:
+A Markdown table with one row per slide:
 
+```markdown
 | Slide | Title | What to Say | Bridge to Next | Timing |
 |---|---|---|---|---|
-| 1 | [Title] | [Natural prose — what to communicate, key phrases to use, emotional tone] | [The connector sentence/question leading to the next slide] | [seconds] |
+| 1 | [Title] | [Natural prose — what to communicate, key phrases to use, emotional tone] | [The connector sentence/question leading to the next slide] | 45s |
 | 2 | [Title] | ... | ... | ... |
+```
 
 **Writing style for "What to Say" column:**
 - Conversational prose, as if explaining to a colleague
@@ -85,10 +74,4 @@ Before generating, verify:
 
 ## After completion
 
-Tell the user: "Speaker script generated! Your Talk Builder project is complete. All outputs:
-- presentation.pptx — open in Keynote for visual fine-tuning
-- study-document.docx — deep review of the topic
-- article-summaries.docx — quick reference for each paper
-- speaker-script.docx — your delivery guide with teleprompter
-
-Run /talk to see the full project status."
+Tell the user: "Speaker script generated! Next phase: Slides — generating the PPTX presentation. Continue with /talk or /talk-slides."
