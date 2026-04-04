@@ -22,7 +22,7 @@ Before doing anything else, check the config path:
 1. **If `${user_config.assets_path}` is empty or not set**: Tell the user: "No assets path configured. Run `/talk-builder:talk-setup` to set up your personal style and preferences." Then stop.
 2. **If the path is set but the directory doesn't exist**: Tell the user: "Your assets folder `[path]` doesn't exist. Run `/talk-builder:talk-setup` to set it up again, or update the path in your plugin settings." Then stop.
 3. **If the directory exists but `config.yaml` is missing**: Tell the user: "Your assets folder exists but has no `config.yaml`. Run `/talk-builder:talk-setup` to complete the configuration." Then stop.
-4. **If `config.yaml` exists**: Read it and continue with phase detection.
+4. **If `config.yaml` exists**: Read it and confirm to the user: "Config loaded from `[path]` (language: [lang], style: [primary color])." Then continue with phase detection.
 
 ## Phase Detection
 
@@ -86,6 +86,8 @@ Based on the user's choice, invoke the appropriate skill:
 ### 4. Handle empty directory
 
 If the working directory is empty (new project), start from `talk-briefing` and create the `pdfs/` and `images/` subdirectories.
+
+If the user already provided useful information in their message (topic, duration, audience, occasion), acknowledge it and note that it will be carried into the briefing phase so they don't have to repeat themselves.
 
 ### 5. Detect _build/ directory
 
