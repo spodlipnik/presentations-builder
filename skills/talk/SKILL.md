@@ -33,8 +33,8 @@ Scan the current working directory for these files to determine project state:
 | `talk.yaml` | Briefing |
 | `vision.md` | Vision |
 | `research.md` | Research |
-| `images/` (non-empty) | Assets |
 | `narrative.md` | Narrative |
+| `images/` (non-empty) | Assets |
 | `study-document.md` + `article-summaries.md` | Study Docs |
 | `speaker-script.md` | Script |
 | `presentation.pptx` | Slides |
@@ -51,13 +51,13 @@ Talk Builder — Project Status:
   [done] Briefing (talk.yaml)
   [done] Vision (vision.md)
   [done] Research (research.md)
-  [open] Assets (images/)
   [open] Narrative (narrative.md)
+  [open] Assets (images/)
   [open] Study Documents (study-document.md)
   [open] Speaker Script (speaker-script.md)
   [open] Slides (presentation.pptx)
 
-  -> Next step: Assets
+  -> Next step: Narrative
   Continue, or jump to another phase?
 ```
 
@@ -77,8 +77,8 @@ Based on the user's choice, invoke the appropriate skill:
 - No `talk.yaml` -> `talk-briefing`
 - No `vision.md` -> `talk-vision`
 - No `research.md` -> `talk-research`
-- No images -> `talk-assets`
 - No `narrative.md` -> `talk-narrative`
+- No images -> `talk-assets`
 - No `study-document.md` -> `talk-study-doc`
 - No `speaker-script.md` -> `talk-script`
 - No `presentation.pptx` -> `talk-slides`

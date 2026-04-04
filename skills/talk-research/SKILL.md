@@ -153,8 +153,32 @@ For each paper, extract:
 - **Exact numbers** — sample sizes, effect sizes, p-values, confidence intervals, hazard ratios
 - **Methodology** — study design, population, follow-up duration
 - **Key conclusions** — in the authors' own words
-- **Relevant figures** — identify figures that could be used in the presentation (mark page numbers and describe content for the assets phase)
 - **Limitations** — what the authors themselves acknowledge
+- **Visual elements catalog** — for EVERY figure, table, and illustration in the paper that could be relevant, describe:
+  - What it is (figure type: boxplot, KM curve, forest plot, flowchart, photograph, diagram, table...)
+  - What it shows (specific data, with numbers when visible)
+  - Visual quality (clear/cluttered, color/BW, resolution, self-explanatory or needs context)
+  - Potential use in the talk (which narrative point it could support)
+
+**Example of a good visual catalog entry:**
+```
+p.4 Fig 3 (Kaplan-Meier): PFS curves by fecal diversity (high vs low).
+  Shows dramatic separation starting at month 6. High diversity 
+  median PFS 12.4 mo vs 3.8 mo. Clean figure, two colors, 
+  publication-quality. Self-explanatory with minimal annotation.
+  → STAR moment candidate: "your gut bacteria predict if immunotherapy works"
+
+p.5 Table 2: Enriched taxa in responders vs non-responders with 
+  adjusted p-values. 8 rows, clear format.
+  → Supporting evidence for mechanism slide, or backup for Q&A
+
+p.6 Fig 4 (Illustration): FMT experimental design diagram. 
+  Shows donor → germ-free mice → tumor challenge → ICI workflow.
+  Color-coded steps, very didactic, explains mechanism visually.
+  → Could be adapted/redrawn for a mechanism slide
+```
+
+Don't catalog every single element — only those relevant to the talk's narrative. Skip generic demographic tables, supplementary figures that repeat main findings, and figures about aspects not covered in the talk.
 
 This deep reading is critical — abstracts alone lead to imprecise claims. The full text gives you the exact data the speaker needs to be credible in front of specialists.
 
@@ -193,13 +217,23 @@ Evidence quality: [meta-analysis / multiple RCTs / emerging]
 - [What skeptics would say, with sources]
 - [Known limitations of the evidence]
 
-## Figures for Slides (from PDFs)
-| Paper | Page | Description | Relevance |
-|---|---|---|---|
-| [Author Year] | p.4 | [Kaplan-Meier survival curve] | [STAR moment slide] |
-| [Author Year] | p.7 | [Forest plot of meta-analysis] | [Evidence summary slide] |
+## Visual Elements Catalog (from PDFs)
 
-This table feeds into the `/talk-assets` phase for extraction.
+### [Author Year] — [Paper Title]
+**Figures:**
+- p.[N] Fig [X] ([type]): [What it shows, with key numbers]. [Visual quality]. → [Potential use]
+- p.[N] Fig [X] ([type]): ...
+
+**Tables:**
+- p.[N] Table [X]: [What it contains, key data points]. → [Potential use]
+
+**Illustrations/Diagrams:**
+- p.[N] Fig [X] ([type]): [What it depicts]. [Quality/clarity]. → [Potential use]
+
+### [Next Author Year] — [Paper Title]
+...
+
+This catalog feeds into `/talk-narrative` (to know what visuals are available when designing slides) and `/talk-assets` (to know what to extract and what to create).
 
 ## Gaps Identified
 - [Areas where more evidence is needed or could strengthen the talk]
