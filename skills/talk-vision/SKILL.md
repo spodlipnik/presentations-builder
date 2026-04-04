@@ -16,8 +16,8 @@ This is NOT about content or evidence (that comes in the research phase). It's a
 ## Important
 
 - Read `talk.yaml` to understand the topic, audience, and duration.
-- Read `${user_config.assets_path}/config.yaml` for the user's language preference.
-- Use the user's language throughout.
+- Read `${user_config.assets_path}/config.yaml` for the user's default language preference.
+- **Language priority:** Use the language the user writes in (primary signal). Only fall back to config.language if the user's message is ambiguous or very short (e.g., "/talk-vision"). Never override the user's own language with the config setting.
 - Ask one question at a time. Be conversational — react to what the user says, don't just move to the next question mechanically.
 - When the user gives a generic answer, gently push for specificity. The difference between a forgettable talk and a memorable one is in the specifics.
 - Adapt your examples to the user's topic. If they're talking about melanoma, don't give examples about cardiology.
