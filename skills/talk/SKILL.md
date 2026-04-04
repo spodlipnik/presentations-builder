@@ -24,9 +24,9 @@ Scan the current working directory for these files to determine project state:
 | `research.md` | Research |
 | `images/` (non-empty) | Assets |
 | `narrative.md` | Narrative |
+| `study-document.md` + `article-summaries.md` | Study Docs |
+| `speaker-script.md` | Script |
 | `presentation.pptx` | Slides |
-| `study-document.docx` + `article-summaries.docx` | Study Docs |
-| `speaker-script.docx` | Script |
 
 ## Behavior
 
@@ -42,9 +42,9 @@ Talk Builder — Project Status:
   [done] Research (research.md)
   [open] Assets (images/)
   [open] Narrative (narrative.md)
+  [open] Study Documents (study-document.md)
+  [open] Speaker Script (speaker-script.md)
   [open] Slides (presentation.pptx)
-  [open] Study Documents
-  [open] Speaker Script
 
   -> Next step: Assets
   Continue, or jump to another phase?
@@ -68,13 +68,19 @@ Based on the user's choice, invoke the appropriate skill:
 - No `research.md` -> `talk-research`
 - No images -> `talk-assets`
 - No `narrative.md` -> `talk-narrative`
+- No `study-document.md` -> `talk-study-doc`
+- No `speaker-script.md` -> `talk-script`
 - No `presentation.pptx` -> `talk-slides`
-- No study docs -> `talk-study-doc`
-- No script -> `talk-script`
 
 ### 4. Handle empty directory
 
 If the working directory is empty (new project), start from `talk-briefing` and create the `pdfs/` and `images/` subdirectories.
+
+### 5. Detect _build/ directory
+
+If a `_build/` directory exists in the project:
+- If `_build/node_modules/` exists, offer to clean it up: "Found leftover node_modules in _build/. Want me to delete it to save space? (You can regenerate it anytime with `npm install` inside `_build/`)"
+- If `_build/` contains generation scripts (`.js` files), mention: "Previous generation scripts are available in `_build/` — these can be used to regenerate or modify the presentation."
 
 ## Config Path Resolution
 
