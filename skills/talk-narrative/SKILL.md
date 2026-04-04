@@ -44,32 +44,36 @@ Map the Sparkline rhythm:
 
 Look for a **narrative thread** — a repeating pattern, a recurring character, a question that evolves. The strongest talks have a thread that the audience tracks unconsciously. Examples from the storytelling guide: patient story bookend, progressive revelation, the "rule of three" with a twist.
 
-### Step 2b: Choose organizational structure
+### Step 2b: Discuss organizational structure
 
-Ask the user how they want to organize the talk's sections. The structure determines what the section divider slides look like and how the audience orients themselves. Present options:
+Propose 2-3 organizational structures that fit the specific talk's content and vision. Don't present a generic menu — think about what would work best for THIS talk and explain why. Some patterns that work well:
 
-- **By questions** — "5 questions about [topic]". Each section answers one question. Divider slides show the question in large text. Works brilliantly for educational/review talks. Example: "Question 1: What exactly is a rosette?" → several slides answering it → "Question 2: Why only with polarized light?"
-- **By themes/topics** — Classic sections like ACNÉ / PSORIASIS / ROSÁCEA. Divider slides show the theme name. Works for talks covering multiple subtopics.
-- **By chronology** — "Before 2015 / The breakthrough / Where we are now". Divider slides mark time periods. Works for historical overviews or field evolution talks.
-- **By hypothesis** — "What we believed / What we found / What it means". Divider slides mark the narrative phase. Works for research-driven talks with surprising findings.
-- **By progressive revelation** — "Creíamos que era X" repeated pattern where each section follows the same structure, building pattern recognition. The pattern breaks at the turning point. Very powerful for multi-condition talks.
+- **By questions** — Each section answers one question. Works for educational/review talks.
+- **By themes/topics** — Classic sections. Works for talks covering multiple subtopics.
+- **By chronology** — Time periods mark sections. Works for field evolution talks.
+- **By hypothesis** — "What we believed / What we found / What it means". Works for surprising findings.
+- **By progressive revelation** — Repeating pattern that builds, then breaks. Very powerful.
+- **Something completely different** — The best talks sometimes invent their own structure.
 
-Let the user choose. Then create:
+Discuss with the user and decide together. The structure should serve the story, not constrain it. Be creative.
 
-1. **A roadmap slide** early in the talk (after opening/COI) that shows the full structure — like "5 questions" or "Part A: Inflammatory / Part B: Oncology". This tells the audience what to expect and how long the journey is.
+Based on the chosen structure, consider:
 
-2. **Section divider slides** between each major section:
+1. **Roadmap slide** — Propose one if it fits (e.g., "5 questions" works, but a cold-open mystery talk would be ruined by showing the roadmap upfront). Let the user decide.
+
+2. **Section divider slides** between major sections:
    - Dark background, large text
    - Section label in accent color (e.g., "QUESTION 3" in red)
    - The section title/question in large white text
    - Optionally a teaser subtitle in smaller gray italic
    - These slides are 5-10 seconds each — they're breaths, not content
+   - Not every talk needs dividers — some flow better without them
 
-3. **Section labels on EVERY content slide** within a section:
-   - Small text in the upper-left corner (e.g., `QUESTION 1: What exactly is a rosette`)
-   - Consistent position and formatting throughout
-   - The audience always knows where they are in the structure
-   - Use the accent color from config.yaml for labels
+3. **Section labels on content slides** within a section:
+   - Small text in the upper-left corner
+   - Keeps the audience oriented ("where am I in this talk?")
+   - Use accent color from config.yaml
+   - Discuss with user — some talks benefit from this, others don't
 
 ### Step 3: Design opening
 
@@ -93,16 +97,15 @@ The closing MUST connect to the opening for narrative completeness. The audience
 
 ### Step 5: Build slide-by-slide structure
 
-This is the most detailed step. For EACH slide, specify:
+This is the most detailed step. For EACH slide, specify these fields:
 
-- **Number and title** — assertion-evidence format (full sentence, not topic phrase). The title IS the takeaway.
-- **Visual design** — background (dark/light), layout (full, split, two-column), label/section marker, typography size/weight for key elements
-- **Content** — what appears on the slide: text, data, image reference. Reference specific files from research.md's Visual Elements Catalog when available.
-- **Speaker text** — NOT just "what to convey" but actual draft dialogue. Write it as the speaker would say it on stage: conversational, with emotional cues (pause), (slow down), (eye contact), (dramatic). Include exact data points with numbers. This becomes the raw material for the speaker script phase.
-- **Image** — reference to specific file from Visual Elements Catalog, or `[GENERATE]` for assets to create, or `[SPEAKER ADDS IN KEYNOTE]` for clinical photos only the speaker has
-- **Timing** — estimated seconds for this slide
-- **Sparkline position** — "what is" (IS) or "what could be" (CB) or STAR
-- **Bridge to next** — the exact transition sentence or question. Must feel natural, not mechanical. Vary bridge types throughout (narrative, rhetorical question, contrast, callback, dramatic pause).
+- **Type line** — combines slide type, section label, timing, and sparkline in one line: `evidence | SECTION · SUBTOPIC | 60s | CB`. Types: `divider`, `evidence`, `emotional`, `data`, `content`, `opening`, `closing`. The `/talk-slides` skill uses the type to decide visual design (dark/light, layout, typography). Narrative does NOT specify visual design — that's the slides skill's job.
+- **Content** — what appears on the slide: the visible text, data, visual description. Reference specific files from research.md's Visual Elements Catalog when available.
+- **Image** — reference to specific file from Visual Elements Catalog, or `[GENERATE]` for assets to create, or `[SPEAKER ADDS IN KEYNOTE]` for clinical photos only the speaker has.
+- **Speaker** — actual draft dialogue. Write it as the speaker would say it on stage: conversational, with emotional cues (pause), (slow down), (eye contact), (dramatic). Include exact data points with numbers. This becomes the raw material for the speaker script phase.
+- **Context** — the comprehensive backstory for this slide. Study design, N patients, exact results with p-values, mechanism, why it matters for the narrative, limitations, connections to other slides. The speaker should be able to read ONLY this field and fully understand everything behind the slide — without opening research.md or any paper. Write 3-6 sentences minimum for evidence slides. This is what the speaker reads on the plane before the conference to refresh their knowledge.
+- **Ref** — author, journal, year, DOI if available. For the speaker to cite on stage.
+- **Bridge** — the exact transition sentence or question to the next slide. Must feel natural, not mechanical. Vary bridge types (narrative, rhetorical question, contrast, callback, dramatic pause).
 
 **Design principles for each slide:**
 - One message per slide — if you need two messages, make two slides
@@ -111,6 +114,7 @@ This is the most detailed step. For EACH slide, specify:
 - Big numbers deserve their own slide — don't bury "65% ORR" in a bullet list
 - Empty or near-empty slides are powerful for pauses and transitions
 - Split layouts work well for image + text combinations
+- **Every word on the slide must earn its place.** Text is not decoration — it must reinforce the speaker's message or anchor a key concept for the audience. If removing a word doesn't weaken understanding, remove it. The slide supports the speaker, not the other way around. Test: "Would the audience understand the slide's message in 3 seconds?" If not, simplify.
 
 ### Step 6: Plan attention reset (for talks > 10 min)
 
@@ -132,16 +136,16 @@ Before presenting to user, verify:
 - [ ] Total timing fits within duration (with 1-2 min buffer)
 - [ ] Sparkline has at least 3 oscillations
 - [ ] Speaker text includes emotional cues, not just content
-- [ ] Visual design specified for every slide (dark/light, layout)
+- [ ] Context field is comprehensive for every evidence slide (no need to check other docs)
 - [ ] All image references point to real files from research.md catalog or are marked [GENERATE]
-- [ ] Section divider slides between every major section
-- [ ] Section labels on every content slide (consistent position, accent color)
-- [ ] Roadmap slide present early in the talk
-- [ ] Audience always knows "where they are" in the structure
+- [ ] Section divider slides between major sections (where appropriate)
+- [ ] Section labels defined for content slides
+- [ ] Every word on every slide earns its place — text supports the message, doesn't decorate
+- [ ] Slide types correctly assigned (divider/evidence/emotional/data/content)
 
-### Step 8: Present for review with quick-edit index
+### Step 8: Present and save for review
 
-First, show a **compact index** for fast scanning and editing:
+Save `narrative.md` to the working directory. Then show the user a **compact index** for quick scanning:
 
 ```
 NARRATIVE INDEX — [Talk Topic] ([X] min, [N] slides)
@@ -154,40 +158,31 @@ OPENING
   4. [Divider: section title]
   5. [Assertion-evidence title]
   6. [Assertion-evidence title]
-  7. [Assertion-evidence title]
 --- SECTION: [Name/Question] ---
-  8. [Divider: section title]
+  7. [Divider: section title]
   ...
 CLOSING
-  N-2. [Take-home messages]
-  N-1. [Callback/closing]
   N. [Thank you / contact]
-
-Quick edits: "move 5 after 8", "add divider before 12",
-"remove 6", "add new slide about X between 7 and 8",
-"swap sections ACNE and PSORIASIS"
 ```
 
-This index lets the user scan the entire structure at a glance and give fast instructions. Support these edit commands:
+Tell the user:
 
-- **"move N after M"** — reorder slides
-- **"remove N"** or **"remove N-M"** — delete slides
-- **"add slide about X between N and M"** — insert new slide
-- **"add divider before N"** — insert section divider
-- **"swap N and M"** — swap two slides
-- **"swap sections A and B"** — swap entire sections
-- **"merge N and N+1"** — combine two slides into one
-- **"split N"** — break one slide into two
+"I've saved `narrative.md`. You can review and edit it in two ways:
 
-After each edit, show the updated index (not the full narrative — just the index for speed). Only show the full detail when the user asks or approves the structure.
+**Option A: Quick feedback here** — Tell me what to change: 'move slide 5 after 8', 'add a divider before 12', 'remove slide 6', 'I want a new slide about X between 7 and 8'.
 
-Then ask:
-- "Does this flow feel right?"
-- "Is the emotional arc what you envisioned?"
-- "Any edits? Use the quick commands above."
-- "When you're happy with the structure, say 'approved' and I'll finalize."
+**Option B: Annotate the document directly** — Open `narrative.md` in your editor, add annotations where you want changes. Use any format you like:
+- `[MOVE AFTER SLIDE 8]` next to a slide
+- `[REMOVE]` on slides you don't want
+- `[NEW SLIDE: about topic X]` where you want to insert
+- `[CHANGE: I want this to be more about Y]` on any field
+- Any free-text notes — I'll interpret them
 
-Iterate until the user approves.
+When you're done annotating, just tell me 'I've edited narrative.md' and I'll re-read the file, apply your changes, and generate a clean updated version."
+
+Both options work. Option B is better for big structural changes because the user can see the full document and make multiple edits at once without chatting back and forth.
+
+After each round of edits, show the updated compact index. Iterate until the user says the structure is approved.
 
 ## Output
 
@@ -216,25 +211,26 @@ Generate `narrative.md`:
 ## [SECTION NAME] (slides N-M, ~X:XX)
 
 ### Slide N: [DIVIDER — Section title/question]
-- **Type:** Divider
-- **Background:** dark
-- **Label:** [SECTION N] or [QUESTION N] in accent color
-- **Content:** "[Section title or question]" in large white text. Optional teaser subtitle in gray italic.
-- **Timing:** 5-10 sec
+- **Type:** divider | [SECTION LABEL] | 5-10s
+- **Content:** "[Section title or question]" large text. Optional teaser subtitle.
 
-### Slide N: [Assertion-evidence title]
-- **Background:** [dark/light]
-- **Layout:** [full / split / two-column]
-- **Label:** [section marker if any]
+### Slide N+1: [Assertion-evidence title]
+- **Type:** [evidence/emotional/data/content] | [SECTION · SUBTOPIC] | [seconds] | [IS/CB/STAR]
 - **Content:** [what appears on screen — text, data, visual description]
 - **Image:** [images/filename.png or [GENERATE]-description or [SPEAKER ADDS]]
-- **Speaker:** "[Full draft dialogue with (emotional cues). Include exact numbers and data points. Write as natural speech, not notes.]"
-- **Ref:** [Author Year — for the speaker to cite on stage]
-- **Timing:** [seconds]
-- **Sparkline:** [IS / CB / STAR]
+- **Speaker:** "[Full draft dialogue with (emotional cues). Include exact 
+  numbers and data points. Write as natural speech, not notes. This is 
+  what you say on stage.]"
+- **Context:** [Comprehensive context for this slide. Include: study design, 
+  N patients, center(s), key results with exact numbers and p-values, 
+  mechanism/rationale, why this matters for the narrative, limitations, 
+  connections to other slides. The speaker should be able to read this 
+  and fully understand the slide without opening any other document. 
+  2-4 sentences minimum, more if the evidence is complex.]
+- **Ref:** [Author et al., Journal Year; DOI if available]
 - **Bridge:** "[exact transition sentence/question to next slide]"
 
-### Slide N+1: ...
+### Slide N+2: ...
 
 ---
 
