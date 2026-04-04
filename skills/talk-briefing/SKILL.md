@@ -7,21 +7,32 @@ allowed-tools:
   - Read
   - Write
   - Bash
+  - Glob
 ---
 
 # Talk Builder — Briefing Wizard
 
-Interactive wizard that collects all essential information about a new presentation. Asks questions one at a time and generates `talk.yaml`.
+Interactive wizard that collects essential information about a new presentation and generates `talk.yaml`. This should feel like a quick, focused conversation — not a bureaucratic form.
 
 ## Important
 
-Ask ONE question per message. Use multiple choice when possible. Do not overwhelm the user with multiple questions at once.
+- Read `${user_config.assets_path}/config.yaml` first to know the user's defaults (language, complexity).
+- Use the user's language (from config or from how they write) for all questions.
+- If the user already provided information in their message or in the `/talk` invocation (topic, duration, audience), acknowledge it and skip those questions. Don't re-ask what you already know.
+- Ask ONE question per message. Use multiple choice when possible.
 
-## Questions (sequential, one per message)
+## Before asking questions
+
+1. Read config.yaml for defaults
+2. Check if there's already a .pptx or .key file in the working directory — if so, this is likely an improvement of an existing talk, not a new one
+3. Check what's available in `${user_config.assets_path}/fixed-slides/` — only ask about fixed slides if the folder has files
+4. Parse the user's initial message for any info already provided
+
+## Questions (sequential, one per message — skip any already answered)
 
 ### 1. Topic
 "What is the topic of your talk?"
-(Open-ended)
+(Open-ended — skip if already provided)
 
 ### 2. Duration
 "How long is your time slot?"
@@ -37,55 +48,35 @@ Ask ONE question per message. Use multiple choice when possible. Do not overwhel
 - b) General practitioners / non-specialists
 - c) International congress (mixed expertise)
 - d) Internal training / department meeting
-- e) Mixed / other (specify)
+- e) Other (specify)
 
-### 4. Language
-"What language will you present in?"
-- a) English
-- b) Spanish
-- c) Other (specify)
+### 4. Language and complexity (confirm defaults)
 
-(Default from config if set)
+If config has defaults for language and complexity, just confirm:
+"Your default settings are [language] and [complexity] complexity. Should I use these, or do you want different settings for this talk?"
 
-### 5. Complexity
-"What level of scientific complexity?"
-- a) Basic — fundamentals, minimal jargon
-- b) Moderate — some technical depth, common terminology
-- c) Advanced — cutting-edge, specialist vocabulary
+If no config defaults, ask separately:
+- Language: "What language will you present in?" (en/es/other)
+- Complexity: "What level of scientific depth?" (basic/moderate/advanced)
 
-(Default from config if set)
+### 5. Existing materials and literature search
 
-### 6. Existing materials
-"Do you have papers or specific bibliography to include?"
-- a) Yes — I'll put PDFs in the `pdfs/` folder
-- b) No, not yet
-- c) I have some, will add more later
+Combine these into one question to save turns:
+"Do you have research papers to include?"
+- a) Yes — I'll put PDFs in the `pdfs/` folder, and also search for more
+- b) Yes — I'll provide everything, no need to search
+- c) No — please search for literature automatically
+- d) Not yet — I'll add papers later
 
-If yes or partially: create `pdfs/` directory and tell the user to place files there.
+### 6. Fixed slides (only if fixed-slides/ has files)
 
-### 7. Literature search
-"Do you want to search for literature using PubMed and Consensus?"
-- a) Yes, search automatically based on topic
-- b) No, I'll provide everything myself
-- c) Yes, but I want to review results before including
+Check `${user_config.assets_path}/fixed-slides/`. If files exist, list what's available:
+"I found these standard slides in your collection: [list]. Which do you want to include?"
+- a) All of them
+- b) None
+- c) Let me pick: [show checkboxes]
 
-### 8. New or existing
-"Is this a new talk or improving an existing one?"
-- a) New talk from scratch
-- b) Improving an existing presentation
-
-If improving: ask the user to place their existing .pptx/.key in the working directory. Read and analyze it as baseline.
-
-### 9. Fixed slides
-"Which standard slides do you want to include?"
-- a) Disclosures / Conflicts of interest
-- b) Contact information
-- c) Acknowledgments
-- d) All of the above
-- e) None
-- f) Custom selection
-
-Check `fixed-slides/` in the user's assets directory to see what's available.
+If the folder is empty or doesn't exist, skip this question entirely.
 
 ## Output
 
@@ -111,4 +102,4 @@ Also create `pdfs/` and `images/` directories if they don't exist.
 
 ## After completion
 
-Tell the user: "Briefing complete! Next phase: Vision — defining your personal angle and message. Continue with /talk or /talk-vision."
+Tell the user: "Briefing complete! Next phase: Vision — defining your personal angle and message. Continue with /talk or /talk-builder:talk-vision."
