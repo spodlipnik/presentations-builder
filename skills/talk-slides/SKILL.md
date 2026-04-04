@@ -1,6 +1,13 @@
 ---
 name: talk-slides
 description: Use when generating the PPTX presentation file from an approved narrative structure. Applies the user's personal style and design principles. Triggers when /talk detects speaker-script.md exists but no presentation.pptx.
+disable-model-invocation: true
+allowed-tools:
+  - Read
+  - Write
+  - Bash
+  - Glob
+  - Skill
 ---
 
 # Talk Builder — PPTX Generation
@@ -9,7 +16,7 @@ Generate the presentation file from the approved narrative structure, applying t
 
 ## Important
 
-- Read `references/slide-design-guide.md` before generating
+- Read `${CLAUDE_PLUGIN_ROOT}/references/slide-design-guide.md` before generating
 - Read the user's `config.yaml` for fonts, colors, and style analysis
 - Read `talk.yaml` for any local style overrides
 - Read `narrative.md` for the complete slide structure
@@ -42,12 +49,18 @@ Use the **PptxGenJS approach** described in the official `pptx` skill to create 
 
 1. Create `_build/` directory in the project root if it doesn't exist
 2. Write the generation script to `_build/generate_presentation.js`
-3. Write `_build/package.json` with PptxGenJS dependency
-4. Run `npm install` inside `_build/`
-5. Run the script — output `presentation.pptx` to the **project root** (not inside `_build/`)
-6. After successful generation, delete `_build/node_modules/` to save space
+3. Run the script with persistent dependencies:
+   ```bash
+   NODE_PATH=${CLAUDE_PLUGIN_DATA}/node_modules node _build/generate_presentation.js
+   ```
+4. Output `presentation.pptx` to the **project root** (not inside `_build/`)
 
-The `_build/` directory with scripts is **permanent** — it allows the user to re-generate or modify the presentation later. Only `node_modules/` is disposable.
+If the script fails with a module not found error, reinstall dependencies:
+```bash
+cd ${CLAUDE_PLUGIN_DATA} && npm install
+```
+
+The `_build/` directory with scripts is **permanent** — it allows the user to re-generate or modify the presentation later. Dependencies (PptxGenJS) are managed by the plugin in `${CLAUDE_PLUGIN_DATA}` and shared across all projects.
 
 Key generation instructions:
 - Apply the user's fonts, colors, and background from `config.yaml` / `talk.yaml`
