@@ -13,9 +13,9 @@ allowed-tools:
 
 Guide the user through configuring their personal Talk Builder environment. This runs once and creates persistent configuration that all other talk-builder skills reference.
 
-## Important
+The goal is to capture the user's personal presentation style so that every future talk feels like *theirs*, not like a generic template. Ask questions conversationally — this should feel like a brief creative consultation, not a form.
 
-This skill creates the user's personal assets directory and config file.
+## Important
 
 The assets path comes from the plugin's `userConfig` system — it's stored in `${user_config.assets_path}`. If the user hasn't configured it yet, Claude Code will have prompted them when they enabled the plugin. If the value is empty, ask them to set it via plugin settings or provide a path now.
 
@@ -27,7 +27,31 @@ Check `${user_config.assets_path}`. If it's set, confirm with the user: "Your as
 
 If not set, ask the user where they want to store their Talk Builder assets (config, example slides, fixed slides). Suggest examples like `~/Documents/talk-builder/` but let them choose any path. Then tell them to update the plugin setting with the chosen path.
 
-### 2. Create directory structure
+### 2. Check dependencies first
+
+Check system dependencies before investing time in style questions. Run these checks silently and only report problems:
+
+**poppler-utils** (for PDF image extraction):
+```bash
+which pdftoppm && which pdfseparate
+```
+
+**Node.js** (for PPTX generation):
+```bash
+which node && node --version
+```
+
+If anything is missing, tell the user what to install and why:
+- poppler: `brew install poppler` — needed to extract figures from research papers
+- Node.js: `brew install node` — needed to generate PPTX files
+
+Also mention: "Talk Builder uses the official PPTX skill from Anthropic. If you haven't installed it yet, you can do so later via `/plugin` → `claude-plugins-official` → `pptx`."
+
+**LibreOffice** (optional): only mention if the user asks about visual QA.
+
+Do not block setup if dependencies are missing — the user can install them later before they need those specific features.
+
+### 3. Create directory structure
 
 Create the chosen directory with subdirectories:
 
@@ -38,18 +62,51 @@ Create the chosen directory with subdirectories:
 └── fixed-slides/
 ```
 
-### 3. Collect style preferences (one question at a time)
+### 4. Collect style preferences (one question at a time)
 
-Ask these questions sequentially, one per message:
+Ask these questions sequentially, one per message. Adapt your language to match the user's — if they write in Spanish, ask in Spanish.
 
-1. "What is your default presentation language?" (en/es/other)
-2. "What font do you use for slide titles?" (e.g., Montserrat Bold, Arial Black)
-3. "What font do you use for body text?" (e.g., Open Sans, Calibri)
-4. "What is your primary color? (hex code, e.g., #1A365D)"
-5. "What is your accent color? (hex code, e.g., #E53E3E)"
-6. "What is your default complexity level?" (basic / moderate / advanced)
+**Question 1 — Language (ask this first, it determines the language for remaining questions):**
+"What language do you usually present in?"
+- English
+- Spanish
+- Other (specify)
 
-### 4. Ask about example slides
+**Question 2 — Title font:**
+"What font do you use for slide titles? Some popular choices for presentations:"
+- **Montserrat Bold** — modern, clean
+- **Helvetica Neue Bold** — classic, professional
+- **Playfair Display** — elegant, editorial
+- **Arial Black** — safe, universal
+- Or type any font name you prefer
+
+**Question 3 — Body font:**
+"What font for body text? It should pair well with [their title font choice]:"
+- **Open Sans** — pairs well with most title fonts
+- **Lato** — friendly, readable
+- **Source Sans Pro** — clean, technical
+- **Calibri** — safe default
+- Or type any font name
+
+**Question 4 — Colors:**
+"What are your brand/presentation colors? You can:"
+- a) Give me hex codes if you know them (e.g., #1A365D)
+- b) Describe them ("dark navy blue and a warm red")
+- c) Choose a preset:
+  - **Classic** — navy #1A365D + red #E53E3E
+  - **Medical** — teal #0D9488 + orange #F97316
+  - **Modern** — dark gray #1F2937 + blue #3B82F6
+  - **Elegant** — black #111827 + gold #D97706
+
+If the user describes colors in words, convert to the closest hex values. Also ask: "Do you prefer light backgrounds (white/cream) or dark backgrounds?"
+
+**Question 5 — Complexity default:**
+"When you give talks, what's your typical audience level? This helps calibrate how much jargon and technical depth to use by default:"
+- **Basic** — general audience, minimal jargon, focus on concepts
+- **Moderate** — professionals in related fields, some technical terms okay
+- **Advanced** — specialists, cutting-edge terminology expected
+
+### 5. Ask about example slides
 
 "Do you have existing presentations that represent your style? If so, place your .pptx or .key files in: `<chosen-path>/example-slides/`"
 
@@ -61,54 +118,9 @@ If the user confirms they have placed files there, read and analyze them to gene
 - `visual_density`: content density (e.g., "low — lots of whitespace")
 - `notes`: any other style patterns (e.g., "uses clinical photos, avoids clip art")
 
-### 5. Ask about fixed slides
+### 6. Ask about fixed slides
 
 "Do you have slides you reuse in every presentation (contact info, disclosures, acknowledgments)? If so, place them in: `<chosen-path>/fixed-slides/`"
-
-### 6. Check dependencies
-
-#### 6a. Required Claude Code plugins
-
-Talk Builder depends on the official Anthropic PPTX skill for presentation generation. Check if it is installed and guide the user if not:
-
-**PPTX skill** (for presentation generation):
-- Required for `/talk-slides`
-- Install via: `/plugin` → select `claude-plugins-official` marketplace → install `pptx`
-
-Tell the user:
-"Talk Builder needs the official PPTX skill from Anthropic to generate presentation files. Please install it from the `claude-plugins-official` marketplace using `/plugin` if you haven't already."
-
-#### 6b. System dependencies
-
-**poppler-utils** (for page extraction from PDFs):
-Verify installed by running:
-
-```bash
-which pdftoppm && which pdfseparate
-```
-
-If not found, tell the user:
-"Talk Builder needs poppler-utils for extracting pages from PDFs. Install with: `brew install poppler`"
-
-**Node.js** (required by PPTX skill):
-Verify installed by running:
-
-```bash
-which node && node --version
-```
-
-If not found, tell the user:
-"The PPTX skill requires Node.js. Install with: `brew install node`"
-
-**LibreOffice** (optional, for visual QA of generated presentations):
-Verify installed by running:
-
-```bash
-which soffice
-```
-
-If not found, tell the user:
-"LibreOffice is optional but recommended for visual QA of generated presentations. Install with: `brew install --cask libreoffice`"
 
 ### 7. Generate config.yaml
 
@@ -124,7 +136,7 @@ style:
   colors:
     primary: "<user-answer>"
     accent: "<user-answer>"
-    background: "#FFFFFF"
+    background: "<user-answer — #FFFFFF or dark>"
   language: "<user-answer>"
   narrative_style: "conversational"
   complexity_default: "<user-answer>"
@@ -140,8 +152,8 @@ style_analysis:
 
 ### 8. Confirm completion
 
-Show the user a summary of their configuration and confirm everything is set up correctly.
+Show the user a visual summary of their configuration — display the colors as hex codes with their names, the fonts, and the language. End with: "You're all set! Start a new presentation anytime with `/talk-builder:talk`."
 
 ## Reconfiguration
 
-If the user already has a config and runs `/talk-setup` again, read the existing config first and ask which sections they want to update. Do not overwrite unchanged sections.
+If the user already has a config and runs `/talk-setup` again, read the existing config first and show them their current settings. Ask which sections they want to update. Do not overwrite unchanged sections.
