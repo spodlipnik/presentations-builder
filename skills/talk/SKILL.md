@@ -15,9 +15,14 @@ Single entry point for the Talk Builder workflow. Detects the current project st
 
 ## Important
 
-Always read the user's `config.yaml` first. If it does not exist, redirect to `/talk-setup` before anything else.
+Always read the user's `config.yaml` first. The config lives at `${user_config.assets_path}/config.yaml`.
 
-The config location is stored at a user-chosen path. Check for a `talk-builder-config-path` file in `~/.claude/` that stores the assets path. If neither exists, ask the user for the path or redirect to `/talk-setup`.
+Before doing anything else, check the config path:
+
+1. **If `${user_config.assets_path}` is empty or not set**: Tell the user: "No assets path configured. Run `/talk-builder:talk-setup` to set up your personal style and preferences." Then stop.
+2. **If the path is set but the directory doesn't exist**: Tell the user: "Your assets folder `[path]` doesn't exist. Run `/talk-builder:talk-setup` to set it up again, or update the path in your plugin settings." Then stop.
+3. **If the directory exists but `config.yaml` is missing**: Tell the user: "Your assets folder exists but has no `config.yaml`. Run `/talk-builder:talk-setup` to complete the configuration." Then stop.
+4. **If `config.yaml` exists**: Read it and continue with phase detection.
 
 ## Phase Detection
 
@@ -88,7 +93,6 @@ If a `_build/` directory exists in the project and contains generation scripts (
 
 ## Config Path Resolution
 
-On first run after setup, the `/talk-setup` skill saves the config path. The orchestrator needs to find it. Strategy:
+The assets path is configured via the plugin's `userConfig` system. When the user enables the plugin, Claude Code prompts for `assets_path`. This value is available as `${user_config.assets_path}` and persists across plugin updates.
 
-1. Check `~/.claude/talk-builder-config-path` (a single-line file with the path)
-2. If not found, ask the user: "Where is your Talk Builder config? (run /talk-setup if you haven't set it up yet)"
+If the user needs to change the path later, they can update it in their plugin settings or run `/talk-builder:talk-setup` again.

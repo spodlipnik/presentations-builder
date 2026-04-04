@@ -15,13 +15,17 @@ Guide the user through configuring their personal Talk Builder environment. This
 
 ## Important
 
-This skill creates the user's personal assets directory and config file. It MUST ask the user for their preferred path — never assume a default.
+This skill creates the user's personal assets directory and config file.
+
+The assets path comes from the plugin's `userConfig` system — it's stored in `${user_config.assets_path}`. If the user hasn't configured it yet, Claude Code will have prompted them when they enabled the plugin. If the value is empty, ask them to set it via plugin settings or provide a path now.
 
 ## Steps
 
-### 1. Ask for assets directory path
+### 1. Verify assets directory path
 
-Ask the user where they want to store their personal Talk Builder assets (config, example slides, fixed slides). Suggest examples but let them choose any path.
+Check `${user_config.assets_path}`. If it's set, confirm with the user: "Your assets folder is set to `[path]`. Is this correct, or would you like to change it?"
+
+If not set, ask the user where they want to store their Talk Builder assets (config, example slides, fixed slides). Suggest examples like `~/Documents/talk-builder/` but let them choose any path. Then tell them to update the plugin setting with the chosen path.
 
 ### 2. Create directory structure
 
@@ -134,17 +138,7 @@ style_analysis:
   notes: "<analyzed or empty>"
 ```
 
-### 8. Save config path for discovery
-
-Write the chosen assets path to `~/.claude/talk-builder-config-path` so the orchestrator can find it:
-
-```bash
-echo "<chosen-path>" > ~/.claude/talk-builder-config-path
-```
-
-This single-line file is how `/talk` locates the user's config without asking every time.
-
-### 9. Confirm completion
+### 8. Confirm completion
 
 Show the user a summary of their configuration and confirm everything is set up correctly.
 

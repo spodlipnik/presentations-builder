@@ -8,5 +8,11 @@
   "homepage": "https://github.com/sebastianpodlipnik/talk-builder",
   "repository": "https://github.com/sebastianpodlipnik/talk-builder",
   "license": "MIT",
-  "keywords": ["presentations", "academic", "medical", "storytelling", "slides", "pptx", "speaker-script"]
+  "keywords": ["presentations", "academic", "medical", "storytelling", "slides", "pptx", "speaker-script"],
+  "userConfig": {
+    "assets_path": {
+      "description": "Path to your Talk Builder assets folder (e.g. ~/Documents/talk-builder). This is where your personal style config, fixed slides, and example slides live.",
+      "sensitive": false
+    }
+  }
 }
