@@ -180,18 +180,53 @@ p.6 Fig 4 (Illustration): FMT experimental design diagram.
 
 Don't catalog every single element — only those relevant to the talk's narrative. Skip generic demographic tables, supplementary figures that repeat main findings, and figures about aspects not covered in the talk.
 
-This deep reading is critical — abstracts alone lead to imprecise claims. The full text gives you the exact data the speaker needs to be credible in front of specialists.
+**Write a COMPREHENSIVE summary per paper, not just bullet points.** Each paper summary should be a mini-review that gives the speaker enough context to talk about the paper confidently in front of specialists. Include:
+
+```
+## [Author Year] — [Short Title]
+**Citation:** Author et al. "Full title." Journal, Year;Vol(Issue):Pages.
+**DOI:** xxx | **PMID:** xxx
+
+**Study Design:** [type, N patients, population, center(s), treatment, duration]
+
+**Key Findings:**
+[Paragraph-form narrative covering main results with exact numbers —
+sample sizes, effect sizes, p-values, CIs, HRs. Not just "significant 
+difference" but the actual numbers.]
+
+**Mechanism/Rationale:**
+[What the authors propose as explanation. Important for the speaker 
+to understand WHY, not just WHAT.]
+
+**Limitations:**
+[What the authors acknowledge. What a specialist in the audience 
+might challenge.]
+
+**Impact:** [citation count if notable, how it influenced the field]
+
+**Relevance to YOUR talk:**
+[How this paper specifically serves your core message and narrative]
+
+**Visual Elements:**
+[Catalog of figures/tables/illustrations as described above]
+```
+
+This depth is essential because:
+- The narrative phase needs rich context to build compelling stories around data
+- The study document phase draws directly from these summaries
+- The speaker needs to answer specialist Q&A confidently
+- Abstracts alone lead to imprecise claims and embarrassing errors on stage
 
 Present a summary per paper: "I've read [N] papers. Here's what I found in each..."
 
 ### Step 7: Consolidate research.md
 
-Write `research.md` organized by narrative role, not by topic taxonomy:
+Write `research.md` with two sections: a narrative evidence summary organized by role, and comprehensive per-paper summaries:
 
 ```markdown
 # Research — [Talk Topic]
 
-## Evidence Summary
+## Part 1: Evidence by Narrative Role
 
 ### [Narrative Section 1 — e.g., "The problem: diagnostic gaps"]
 - [Finding with source] (Author et al., Year; DOI: xxx)
@@ -203,6 +238,22 @@ Evidence quality: [meta-analysis / multiple RCTs / emerging]
 
 ### [Narrative Section 3 — e.g., "Clinical impact: what changes"]
 - ...
+
+## Part 2: Comprehensive Paper Summaries
+
+### [Author Year] — [Short Title]
+**Citation:** Author et al. "Full title." Journal, Year;Vol(Issue):Pages.
+**DOI:** xxx | **PMID:** xxx
+**Study Design:** [type, N, population, centers, treatment, duration]
+**Key Findings:** [paragraph with exact numbers]
+**Mechanism/Rationale:** [why, not just what]
+**Limitations:** [what authors acknowledge, what specialists might challenge]
+**Impact:** [citations, field influence]
+**Relevance to your talk:** [how it serves the narrative]
+**Visual Elements:** [catalog of figures/tables with page, type, description, quality, potential use]
+
+### [Next Author Year] — [Short Title]
+...
 
 ## Key Statistics (ready for slides)
 | Statistic | Source | Priority |
