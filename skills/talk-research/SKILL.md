@@ -26,7 +26,8 @@ Iterative research phase that builds a comprehensive evidence base for the prese
 - This phase is iterative — it loops until the user is satisfied.
 - The user can add PDFs to `pdfs/` at ANY point during this phase.
 - Every claim in `research.md` MUST have a verifiable reference (DOI or PMID).
-- NEVER invent or fabricate references. If you cannot find a source, say so explicitly.
+- **NEVER invent or fabricate references.** If you cannot find a source, say so explicitly. If a DOI cannot be confirmed, mark it as "[DOI: UNVERIFIED — check manually]". A missing reference is always better than a fake one. This is a medical presentation — incorrect citations damage the speaker's credibility with specialists who know the literature.
+- **Reference quality matters.** Prioritize high-impact journals and high-evidence-level studies. A meta-analysis in Lancet carries more weight than a case series in a low-tier journal. Note the journal and evidence level for each reference.
 
 ## Tool Availability Check
 
@@ -48,6 +49,19 @@ Would you like to connect them before we continue, or proceed with web search on
 Wait for the user's explicit response before proceeding. If they choose to continue without the MCP tools, use WebSearch and WebFetch as fallback for all literature searches. Always inform the user which tools you are using at the start of each search round.
 
 ## Workflow
+
+### Step 0: Ask research preferences
+
+Before searching, ask the user ONE question that sets scope:
+
+"Before I start searching, a few quick preferences:
+- **How many key references** do you want in the final research doc? (I'd suggest [N] for a [X]-minute talk, but you decide)
+- **Any specific journals or databases you trust most?** (e.g., 'prioritize NEJM, Lancet, JAAD' or 'anything peer-reviewed is fine')
+- **Any papers you already know should be included?** (landmark studies, your own publications, etc.)
+
+This helps me search smarter and not overwhelm you with 50 papers when you need 8."
+
+Use their answers to calibrate search depth and filtering.
 
 ### Step 1: Build search strategy from vision
 
@@ -77,18 +91,24 @@ This saves time — the user might redirect you before you burn search tokens on
 Use PubMed and Consensus (or WebSearch as fallback). For each result, show:
 
 ```
-1. [Title] — Author et al., Journal (Year)
+1. [Title] — Author et al., Journal (Year) [IF: X.X]
+   Evidence: [meta-analysis / RCT / cohort / case series / review]
    Key finding: [one sentence]
-   Evidence level: [meta-analysis / RCT / cohort / case series / review]
-   Relevance to YOUR talk: [how it connects to the vision]
+   Relevance: [how it connects to the vision]
+   Priority: [ESSENTIAL / SUPPORTING / OPTIONAL]
 
-2. [Title] — Author et al., Journal (Year)
+2. [Title] — Author et al., Journal (Year) [IF: X.X]
    ...
 ```
 
-Prioritize by evidence quality: meta-analyses and RCTs first, case series and expert opinion last. But a compelling case report that fits the narrative can be more valuable than a weak meta-analysis that doesn't.
+**Prioritization criteria:**
+- **ESSENTIAL:** Directly supports core message, high evidence level, high-impact journal. These MUST be in the talk.
+- **SUPPORTING:** Adds depth or context, good evidence. Include if there's room.
+- **OPTIONAL:** Interesting but not critical. Keep as backup for Q&A.
 
-Ask: "Which of these do you want to include? Any angles to explore further?"
+Prioritize by evidence quality (meta-analyses > RCTs > cohort > case series) AND by journal quality. But a compelling case report that fits the narrative can be more valuable than a weak meta-analysis that doesn't.
+
+Ask: "Which of these do you want to include? I've marked my recommendations — the ESSENTIAL ones I'd keep no matter what."
 
 ### Step 4: Read user PDFs
 
@@ -118,6 +138,11 @@ Evidence quality: [meta-analysis / multiple RCTs / emerging]
 
 ### [Narrative Section 3 — e.g., "Clinical impact: what changes"]
 - ...
+
+## Key Statistics (ready for slides)
+| Statistic | Source | Priority |
+|---|---|---|
+| [number + context] | [Author Year] | [ESSENTIAL / SUPPORTING] |
 
 ## STAR Moment Candidates
 - [Surprising or impactful data points that could serve as STAR moments]
