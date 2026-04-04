@@ -1,6 +1,6 @@
 ---
 name: talk-assets
-description: Use when extracting and preparing visual assets for a presentation. Extracts full pages from PDFs as PNG+PDF, proposes didactic image prompts for Gemini, and creates an image map. Triggers when /talk detects research.md exists but images/ is empty.
+description: Use when extracting and preparing visual assets for a presentation. Extracts specific figures from PDFs as PNG+PDF, proposes didactic image prompts, and creates an image map. Triggers when /talk detects research.md exists but images/ is empty.
 disable-model-invocation: true
 allowed-tools:
   - Read
@@ -11,17 +11,17 @@ allowed-tools:
 
 # Talk Builder — Visual Assets
 
-Extract relevant pages from research papers, propose didactic images for generation with Gemini, and create a visual asset library for the presentation.
+Extract SPECIFIC relevant figures from research papers and prepare visual assets for the presentation. The goal is quality over quantity — only extract what serves the narrative.
 
 ## Important
 
-- Always maintain aspect ratio when processing images. NEVER distort by adjusting width and height independently.
-- For each extracted page, generate TWO files: the page as PNG (.png) AND the page as PDF (.pdf) for vector quality in Keynote.
+- Read `talk.yaml`, `vision.md`, `research.md`, and `${user_config.assets_path}/config.yaml` before starting.
+- **Language priority:** Use the language the user writes in. Fall back to config.language for ambiguous messages.
+- **Start from research.md's "Figures for Slides" table** (if it exists). That table already identifies which figures from which papers are relevant to which slides. Don't re-scan from scratch.
+- Only extract figures that serve the narrative. A 20-minute talk needs ~15-20 images max. Extracting 100 images from every PDF creates clutter, not value.
+- Always maintain aspect ratio when processing images. NEVER distort.
+- For each extracted page, generate TWO files: PNG (.png) for preview AND PDF (.pdf) for vector quality in Keynote.
 - Naming convention: `author-year-pN-description` (e.g., `smith2024-p4-survival-curve`)
-- Images must be **didactic and self-explanatory** — they should help the audience understand complex concepts, not just decorate slides.
-
-Read `research.md` to know which papers and findings are relevant.
-Read `config.yaml` for the presentation's color palette and style (used for generative image prompts).
 
 ## Dependencies
 
@@ -29,15 +29,30 @@ Requires `poppler-utils` installed (`pdftoppm`, `pdfseparate`). If not available
 
 ## Workflow
 
-### Step 1: Scan PDFs
+### Step 1: Build extraction plan from research.md
 
-List all PDFs in `pdfs/`. For each, identify figures that are relevant to the research findings.
+Read the "Figures for Slides" table in `research.md` (if present). This gives you a pre-identified list of:
+- Which paper has the figure
+- Which page
+- What it shows
+- Which slide it's intended for
 
-### Step 2: Extract pages
+If the table doesn't exist, read `research.md` and `narrative.md` (if available) to identify which data points need visual support, then scan the PDFs for matching figures.
 
-For each relevant page identified in Step 1, extract both formats:
+Present the extraction plan to the user:
 
-**PNG** (for preview and slide use):
+"Based on the research, I plan to extract these figures:
+1. [Author Year] p.[N] — [description] → for slide about [topic]
+2. ...
+[Total: N figures from M papers]
+
+Does this look right? Any others you want, or any to skip?"
+
+### Step 2: Extract targeted figures
+
+For each approved figure, extract ONLY that page in both formats:
+
+**PNG** (300dpi for slides):
 ```bash
 pdftoppm -png -r 300 -f <page> -l <page> <paper.pdf> images/<author-year-pN-description>
 ```
@@ -47,35 +62,51 @@ pdftoppm -png -r 300 -f <page> -l <page> <paper.pdf> images/<author-year-pN-desc
 pdfseparate -f <page> -l <page> <paper.pdf> images/<author-year-pN-description>-page.pdf
 ```
 
-Always generate both files per page. Present the extracted pages to the user and ask which to keep.
+**Do NOT extract every image from every PDF.** Only extract what was planned in Step 1. If a page has multiple figures, extract the whole page — the user can crop in Keynote.
 
-### Step 3: Present to user
+### Step 3: Present extracted figures
 
-Show all extracted figures to the user. Ask which ones to keep, which to discard, and if any are missing.
+Show the user what was extracted with a brief description of each:
 
-### Step 4: Propose didactic images for Gemini
+```
+Extracted 12 figures:
 
-Based on `research.md` and `vision.md`, propose images that help the audience **understand complex concepts**. Focus on:
-- Illustrations that explain mechanisms, pathways, or processes
-- Visual comparisons (before/after, treatment A vs B)
-- Conceptual diagrams that simplify complex ideas
+From Gopalakrishnan 2018:
+  ✓ gopalakrishnan2018-p2-diversity.png — Alpha diversity comparison
+  ✓ gopalakrishnan2018-p4-survival.png — PFS Kaplan-Meier curve
 
-Do NOT propose purely decorative images. Every proposed image must have a clear didactic purpose.
+From Routy 2023:
+  ✓ routy2023-p3-clinical-response.png — ORR waterfall plot
+  ...
+```
 
-For each proposal, generate a ready-to-use prompt file:
+Ask: "Review these in the `images/` folder. Which to keep, which to discard? Any figures missing?"
+
+### Step 4: Propose didactic images
+
+Based on `research.md` and `vision.md`, identify gaps where a custom illustration would help the audience understand a concept better than a paper figure. Focus on:
+
+- **Mechanisms or pathways** that don't have a good published figure
+- **Comparisons or timelines** that synthesize data from multiple papers
+- **Conceptual diagrams** that simplify complex ideas for the audience level
+
+Do NOT propose purely decorative images. Every proposed image must have a clear didactic purpose. Limit to 3-5 proposals max — quality over quantity.
+
+For each proposal, generate a ready-to-use prompt file in `images/`:
 `[GENERATE]-description.txt` containing:
 
 ```
-## Prompt (optimized for Gemini)
-[Detailed descriptive prompt in natural language — no Midjourney syntax like --ar or --v]
+## Prompt (for image generation — Gemini, DALL-E, or Midjourney)
+[Detailed descriptive prompt in natural language]
 
 ## Purpose
 [How this image helps the audience understand a specific concept]
 
 ## Style Context
 Colors: [primary and accent from config.yaml]
-Tone: [matching the presentation style from config.yaml]
-Background: transparent or clean, suitable for slide insertion
+Tone: [matching the presentation style]
+Background: transparent or clean white, suitable for slide insertion
+Aspect ratio: 16:9 (slide format)
 
 ## Target Slide
 [Which slide in the narrative this is intended for]
@@ -83,19 +114,28 @@ Background: transparent or clean, suitable for slide insertion
 
 ### Step 5: Create image-map.md
 
-Generate `images/image-map.md`:
+Generate `images/image-map.md` — this is the master reference that connects images to slides:
 
 ```markdown
 # Image Map — [Talk Topic]
 
-| Slide | Description | File | Status |
-|---|---|---|---|
-| 3 | Survival curve comparison | smith2024-p4-survival.png | Ready |
-| 7 | Molecular pathway diagram | jones2023-p8-pathway.png | Ready |
-| 9 | Treatment mechanism | [GENERATE]-mechanism.txt | To generate (Gemini) |
-| 12 | Before/after comparison | [MISSING] | Need to find |
+## Summary
+- Total figures extracted: [N]
+- Figures to generate: [N]
+- Figures missing: [N]
+
+## Map
+
+| Slide | Description | File | Source | Status |
+|---|---|---|---|---|
+| 3 | Survival curve | gopalakrishnan2018-p4-survival.png | Gopalakrishnan 2018, Fig 3 | Ready |
+| 7 | Gut-skin axis diagram | [GENERATE]-gut-skin-axis.txt | AI-generated | To generate |
+| 9 | Forest plot PASI-75 | li2024-p9-forest.png | Li 2024, Fig 1 | Ready |
+| 12 | Treatment mechanism | [MISSING] | — | Need to find/create |
 ```
+
+**This file is critical** — it's the bridge between research and narrative. The narrative phase uses it to know what visuals are available per slide.
 
 ## After completion
 
-Tell the user: "Assets prepared! Review the images/ folder and generate any AI images from the prompt files using Gemini. Next phase: Narrative — building the slide structure with storytelling. Continue with /talk or /talk-narrative."
+Tell the user: "Assets prepared! You have [N] figures ready and [N] to generate. Review the `images/` folder and create any AI images from the prompt files. Next phase: Narrative — building the slide structure with storytelling. Continue with /talk or /talk-builder:talk-narrative."
