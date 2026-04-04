@@ -1,6 +1,12 @@
 ---
 name: talk
 description: Use when building academic or medical presentations. Main entry point for Talk Builder — orchestrates the full workflow from briefing to final outputs. Triggers when user says "create a presentation", "build a talk", "prepare slides", "presentation about", or invokes /talk.
+argument-hint: "[topic or phase]"
+allowed-tools:
+  - Read
+  - Glob
+  - Bash
+  - Skill
 ---
 
 # Talk Builder — Orchestrator
@@ -78,9 +84,7 @@ If the working directory is empty (new project), start from `talk-briefing` and 
 
 ### 5. Detect _build/ directory
 
-If a `_build/` directory exists in the project:
-- If `_build/node_modules/` exists, offer to clean it up: "Found leftover node_modules in _build/. Want me to delete it to save space? (You can regenerate it anytime with `npm install` inside `_build/`)"
-- If `_build/` contains generation scripts (`.js` files), mention: "Previous generation scripts are available in `_build/` — these can be used to regenerate or modify the presentation."
+If a `_build/` directory exists in the project and contains generation scripts (`.js` files), mention: "Previous generation scripts are available in `_build/` — these can be used to regenerate or modify the presentation."
 
 ## Config Path Resolution
 

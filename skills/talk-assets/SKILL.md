@@ -1,6 +1,12 @@
 ---
 name: talk-assets
 description: Use when extracting and preparing visual assets for a presentation. Extracts full pages from PDFs as PNG+PDF, proposes didactic image prompts for Gemini, and creates an image map. Triggers when /talk detects research.md exists but images/ is empty.
+disable-model-invocation: true
+allowed-tools:
+  - Read
+  - Write
+  - Bash
+  - Glob
 ---
 
 # Talk Builder — Visual Assets

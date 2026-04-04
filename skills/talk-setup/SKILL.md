@@ -1,6 +1,12 @@
 ---
 name: talk-setup
 description: Use when setting up Talk Builder for the first time or reconfiguring personal style preferences. Triggers on first /talk invocation if no config exists, or when user says "configure talk builder", "setup talk builder", "change my presentation style".
+disable-model-invocation: true
+allowed-tools:
+  - Read
+  - Write
+  - Bash
+  - Glob
 ---
 
 # Talk Builder — Initial Setup

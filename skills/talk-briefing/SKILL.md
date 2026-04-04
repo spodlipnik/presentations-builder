@@ -1,6 +1,12 @@
 ---
 name: talk-briefing
 description: Use when starting a new presentation project. Interactive wizard that collects topic, duration, audience, and preferences. Triggers on "new talk", "new presentation", or when /talk detects no talk.yaml exists.
+disable-model-invocation: true
+argument-hint: "[topic]"
+allowed-tools:
+  - Read
+  - Write
+  - Bash
 ---
 
 # Talk Builder — Briefing Wizard

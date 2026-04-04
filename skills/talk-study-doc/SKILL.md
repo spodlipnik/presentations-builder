@@ -1,6 +1,11 @@
 ---
 name: talk-study-doc
 description: Use when generating study documents for a presentation — a comprehensive reference document and per-article summaries in Markdown. Triggers when /talk detects narrative.md exists but no study-document.md.
+disable-model-invocation: true
+allowed-tools:
+  - Read
+  - Write
+  - Glob
 ---
 
 # Talk Builder — Study Documents

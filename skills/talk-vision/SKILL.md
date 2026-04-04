@@ -1,6 +1,10 @@
 ---
 name: talk-vision
 description: Use when defining the personal angle, message, and emotional intent for a presentation. Interactive conversation to capture the speaker's vision. Triggers when /talk detects talk.yaml exists but no vision.md.
+disable-model-invocation: true
+allowed-tools:
+  - Read
+  - Write
 ---
 
 # Talk Builder — Vision & Personal Angle
