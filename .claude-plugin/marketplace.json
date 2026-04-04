@@ -1,6 +1,5 @@
 {
   "name": "talk-builder",
-  "version": "1.0.0",
   "description": "Multi-skill plugin for building academic and medical presentations with storytelling, from research to PPTX and speaker scripts",
   "owner": {
     "name": "Sebastian Podlipnik"
