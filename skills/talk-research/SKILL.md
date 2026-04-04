@@ -1,6 +1,18 @@
 ---
 name: talk-research
 description: Use when researching evidence for a presentation. Iterative phase that searches PubMed, Consensus, reads PDFs, and builds a consolidated research document. Triggers when /talk detects vision.md exists but no research.md.
+disable-model-invocation: true
+allowed-tools:
+  - Read
+  - Write
+  - Glob
+  - Grep
+  - WebSearch
+  - WebFetch
+  - mcp__claude_ai_PubMed__search_articles
+  - mcp__claude_ai_PubMed__get_article_metadata
+  - mcp__claude_ai_PubMed__get_full_text_article
+  - mcp__claude_ai_Consensus__search
 ---
 
 # Talk Builder — Research Phase
@@ -15,6 +27,25 @@ Iterative research phase that builds a comprehensive evidence base for the prese
 - NEVER invent or fabricate references. If you cannot find a source, say so.
 
 Read `talk.yaml` and `vision.md` before starting to understand topic, angle, and intent.
+
+## Tool Availability Check
+
+Before starting any search, check if these MCP tools are available:
+- `mcp__claude_ai_PubMed__search_articles`
+- `mcp__claude_ai_Consensus__search`
+
+If ANY of them is NOT available, STOP and tell the user:
+
+"The following recommended tools are not available in this session:
+- [list missing tools]
+
+These tools provide structured medical literature search with verified references (DOI/PMID). Without them, I'll use general web search which produces less precise and less structured results.
+
+To connect them: go to claude.ai > Settings > MCP Servers and activate PubMed and/or Consensus.
+
+Would you like to connect them before we continue, or proceed with web search only?"
+
+Wait for the user's explicit response before proceeding. If they choose to continue without the MCP tools, use WebSearch and WebFetch as fallback for all literature searches. Always inform the user which tools you are using at the start of each search round.
 
 ## Workflow
 
