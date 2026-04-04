@@ -64,7 +64,21 @@ Create each slide with:
 - **Timing** — estimated seconds for this slide
 - **Sparkline position** — is this a "what is" or "what could be" moment?
 
-### Step 6: Apply quality checks
+### Step 6: Generate data visualizations
+
+For any slide that would benefit from a data visualization (bar chart, survival curve, forest plot, comparison chart, clinical algorithm flowchart, etc.):
+
+1. Identify the data from `research.md` that needs visual representation
+2. Generate an SVG file with **transparent background**
+3. Write the SVG directly — no external libraries needed for most charts. For complex visualizations, use a Node.js script with d3.
+4. Save to `images/[VIZ]-description.svg`
+5. Add to `images/image-map.md` with status "Generated"
+
+The user can convert SVG to PNG for Keynote if needed, or use SVG directly.
+
+Only generate visualizations that the narrative identifies as necessary — do not create them speculatively.
+
+### Step 7: Apply quality checks
 
 Before presenting to user, verify:
 - [ ] Rule of Three: no more than 3 key messages
@@ -77,7 +91,7 @@ Before presenting to user, verify:
 - [ ] Total timing fits within duration (with buffer)
 - [ ] Sparkline has at least 3 oscillations
 
-### Step 7: Present and iterate
+### Step 8: Present and iterate
 
 Show the complete narrative structure to the user. Ask:
 - "Does this flow feel right?"
@@ -134,4 +148,4 @@ Generate `narrative.md`:
 
 ## After completion
 
-Tell the user: "Narrative approved! Next phase: Slides — generating the PPTX. Continue with /talk or /talk-slides. Remember: you'll fine-tune in Keynote after generation."
+Tell the user: "Narrative approved! Next phase: Study Document — building the comprehensive reference document. Continue with /talk or /talk-study-doc."
