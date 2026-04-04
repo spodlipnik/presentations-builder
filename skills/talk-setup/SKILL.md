@@ -80,7 +80,7 @@ which pdftoppm && which pdfseparate
 If not found, tell the user:
 "Talk Builder needs poppler-utils for extracting pages from PDFs. Install with: `brew install poppler`"
 
-**Node.js** (required by PPTX and DOCX skills):
+**Node.js** (required by PPTX skill):
 Verify installed by running:
 
 ```bash
@@ -88,7 +88,7 @@ which node && node --version
 ```
 
 If not found, tell the user:
-"The PPTX and DOCX skills require Node.js. Install with: `brew install node`"
+"The PPTX skill requires Node.js. Install with: `brew install node`"
 
 **LibreOffice** (optional, for visual QA of generated presentations):
 Verify installed by running:
