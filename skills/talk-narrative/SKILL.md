@@ -1,6 +1,11 @@
 ---
 name: talk-narrative
 description: Use when building the slide structure and storytelling arc for a presentation. Creates narrative.md with slide-by-slide plan including timing, connectors, and storytelling elements. Triggers when /talk detects assets ready but no narrative.md.
+disable-model-invocation: true
+allowed-tools:
+  - Read
+  - Write
+  - Glob
 ---
 
 # Talk Builder — Narrative Structure & Storytelling
@@ -9,9 +14,9 @@ Build the complete slide-by-slide structure with storytelling arc, connectors, a
 
 ## Important
 
-- MUST read `references/storytelling-guide.md` before starting
-- MUST read `references/slide-design-guide.md` for slide design principles
-- MUST read `references/pacing-guide.md` to select the timing template
+- MUST read `${CLAUDE_PLUGIN_ROOT}/references/storytelling-guide.md` before starting
+- MUST read `${CLAUDE_PLUGIN_ROOT}/references/slide-design-guide.md` for slide design principles
+- MUST read `${CLAUDE_PLUGIN_ROOT}/references/pacing-guide.md` to select the timing template
 - Read `talk.yaml`, `vision.md`, `research.md`, and `images/image-map.md`
 - The narrative must serve the user's vision and emotional intent, not just present facts
 - This is ITERATIVE — present the structure and refine until the user approves
@@ -20,7 +25,7 @@ Build the complete slide-by-slide structure with storytelling arc, connectors, a
 
 ### Step 1: Select pacing template
 
-Based on `talk.yaml` duration, select the appropriate template from `references/pacing-guide.md`. Show it to the user as the structural skeleton.
+Based on `talk.yaml` duration, select the appropriate template from `${CLAUDE_PLUGIN_ROOT}/references/pacing-guide.md`. Show it to the user as the structural skeleton.
 
 ### Step 2: Design macro structure
 
@@ -35,7 +40,7 @@ Map the Sparkline rhythm:
 
 ### Step 3: Design opening
 
-Based on the user's vision, propose 2-3 opening options from `references/storytelling-guide.md`:
+Based on the user's vision, propose 2-3 opening options from `${CLAUDE_PLUGIN_ROOT}/references/storytelling-guide.md`:
 - Cold open with patient case (if story thread exists)
 - Startling statistic from research
 - Provocative question
