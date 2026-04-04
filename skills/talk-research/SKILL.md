@@ -17,16 +17,16 @@ allowed-tools:
 
 # Talk Builder — Research Phase
 
-Iterative research phase that builds a comprehensive evidence base for the presentation. Uses PubMed, Consensus, and user-provided PDFs.
+Iterative research phase that builds a comprehensive evidence base for the presentation. The goal is not to find every paper on the topic — it's to find the RIGHT papers that support the speaker's vision and narrative.
 
 ## Important
 
+- Read `talk.yaml`, `vision.md`, and `${user_config.assets_path}/config.yaml` before starting.
+- **Language priority:** Use the language the user writes in. Fall back to config.language for ambiguous messages.
 - This phase is iterative — it loops until the user is satisfied.
 - The user can add PDFs to `pdfs/` at ANY point during this phase.
 - Every claim in `research.md` MUST have a verifiable reference (DOI or PMID).
-- NEVER invent or fabricate references. If you cannot find a source, say so.
-
-Read `talk.yaml` and `vision.md` before starting to understand topic, angle, and intent.
+- NEVER invent or fabricate references. If you cannot find a source, say so explicitly.
 
 ## Tool Availability Check
 
@@ -49,100 +49,126 @@ Wait for the user's explicit response before proceeding. If they choose to conti
 
 ## Workflow
 
-### Step 1: Initial search
+### Step 1: Build search strategy from vision
 
-Based on the topic and vision, construct search queries for PubMed and Consensus.
+Read `vision.md` carefully. The vision drives what to search — not the topic alone. Build search queries targeting:
 
-Use the MCP tools:
-- `mcp__claude_ai_PubMed__search_articles` for PubMed searches
-- `mcp__claude_ai_Consensus__search` for Consensus searches
+- **Core message support:** Evidence that directly backs the speaker's main thesis
+- **Story thread material:** If vision mentions a patient case or narrative, search for published cases or data that support it
+- **STAR moment candidates:** Surprising statistics, counterintuitive findings, striking comparisons
+- **Counter-arguments:** What the skeptics would cite — knowing this makes the talk stronger
+- **Anti-goals filter:** If the speaker said "not a guidelines review", don't fill research.md with guidelines
 
-Search strategy:
-- Start broad with the main topic
-- Then narrow based on the vision angle
-- Look for: key reviews, landmark studies, recent advances, relevant clinical data
+### Step 2: Propose search queries before executing
 
-### Step 2: Present results interactively
+Show the user your planned queries before searching:
 
-Show the user what you found in a structured list:
+"Based on your vision, I'm going to search for:
+1. [Query 1] — to support [core message aspect]
+2. [Query 2] — to find [STAR moment / story data]
+3. [Query 3] — to address [counter-argument / gap]
+
+Does this look right, or should I adjust?"
+
+This saves time — the user might redirect you before you burn search tokens on the wrong angle.
+
+### Step 3: Search and present results
+
+Use PubMed and Consensus (or WebSearch as fallback). For each result, show:
 
 ```
-Found 15 relevant articles. Here are the top results:
-
 1. [Title] — Author et al., Journal (Year)
    Key finding: [one sentence]
-   Relevance: [why it matters for this talk]
+   Evidence level: [meta-analysis / RCT / cohort / case series / review]
+   Relevance to YOUR talk: [how it connects to the vision]
 
 2. [Title] — Author et al., Journal (Year)
    ...
 ```
 
-Ask: "Which of these do you want to include? Any specific angles to explore further?"
+Prioritize by evidence quality: meta-analyses and RCTs first, case series and expert opinion last. But a compelling case report that fits the narrative can be more valuable than a weak meta-analysis that doesn't.
 
-### Step 3: Read user PDFs
+Ask: "Which of these do you want to include? Any angles to explore further?"
 
-Check `pdfs/` for any files. If present:
+### Step 4: Read user PDFs
+
+Check `pdfs/` for files. If present:
 - Read each PDF
 - Extract key findings, methodology, conclusions
-- Integrate into the research base
+- Connect findings to the vision — explain how each paper serves the narrative
 
-Tell the user: "I've read [N] PDFs from your pdfs/ folder. Here's what I found relevant..."
+Tell the user: "I've read [N] PDFs from your pdfs/ folder. Here's what I found relevant to your vision..."
 
-### Step 4: Consolidate research.md
+### Step 5: Consolidate research.md
 
-Write `research.md` with this structure:
+Write `research.md` organized by narrative role, not by topic taxonomy:
 
 ```markdown
 # Research — [Talk Topic]
 
-## Key Findings
+## Evidence Summary
 
-### [Finding Category 1]
+### [Narrative Section 1 — e.g., "The problem: diagnostic gaps"]
 - [Finding with source] (Author et al., Year; DOI: xxx)
 - [Finding with source] ...
+Evidence quality: [meta-analysis / multiple RCTs / emerging]
 
-### [Finding Category 2]
+### [Narrative Section 2 — e.g., "The solution: AI-assisted diagnosis"]
 - ...
 
-## Key Statistics
-- [Statistic] (Source)
+### [Narrative Section 3 — e.g., "Clinical impact: what changes"]
 - ...
 
-## Potential STAR Moment Data
+## STAR Moment Candidates
 - [Surprising or impactful data points that could serve as STAR moments]
+- [Include the numbers — specific, visceralized, comparable]
+
+## Counter-Arguments & Limitations
+- [What skeptics would say, with sources]
+- [Known limitations of the evidence]
 
 ## Gaps Identified
-- [Areas where more evidence is needed]
+- [Areas where more evidence is needed or could strengthen the talk]
 
 ## References
 1. Author et al. "Title." Journal, Year. DOI: xxx / PMID: xxx
 2. ...
 ```
 
-### Step 5: Review together
+### Step 6: Calibrate scope
 
-Present the consolidated research to the user. Ask:
-- "Are there gaps you'd like to fill?"
+Guide the user on how much evidence is enough:
+- **10-min talk:** 3-5 key references are plenty
+- **15-min talk:** 5-8 key references
+- **20-min talk:** 8-12 key references
+- **30-min talk:** 10-15 key references
+
+These are references that directly appear in or support the narrative — not every paper you read. More is not better. Say: "You have [N] references for a [X]-minute talk. That's [sufficient / a bit light / more than enough]. Want to search for more or are we solid?"
+
+### Step 7: Review together
+
+Present the consolidated research. Ask:
+- "Does this evidence support your core message?"
+- "Are there gaps that weaken your argument?"
 - "Any specific aspect you want to dig deeper into?"
-- "Should we search for more papers on [identified gap]?"
 
-### Step 6: Iterate
+### Step 8: Iterate
 
 If the user wants more:
-- Run additional searches
+- Run additional targeted searches
 - Read new PDFs they add to `pdfs/`
 - Update `research.md`
 
-Continue until the user confirms: "The research base is solid."
+Continue until the user confirms the evidence base is solid.
 
-### Step 7: Reference verification
+### Step 9: Reference verification
 
 Before finalizing, verify:
-- Every claim has a source
-- DOIs/PMIDs are present for all references
-- No fabricated citations
+- Every claim has a source with DOI or PMID
+- No fabricated citations — if in doubt, flag it
 - Key statistics are accurately transcribed from sources
+- References section is complete and consistently formatted
 
 ## After completion
 
-Tell the user: "Research complete! Next phase: Assets — extracting and preparing visual materials. Continue with /talk or /talk-assets."
+Tell the user: "Research complete! Next phase: Assets — extracting and preparing visual materials. Continue with /talk or /talk-builder:talk-assets."
