@@ -59,30 +59,26 @@ If the user confirms they have placed files there, read and analyze them to gene
 
 #### 6a. Required Claude Code plugins
 
-Talk Builder depends on the official Anthropic document generation skills. Check if they are installed and guide the user if not:
+Talk Builder depends on the official Anthropic PPTX skill for presentation generation. Check if it is installed and guide the user if not:
 
 **PPTX skill** (for presentation generation):
 - Required for `/talk-slides`
 - Install via: `/plugin` → select `claude-plugins-official` marketplace → install `pptx`
 
-**DOCX skill** (for document generation):
-- Required for `/talk-study-doc` and `/talk-script`
-- Install via: `/plugin` → select `claude-plugins-official` marketplace → install `docx`
-
 Tell the user:
-"Talk Builder needs the official PPTX and DOCX skills from Anthropic to generate presentation and document files. Please install them from the `claude-plugins-official` marketplace using `/plugin` if you haven't already."
+"Talk Builder needs the official PPTX skill from Anthropic to generate presentation files. Please install it from the `claude-plugins-official` marketplace using `/plugin` if you haven't already."
 
 #### 6b. System dependencies
 
-**poppler-utils** (for image extraction from PDFs):
+**poppler-utils** (for page extraction from PDFs):
 Verify installed by running:
 
 ```bash
-which pdfimages && which pdftoppm
+which pdftoppm && which pdfseparate
 ```
 
 If not found, tell the user:
-"Talk Builder needs poppler-utils for extracting images from PDFs. Install with: `brew install poppler`"
+"Talk Builder needs poppler-utils for extracting pages from PDFs. Install with: `brew install poppler`"
 
 **Node.js** (required by PPTX and DOCX skills):
 Verify installed by running:
