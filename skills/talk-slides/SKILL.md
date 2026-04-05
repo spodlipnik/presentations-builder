@@ -184,3 +184,32 @@ update_narrative_variants('docs/narrative.md', decisions)
 print('narrative.md updated')
 "
 ```
+
+---
+
+## Phase 4: Quality Check (LLM review)
+
+**Goal:** Review the full mapping for issues the rubric may have missed.
+
+Read `/tmp/variant_decisions.json` and `/tmp/parsed_slides.json`. Look for:
+
+1. **Consecutive same variants**: 3+ slides in a row with identical variant → suggest breaking up
+2. **Content-variant mismatch**: e.g., `ae.image-right` but slide has no image; `chart.single-key` but no chart mentioned
+3. **Missing required fields**: variant requires `image` slot but slide has no `Image:`
+4. **Variety**: if only 1-2 variants used across all AE slides, suggest alternatives
+
+Report findings:
+
+> "🔍 Quality check:
+> - {count} issues found
+> - {details}
+>
+> Sugerencias:
+> - Slide 7-9 usan todos `ae.image-right`. Considera alternar con `ae.image-left` para variedad visual.
+> - Slide 12 usa `chart.single-key` pero no hay imagen. Verifica que el slide tenga una imagen de chart.
+>
+> ¿Aplicar sugerencias, ignorar, o dejar al usuario decidir? (apply/ignore/review)"
+
+If apply → update decisions and re-run write-back.
+If ignore → continue.
+If review → pause for user input per-issue.
