@@ -1,6 +1,6 @@
 ---
 name: talk-assets
-description: Use when creating and preparing visual assets for a presentation. Collaborative visual creation — extracts figures from PDFs, generates data charts (SVG), creates diagrams, and proposes AI illustration prompts. Triggers when /talk detects narrative.md exists but images/ is empty.
+description: Use when creating and preparing visual assets for a presentation. Collaborative visual creation — extracts figures from PDFs, generates data charts (SVG), creates diagrams, and proposes AI illustration prompts. Triggers when /talk detects docs/narrative.md exists but images/ is empty.
 disable-model-invocation: true
 allowed-tools:
   - Read
@@ -17,10 +17,10 @@ The goal is NOT to extract every figure from every PDF. It's to create a focused
 
 ## Important
 
-- Read `narrative.md` first — it defines what each slide needs
-- Read `research.md` for the Visual Elements Catalog (what figures exist in papers)
+- Read `docs/narrative.md` first — it defines what each slide needs
+- Read `docs/research.md` for the Visual Elements Catalog (what figures exist in papers)
 - Read `${user_config.assets_path}/config.yaml` for colors, fonts, and style
-- Read `talk.yaml` and `vision.md` for topic and intent context
+- Read `docs/talk.yaml` and `docs/vision.md` for topic and intent context
 - **Language priority:** Use the language the user writes in. Fall back to config.language for ambiguous messages.
 - **Every visual must be didactic** — it must teach, explain, or make data tangible. No decorative images.
 - **Quality over quantity** — a 20-minute talk needs ~10-15 visuals max. 100 images is failure, not thoroughness.
@@ -76,12 +76,12 @@ node -e "const sharp = require('/opt/homebrew/lib/node_modules/sharp'); sharp('i
 
 ### Step 1: Visual needs analysis
 
-Read `narrative.md` slide by slide. For each slide, determine:
+Read `docs/narrative.md` slide by slide. For each slide, determine:
 - Does it need a visual? (divider slides, text-only emotional slides, and big-number slides usually don't)
 - What type of visual? (EXTRACT / CHART / DIAGRAM / ILLUSTRATE / SPEAKER ADDS)
 - What source? (which paper, which data, what concept)
 
-Cross-reference with `research.md`'s Visual Elements Catalog to match paper figures to slide needs.
+Cross-reference with `docs/research.md`'s Visual Elements Catalog to match paper figures to slide needs.
 
 ### Step 2: Present visual plan and discuss
 
@@ -97,7 +97,7 @@ VISUAL PLAN — [Talk Topic] ([N] visuals for [M] slides)
 
 📊 CREATE charts ([N]):
   S[N]: [description]
-    Data: [specific numbers from research.md]
+    Data: [specific numbers from docs/research.md]
     Proposed: [chart type — bar, comparison, trend]
     Why not EXTRACT: [reason — e.g., "paper figure has 20 rows, we need 3"]
   

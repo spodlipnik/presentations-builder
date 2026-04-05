@@ -1,6 +1,6 @@
 ---
 name: talk-narrative
-description: Use when building the slide structure and storytelling arc for a presentation. Creates narrative.md with slide-by-slide plan including timing, connectors, and storytelling elements. Triggers when /talk detects research.md exists but no narrative.md.
+description: Use when building the slide structure and storytelling arc for a presentation. Creates docs/narrative.md with slide-by-slide plan including timing, connectors, and storytelling elements. Triggers when /talk detects docs/research.md exists but no docs/narrative.md.
 disable-model-invocation: true
 allowed-tools:
   - Read
@@ -19,7 +19,7 @@ The goal is NOT to organize information into slides. It's to design an emotional
 - MUST read `${CLAUDE_PLUGIN_ROOT}/references/storytelling-guide.md` before starting
 - MUST read `${CLAUDE_PLUGIN_ROOT}/references/slide-design-guide.md` for slide design principles
 - MUST read `${CLAUDE_PLUGIN_ROOT}/references/pacing-guide.md` to select the timing template
-- Read `talk.yaml`, `vision.md`, and `research.md` (including the Visual Elements Catalog and comprehensive paper summaries)
+- Read `docs/talk.yaml`, `docs/vision.md`, and `docs/research.md` (including the Visual Elements Catalog and comprehensive paper summaries)
 - Read `${user_config.assets_path}/config.yaml` for style preferences (colors, fonts, language)
 - **Language priority:** Use the language the user writes in. Fall back to config.language for ambiguous messages.
 - The narrative must serve the user's vision and emotional intent, not just present facts
@@ -29,7 +29,7 @@ The goal is NOT to organize information into slides. It's to design an emotional
 
 ### Step 1: Select pacing template
 
-Based on `talk.yaml` duration, select the appropriate template from `${CLAUDE_PLUGIN_ROOT}/references/pacing-guide.md`. Show it to the user as the structural skeleton.
+Based on `docs/talk.yaml` duration, select the appropriate template from `${CLAUDE_PLUGIN_ROOT}/references/pacing-guide.md`. Show it to the user as the structural skeleton.
 
 ### Step 2: Design macro structure
 
@@ -100,10 +100,10 @@ The closing MUST connect to the opening for narrative completeness. The audience
 This is the most detailed step. For EACH slide, specify these fields:
 
 - **Type line** — combines slide type, section label, timing, and sparkline in one line: `evidence | SECTION · SUBTOPIC | 60s | CB`. Types: `divider`, `evidence`, `emotional`, `data`, `content`, `opening`, `closing`. The `/talk-slides` skill uses the type to decide visual design (dark/light, layout, typography). Narrative does NOT specify visual design — that's the slides skill's job.
-- **Content** — what appears on the slide: the visible text, data, visual description. Reference specific files from research.md's Visual Elements Catalog when available.
+- **Content** — what appears on the slide: the visible text, data, visual description. Reference specific files from `docs/research.md`'s Visual Elements Catalog when available.
 - **Image** — reference to specific file from Visual Elements Catalog, or `[GENERATE]` for assets to create, or `[SPEAKER ADDS IN KEYNOTE]` for clinical photos only the speaker has.
 - **Speaker** — actual draft dialogue. Write it as the speaker would say it on stage: conversational, with emotional cues (pause), (slow down), (eye contact), (dramatic). Include exact data points with numbers. This becomes the raw material for the speaker script phase.
-- **Context** — the comprehensive backstory for this slide. Study design, N patients, exact results with p-values, mechanism, why it matters for the narrative, limitations, connections to other slides. The speaker should be able to read ONLY this field and fully understand everything behind the slide — without opening research.md or any paper. Write 3-6 sentences minimum for evidence slides. This is what the speaker reads on the plane before the conference to refresh their knowledge.
+- **Context** — the comprehensive backstory for this slide. Study design, N patients, exact results with p-values, mechanism, why it matters for the narrative, limitations, connections to other slides. The speaker should be able to read ONLY this field and fully understand everything behind the slide — without opening `docs/research.md` or any paper. Write 3-6 sentences minimum for evidence slides. This is what the speaker reads on the plane before the conference to refresh their knowledge.
 - **Ref** — author, journal, year, DOI if available. For the speaker to cite on stage.
 - **Bridge** — the exact transition sentence or question to the next slide. Must feel natural, not mechanical. Vary bridge types (narrative, rhetorical question, contrast, callback, dramatic pause).
 
@@ -137,7 +137,7 @@ Before presenting to user, verify:
 - [ ] Sparkline has at least 3 oscillations
 - [ ] Speaker text includes emotional cues, not just content
 - [ ] Context field is comprehensive for every evidence slide (no need to check other docs)
-- [ ] All image references point to real files from research.md catalog or are marked [GENERATE]
+- [ ] All image references point to real files from `docs/research.md` catalog or are marked [GENERATE]
 - [ ] Section divider slides between major sections (where appropriate)
 - [ ] Section labels defined for content slides
 - [ ] Every word on every slide earns its place — text supports the message, doesn't decorate
@@ -145,7 +145,7 @@ Before presenting to user, verify:
 
 ### Step 8: Present and save for review
 
-Save `narrative.md` to the working directory. Then show the user a **compact index** for quick scanning:
+Save `docs/narrative.md` to the working directory. Then show the user a **compact index** for quick scanning:
 
 ```
 NARRATIVE INDEX — [Talk Topic] ([X] min, [N] slides)
@@ -167,18 +167,18 @@ CLOSING
 
 Tell the user:
 
-"I've saved `narrative.md`. You can review and edit it in two ways:
+"I've saved `docs/narrative.md`. You can review and edit it in two ways:
 
 **Option A: Quick feedback here** — Tell me what to change: 'move slide 5 after 8', 'add a divider before 12', 'remove slide 6', 'I want a new slide about X between 7 and 8'.
 
-**Option B: Annotate the document directly** — Open `narrative.md` in your editor, add annotations where you want changes. Use any format you like:
+**Option B: Annotate the document directly** — Open `docs/narrative.md` in your editor, add annotations where you want changes. Use any format you like:
 - `[MOVE AFTER SLIDE 8]` next to a slide
 - `[REMOVE]` on slides you don't want
 - `[NEW SLIDE: about topic X]` where you want to insert
 - `[CHANGE: I want this to be more about Y]` on any field
 - Any free-text notes — I'll interpret them
 
-When you're done annotating, just tell me 'I've edited narrative.md' and I'll re-read the file, apply your changes, and generate a clean updated version."
+When you're done annotating, just tell me 'I've edited docs/narrative.md' and I'll re-read the file, apply your changes, and generate a clean updated version."
 
 Both options work. Option B is better for big structural changes because the user can see the full document and make multiple edits at once without chatting back and forth.
 
@@ -186,7 +186,7 @@ After each round of edits, show the updated compact index. Iterate until the use
 
 ## Output
 
-Generate `narrative.md`:
+Generate `docs/narrative.md`:
 
 ```markdown
 # Narrative — [Talk Topic]

@@ -1,6 +1,6 @@
 ---
 name: talk-study-doc
-description: Use when generating the study document for a presentation — a comprehensive reference document for the speaker to study and refresh their knowledge. Triggers when /talk detects narrative.md exists but no study-document.md.
+description: Use when generating the study document for a presentation — a comprehensive reference document for the speaker to study and refresh their knowledge. Triggers when /talk detects docs/narrative.md exists but no docs/study-document.md.
 disable-model-invocation: true
 allowed-tools:
   - Read
@@ -14,10 +14,10 @@ Generate a single comprehensive study document that the speaker can use to maste
 
 ## Important
 
-- Read `narrative.md` for the presentation structure — the study document follows this order
-- Read `research.md` for all evidence, paper summaries, and visual elements catalog
+- Read `docs/narrative.md` for the presentation structure — the study document follows this order
+- Read `docs/research.md` for all evidence, paper summaries, and visual elements catalog
 - Read `${user_config.assets_path}/config.yaml` for language and speaker info
-- Read `talk.yaml` and `vision.md` for topic and intent context
+- Read `docs/talk.yaml` and `docs/vision.md` for topic and intent context
 - **Language priority:** Use the language the user writes in. Fall back to config.language for ambiguous messages.
 - Every claim must include its reference with DOI/PMID — NEVER invent citations
 - Write in **review article style** — continuous narrative prose. No bullet lists except for key data points that must be memorized.
@@ -31,7 +31,7 @@ This document is designed around three cognitive science principles:
 2. **Active recall** — each section ends with self-test questions. Struggling to recall is what builds retention, not passive re-reading.
 3. **Modular sections** — each section is self-contained. The speaker can review one section independently (e.g., on the train to the conference) without reading the whole document.
 
-## Output: study-document.md
+## Output: docs/study-document.md
 
 Target length: **2,500-4,000 words** for a 20-minute talk. Scale proportionally for shorter/longer talks. This is enough to be comprehensive without becoming a textbook.
 

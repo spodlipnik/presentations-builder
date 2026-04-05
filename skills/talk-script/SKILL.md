@@ -10,15 +10,15 @@ allowed-tools:
 
 # Talk Builder — Teleprompter Script (Optional)
 
-Generate a teleprompter-format script from the approved narrative. This is an optional convenience tool — the narrative.md already contains full speaker text. This skill reformats it for on-screen reading during rehearsal or delivery.
+Generate a teleprompter-format script from the approved narrative. This is an optional convenience tool — `docs/narrative.md` already contains full speaker text. This skill reformats it for on-screen reading during rehearsal or delivery.
 
 ## Important
 
-- Read `narrative.md` — extract the Speaker field from every slide
+- Read `docs/narrative.md` — extract the Speaker field from every slide
 - Read `${user_config.assets_path}/config.yaml` for language
 - **Language priority:** Use the language the user writes in. Fall back to config.language.
-- This skill does NOT create new content. It reformats what's already in narrative.md.
-- If narrative.md doesn't exist, tell the user to complete the narrative phase first.
+- This skill does NOT create new content. It reformats what's already in `docs/narrative.md`.
+- If `docs/narrative.md` doesn't exist, tell the user to complete the narrative phase first.
 
 ## Teleprompter Format Rules
 
@@ -35,7 +35,7 @@ Key rules:
 - **[STAR MOMENT]** marker at the STAR moment
 - Short sentences. Natural speech. Not written text read aloud.
 
-## Output: speaker-script.md
+## Output: docs/speaker-script.md
 
 ```markdown
 # Teleprompter — [Talk Title]
@@ -60,7 +60,7 @@ continue the idea.]
 [TIME: 0:15]
 
 [Speaker text reformatted
-from narrative.md,
+from docs/narrative.md,
 keeping emotional cues.]
 
 [PAUSE]
@@ -89,11 +89,11 @@ let it land.]
 
 ## Quality Checks
 
-- [ ] Every slide from narrative.md has a corresponding section
+- [ ] Every slide from `docs/narrative.md` has a corresponding section
 - [ ] Cumulative timing adds up correctly
 - [ ] STAR moment is marked
 - [ ] Bridges between slides are included
-- [ ] Language matches narrative.md
+- [ ] Language matches `docs/narrative.md`
 - [ ] No new content invented — only reformatted from narrative
 
 ## After completion

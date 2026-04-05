@@ -1,6 +1,6 @@
 ---
 name: talk-briefing
-description: Use when starting a new presentation project. Interactive wizard that collects topic, duration, audience, and preferences. Triggers on "new talk", "new presentation", or when /talk detects no talk.yaml exists.
+description: Use when starting a new presentation project. Interactive wizard that collects topic, duration, audience, and preferences. Triggers on "new talk", "new presentation", or when /talk detects no docs/talk.yaml exists.
 disable-model-invocation: true
 argument-hint: "[topic]"
 allowed-tools:
@@ -12,7 +12,7 @@ allowed-tools:
 
 # Talk Builder — Briefing Wizard
 
-Interactive wizard that collects essential information about a new presentation and generates `talk.yaml`. This should feel like a quick, focused conversation — not a bureaucratic form.
+Interactive wizard that collects essential information about a new presentation and generates `docs/talk.yaml`. This should feel like a quick, focused conversation — not a bureaucratic form.
 
 ## Important
 
@@ -80,7 +80,7 @@ If the folder is empty or doesn't exist, skip this question entirely.
 
 ## Output
 
-Generate `talk.yaml` in the current working directory:
+Generate `docs/talk.yaml` in the current working directory:
 
 ```yaml
 topic: "<user answer>"
@@ -98,7 +98,7 @@ fixed_slides:
 created: "<ISO date>"
 ```
 
-Also create `pdfs/` and `images/` directories if they don't exist.
+Also create `docs/`, `pdfs/`, and `images/` directories if they don't exist.
 
 ## After completion
 

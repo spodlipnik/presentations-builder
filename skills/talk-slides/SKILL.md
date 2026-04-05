@@ -1,6 +1,6 @@
 ---
 name: talk-slides
-description: Use when generating the PPTX presentation file from an approved narrative structure. Applies the user's personal style and design principles. Triggers when /talk detects speaker-script.md exists but no presentation.pptx.
+description: Use when generating the PPTX presentation file from an approved narrative structure. Applies the user's personal style and design principles. Triggers when /talk detects docs/speaker-script.md exists but no presentation.pptx.
 disable-model-invocation: true
 allowed-tools:
   - Read
@@ -18,9 +18,9 @@ Generate the presentation file from the approved narrative structure, applying t
 
 - Read `${CLAUDE_PLUGIN_ROOT}/references/slide-design-guide.md` before generating
 - Read the user's `config.yaml` for fonts, colors, and style analysis
-- Read `talk.yaml` for any local style overrides
-- Read `narrative.md` for the complete slide structure
-- Read `speaker-script.md` to understand the full delivery context
+- Read `docs/talk.yaml` for any local style overrides
+- Read `docs/narrative.md` for the complete slide structure
+- Read `docs/speaker-script.md` to understand the full delivery context
 - Check `images/` for available visual assets
 - Check the user's `fixed-slides/` directory for reusable slides
 
@@ -35,8 +35,8 @@ The PPTX is a FIRST DRAFT. The user will fine-tune in Keynote. Focus on:
 ### Step 1: Load configuration
 
 1. Read `config.yaml` from the user's assets path
-2. Read `talk.yaml` for local overrides
-3. Merge: talk.yaml overrides config.yaml for any shared fields
+2. Read `docs/talk.yaml` for local overrides
+3. Merge: docs/talk.yaml overrides config.yaml for any shared fields
 4. Note the style_analysis for design decisions
 
 ### Step 2: Generate PPTX
@@ -63,7 +63,7 @@ cd ${CLAUDE_PLUGIN_DATA} && npm install
 The `_build/` directory with scripts is **permanent** — it allows the user to re-generate or modify the presentation later. Dependencies (PptxGenJS) are managed by the plugin in `${CLAUDE_PLUGIN_DATA}` and shared across all projects.
 
 Key generation instructions:
-- Apply the user's fonts, colors, and background from `config.yaml` / `talk.yaml`
+- Apply the user's fonts, colors, and background from `config.yaml` / `docs/talk.yaml`
 - Use the `pptx` skill's design guidance for layout, spacing, and visual hierarchy
 
 ### Step 3: Visual QA (optional but recommended)
@@ -76,7 +76,7 @@ If LibreOffice is available, follow the `pptx` skill's QA workflow:
 
 ### Step 4: Insert fixed slides
 
-If `talk.yaml` specifies fixed slides (disclosures, contact, acknowledgments):
+If `docs/talk.yaml` specifies fixed slides (disclosures, contact, acknowledgments):
 - Read corresponding files from the user's `fixed-slides/` directory
 - Insert at appropriate positions (disclosures near start, contact at end)
 
@@ -92,9 +92,9 @@ Tell the user:
 ## After completion
 
 Tell the user: "Slides generated! Your Talk Builder project is complete. All outputs:
-- study-document.md — comprehensive reference document
+- docs/study-document.md — comprehensive reference document
 - article-summaries.md — quick reference per paper
-- speaker-script.md — delivery guide with teleprompter
+- docs/speaker-script.md — delivery guide with teleprompter
 - presentation.pptx — open in Keynote for visual fine-tuning
 - _build/ — generation scripts (reusable for modifications)
 

@@ -30,13 +30,13 @@ Scan the current working directory for these files to determine project state:
 
 | File | Phase Completed |
 |---|---|
-| `talk.yaml` | Briefing |
-| `vision.md` | Vision |
-| `research.md` | Research |
-| `narrative.md` | Narrative |
+| `docs/talk.yaml` | Briefing |
+| `docs/vision.md` | Vision |
+| `docs/research.md` | Research |
+| `docs/narrative.md` | Narrative |
 | `images/` (non-empty) | Assets |
-| `study-document.md` + `article-summaries.md` | Study Docs |
-| `speaker-script.md` | Script |
+| `docs/study-document.md` + `article-summaries.md` | Study Docs |
+| `docs/speaker-script.md` | Script |
 | `presentation.pptx` | Slides |
 
 ## Behavior
@@ -48,13 +48,13 @@ Display a visual checklist of all phases:
 ```
 Talk Builder — Project Status:
 
-  [done] Briefing (talk.yaml)
-  [done] Vision (vision.md)
-  [done] Research (research.md)
-  [open] Narrative (narrative.md)
+  [done] Briefing (docs/talk.yaml)
+  [done] Vision (docs/vision.md)
+  [done] Research (docs/research.md)
+  [open] Narrative (docs/narrative.md)
   [open] Assets (images/)
-  [open] Study Documents (study-document.md)
-  [open] Speaker Script (speaker-script.md)
+  [open] Study Documents (docs/study-document.md)
+  [open] Speaker Script (docs/speaker-script.md)
   [open] Slides (presentation.pptx)
 
   -> Next step: Narrative
@@ -74,18 +74,18 @@ Suggest the next uncompleted phase. The user can:
 
 Based on the user's choice, invoke the appropriate skill:
 - No config found -> `talk-setup`
-- No `talk.yaml` -> `talk-briefing`
-- No `vision.md` -> `talk-vision`
-- No `research.md` -> `talk-research`
-- No `narrative.md` -> `talk-narrative`
+- No `docs/talk.yaml` -> `talk-briefing`
+- No `docs/vision.md` -> `talk-vision`
+- No `docs/research.md` -> `talk-research`
+- No `docs/narrative.md` -> `talk-narrative`
 - No images -> `talk-assets`
-- No `study-document.md` -> `talk-study-doc`
-- No `speaker-script.md` -> `talk-script`
+- No `docs/study-document.md` -> `talk-study-doc`
+- No `docs/speaker-script.md` -> `talk-script`
 - No `presentation.pptx` -> `talk-slides`
 
 ### 4. Handle empty directory
 
-If the working directory is empty (new project), start from `talk-briefing` and create the `pdfs/` and `images/` subdirectories.
+If the working directory is empty (new project), start from `talk-briefing` and create the `docs/`, `pdfs/`, and `images/` subdirectories.
 
 If the user already provided useful information in their message (topic, duration, audience, occasion), acknowledge it and note that it will be carried into the briefing phase so they don't have to repeat themselves.
 

@@ -1,6 +1,6 @@
 ---
 name: talk-vision
-description: Use when defining the personal angle, message, and emotional intent for a presentation. Interactive conversation to capture the speaker's vision. Triggers when /talk detects talk.yaml exists but no vision.md.
+description: Use when defining the personal angle, message, and emotional intent for a presentation. Interactive conversation to capture the speaker's vision. Triggers when /talk detects docs/talk.yaml exists but no docs/vision.md.
 disable-model-invocation: true
 allowed-tools:
   - Read
@@ -15,7 +15,7 @@ This is NOT about content or evidence (that comes in the research phase). It's a
 
 ## Important
 
-- Read `talk.yaml` to understand the topic, audience, and duration.
+- Read `docs/talk.yaml` to understand the topic, audience, and duration.
 - Read `${user_config.assets_path}/config.yaml` for the user's default language preference.
 - **Language priority:** Use the language the user writes in (primary signal). Only fall back to config.language if the user's message is ambiguous or very short (e.g., "/talk-vision"). Never override the user's own language with the config setting.
 - Ask one question at a time. Be conversational — react to what the user says, don't just move to the next question mechanically.
@@ -88,7 +88,7 @@ These can flow naturally in one conversation turn. The user doesn't have to answ
 
 ## Output
 
-Generate `vision.md` in the current working directory. Write it as a cohesive document that captures the spirit of the conversation, not just a form with filled blanks:
+Generate `docs/vision.md` in the current working directory. Write it as a cohesive document that captures the spirit of the conversation, not just a form with filled blanks:
 
 ```markdown
 # Vision — [Talk Topic]

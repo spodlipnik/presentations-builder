@@ -1,6 +1,6 @@
 ---
 name: talk-research
-description: Use when researching evidence for a presentation. Iterative phase that searches PubMed, Consensus, reads PDFs, and builds a consolidated research document. Triggers when /talk detects vision.md exists but no research.md.
+description: Use when researching evidence for a presentation. Iterative phase that searches PubMed, Consensus, reads PDFs, and builds a consolidated research document. Triggers when /talk detects docs/vision.md exists but no docs/research.md.
 disable-model-invocation: true
 allowed-tools:
   - Read
@@ -21,11 +21,11 @@ Iterative research phase that builds a comprehensive evidence base for the prese
 
 ## Important
 
-- Read `talk.yaml`, `vision.md`, and `${user_config.assets_path}/config.yaml` before starting.
+- Read `docs/talk.yaml`, `docs/vision.md`, and `${user_config.assets_path}/config.yaml` before starting.
 - **Language priority:** Use the language the user writes in. Fall back to config.language for ambiguous messages.
 - This phase is iterative — it loops until the user is satisfied.
 - The user can add PDFs to `pdfs/` at ANY point during this phase.
-- Every claim in `research.md` MUST have a verifiable reference (DOI or PMID).
+- Every claim in `docs/research.md` MUST have a verifiable reference (DOI or PMID).
 - **NEVER invent or fabricate references.** If you cannot find a source, say so explicitly. If a DOI cannot be confirmed, mark it as "[DOI: UNVERIFIED — check manually]". A missing reference is always better than a fake one. This is a medical presentation — incorrect citations damage the speaker's credibility with specialists who know the literature.
 - **Reference quality matters.** Prioritize high-impact journals and high-evidence-level studies. A meta-analysis in Lancet carries more weight than a case series in a low-tier journal. Note the journal and evidence level for each reference.
 
@@ -65,13 +65,13 @@ Use their answers to calibrate search depth and filtering.
 
 ### Step 1: Build search strategy from vision
 
-Read `vision.md` carefully. The vision drives what to search — not the topic alone. Build search queries targeting:
+Read `docs/vision.md` carefully. The vision drives what to search — not the topic alone. Build search queries targeting:
 
 - **Core message support:** Evidence that directly backs the speaker's main thesis
 - **Story thread material:** If vision mentions a patient case or narrative, search for published cases or data that support it
 - **STAR moment candidates:** Surprising statistics, counterintuitive findings, striking comparisons
 - **Counter-arguments:** What the skeptics would cite — knowing this makes the talk stronger
-- **Anti-goals filter:** If the speaker said "not a guidelines review", don't fill research.md with guidelines
+- **Anti-goals filter:** If the speaker said "not a guidelines review", don't fill `docs/research.md` with guidelines
 
 ### Step 2: Propose search queries before executing
 
@@ -238,9 +238,9 @@ This depth is essential because:
 
 Present a summary per paper: "I've read [N] papers. Here's what I found in each..."
 
-### Step 7: Consolidate research.md
+### Step 7: Consolidate docs/research.md
 
-Write `research.md` with two sections: a narrative evidence summary organized by role, and comprehensive per-paper summaries:
+Write `docs/research.md` with two sections: a narrative evidence summary organized by role, and comprehensive per-paper summaries:
 
 ```markdown
 # Research — [Talk Topic]
@@ -336,7 +336,7 @@ Present the consolidated research. Ask:
 If the user wants more:
 - Run additional targeted searches
 - Read new PDFs they add to `pdfs/`
-- Update `research.md`
+- Update `docs/research.md`
 
 Continue until the user confirms the evidence base is solid.
 
