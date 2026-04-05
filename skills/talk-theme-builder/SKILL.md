@@ -344,3 +344,73 @@ When done with all roles:
 > Podrás añadir esos roles con `talk-theme-builder edit` más adelante.
 >
 > Siguiente: guardar el tema (Fase 5)."
+
+---
+
+## Phase 5: Save + Naming
+
+**Goal:** Confirm theme name and write the final theme.yaml.
+
+### Steps
+
+**1. Confirm theme name**
+
+> "Ya tienes el tema listo. ¿Confirmas el nombre `{THEME_ID}` o quieres cambiarlo?"
+
+If changes, validate format ([a-z0-9-]+) and rename directory:
+```bash
+mv "${ASSETS_PATH}/themes/${OLD_ID}" "${ASSETS_PATH}/themes/${NEW_ID}"
+```
+
+**2. Ask for description**
+
+> "Dame una descripción breve (1-2 frases) del propósito de este tema:"
+
+Save as `theme.description`.
+
+**3. Finalize theme.yaml**
+
+Read the WIP file `${THEME_DIR}/theme.yaml.wip`, add:
+- `theme.id`: confirmed ID
+- `theme.name`: human-friendly version of ID
+- `theme.version`: "1.0"
+- `theme.description`: from step 2
+- `theme.created`: today's ISO date
+- `theme.updated`: today's ISO date
+
+Write to `${THEME_DIR}/theme.yaml` (final, without `.wip`).
+
+Validate it's parseable YAML:
+```bash
+python3 -c "import yaml; yaml.safe_load(open('${THEME_DIR}/theme.yaml'))" && echo "Valid"
+```
+
+**4. Remove WIP file**
+
+```bash
+rm "${THEME_DIR}/theme.yaml.wip"
+```
+
+**5. Create initial backup**
+
+```bash
+bash "${CLAUDE_PLUGIN_ROOT}/assets/scripts/backup_theme.sh" "${THEME_DIR}/theme.yaml"
+```
+
+**6. Final report**
+
+> "🎉 Tema `{THEME_ID}` guardado en `${THEME_DIR}`.
+>
+> **Archivos generados:**
+> - `theme.yaml` — el catálogo
+> - `reference-slides.pptx` — fuente original
+> - `reference-catalog.yaml` — datos crudos de extracción
+> - `thumbnails/` — {N} JPGs de tus slides
+> - `clusters.yaml` — agrupación de slides
+> - `.backups/` — backup inicial
+>
+> **Para usarlo en una presentación**: en tu `docs/talk.yaml`, añade `theme: {THEME_ID}` y corre `/talk-slides`.
+>
+> **Para refinar este tema más adelante**: `/talk-theme-builder edit {THEME_ID}` (disponible en Plan 2B).
+>
+> ¿Quieres crear otro tema ahora o terminamos?"
