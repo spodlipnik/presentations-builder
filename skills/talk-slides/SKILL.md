@@ -249,3 +249,50 @@ echo "Backup: presentation.backup-${TIMESTAMP}.pptx"
 ```
 
 Then proceed to generation.
+
+---
+
+## Phase 5: Generate PPTX
+
+**Step 1:** Copy the generator template to `_build/`:
+
+```bash
+mkdir -p _build
+cp "${CLAUDE_PLUGIN_ROOT}/assets/scripts/generate_presentation_template.js" _build/generate_presentation.js
+```
+
+**Step 2:** Fill in the template variables. Use sed or manual Edit:
+
+```bash
+THEME_PATH="${ASSETS_PATH}/themes/${THEME_ID}/theme.yaml"
+SLIDES_JSON="/tmp/parsed_slides.json"
+IMAGES_DIR="$(pwd)/images"
+OUTPUT="$(pwd)/presentation.pptx"
+
+# Use sed to substitute (backup first)
+sed -i.bak \
+  -e "s|\${THEME_PATH}|${THEME_PATH}|g" \
+  -e "s|\${SLIDES_JSON_PATH}|${SLIDES_JSON}|g" \
+  -e "s|\${IMAGES_DIR}|${IMAGES_DIR}|g" \
+  -e "s|\${OUTPUT_PATH}|${OUTPUT}|g" \
+  _build/generate_presentation.js
+rm _build/generate_presentation.js.bak
+```
+
+**Step 3:** Run the generator:
+
+```bash
+NODE_PATH="${CLAUDE_PLUGIN_DATA}/node_modules" node _build/generate_presentation.js
+```
+
+Expected output: `Generated: /path/to/presentation.pptx`
+
+If fails with module error → reinstall dependencies:
+```bash
+cd "${CLAUDE_PLUGIN_DATA}" && npm install
+```
+
+**Step 4:** Verify file exists:
+```bash
+ls -la presentation.pptx
+```
