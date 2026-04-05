@@ -116,6 +116,29 @@ This is the most detailed step. For EACH slide, specify these fields:
 - Split layouts work well for image + text combinations
 - **Every word on the slide must earn its place.** Text is not decoration — it must reinforce the speaker's message or anchor a key concept for the audience. If removing a word doesn't weaken understanding, remove it. The slide supports the speaker, not the other way around. Test: "Would the audience understand the slide's message in 3 seconds?" If not, simplify.
 
+### Slide Type (obligatorio) — 18 roles canónicos
+
+Cada slide debe tener un `Type:` que corresponde a uno de los 18 roles:
+
+`title`, `disclosure`, `agenda`, `section-divider`, `assertion-evidence`, `patient-case`, `methodology`, `data-chart`, `data-table`, `comparison`, `quote-pullout`, `image-fullbleed`, `image-gallery`, `timeline-process`, `key-takeaway`, `poll-question`, `contact`, `closing`.
+
+Ver `${CLAUDE_PLUGIN_ROOT}/references/role-taxonomy.md` para descripción de cada rol.
+
+### Slide Variant (opcional) — elección específica de layout
+
+Si quieres controlar qué variante usar, añade `Variant:` con el ID de la variante definida en tu tema:
+
+```
+## Slide 5
+Type: assertion-evidence
+Variant: ae.image-right       ← elección explícita
+Content: ...
+```
+
+Si omites `Variant:`, `talk-slides` lo elige automáticamente usando la rúbrica del tema y escribe la elección de vuelta como `Variant: X # auto`. Puedes cambiarla editando el archivo.
+
+Para LOCKEAR una variante (para que auto no la sobrescriba), simplemente quita el sufijo ` # auto`.
+
 ### Step 6: Plan attention reset (for talks > 10 min)
 
 At approximately the 10-minute mark, plan a deliberate attention reset — a moment that breaks the pattern and re-engages the audience. This could be:
