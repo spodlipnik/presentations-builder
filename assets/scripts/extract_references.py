@@ -53,8 +53,77 @@ def extract_shape_box(shape, slide_width_emu, slide_height_emu):
     ]
 
 
-def extract_font_info(shape):
+# OOXML namespace for drawingml (used by font inheritance parsers)
+_A_NS = {"a": "http://schemas.openxmlformats.org/drawingml/2006/main"}
+
+
+def _parse_rpr_element(rpr_elem, theme_fonts=None, theme_colors=None):
+    """Parse a <a:rPr> or <a:defRPr> XML element into a partial font dict.
+
+    Resolves theme font references (+mn-lt, +mj-lt, etc.) and schemeClr colors.
+    Returns dict with any of: family, size_pt, weight, color_rgb.
+    """
+    if rpr_elem is None:
+        return {}
+    result = {}
+    # Size: sz attribute in 100ths of point
+    sz = rpr_elem.get("sz")
+    if sz:
+        try:
+            result["size_pt"] = int(sz) / 100.0
+        except ValueError:
+            pass
+    # Weight: b="1" bold
+    b = rpr_elem.get("b")
+    if b == "1":
+        result["weight"] = 700
+    elif b == "0":
+        result["weight"] = 400
+    # Family: check latin first, then sym (Keynote uses sym for concrete font)
+    family = None
+    latin = rpr_elem.find("a:latin", _A_NS)
+    if latin is not None:
+        tf_val = latin.get("typeface", "")
+        if tf_val.startswith("+") and theme_fonts:
+            # Theme font reference: +mn-lt, +mj-lt, +mn-ea, +mj-ea, +mn-cs, +mj-cs
+            token = tf_val[1:]  # strip leading +
+            key_map = {
+                "mn-lt": "minor_latin", "mj-lt": "major_latin",
+                "mn-ea": "minor_ea", "mj-ea": "major_ea",
+                "mn-cs": "minor_cs", "mj-cs": "major_cs",
+            }
+            family = theme_fonts.get(key_map.get(token))
+        elif tf_val:
+            family = tf_val
+    # sym typeface often overrides (Keynote puts concrete font here)
+    sym = rpr_elem.find("a:sym", _A_NS)
+    if sym is not None:
+        sym_tf = sym.get("typeface", "")
+        if sym_tf and not sym_tf.startswith("+"):
+            family = sym_tf
+    if family:
+        result["family"] = family
+    # Color: look inside solidFill child
+    solid = rpr_elem.find("a:solidFill", _A_NS)
+    if solid is not None:
+        srgb = solid.find("a:srgbClr", _A_NS)
+        scheme = solid.find("a:schemeClr", _A_NS)
+        if srgb is not None:
+            val = srgb.get("val", "").upper()
+            if val:
+                result["color_rgb"] = val
+        elif scheme is not None and theme_colors:
+            role = scheme.get("val")
+            if role and role in theme_colors:
+                result["color_rgb"] = theme_colors[role]
+    return result
+
+
+def extract_font_info(shape, theme_fonts=None, theme_colors=None):
     """Extract font info from first run of first paragraph of a text shape.
+
+    Walks inheritance chain when run-level fields are empty (Keynote exports):
+      run.rPr → paragraph.pPr/defRPr → text_frame.lstStyle/lvl1pPr/defRPr
 
     Returns None if shape has no text frame or no runs.
     Returns dict with family, size_pt, weight, color_rgb (may have None values).
@@ -68,15 +137,15 @@ def extract_font_info(shape):
     run = tf.paragraphs[0].runs[0]
     font = run.font
 
-    # Weight: python-pptx gives bool bold; convert to OpenType weight
+    # Weight from python-pptx run level
     if font.bold is True:
         weight = 700
     elif font.bold is False:
         weight = 400
     else:
-        weight = None  # inherited
+        weight = None
 
-    # Color: only extract RGB, not theme colors (handled separately in Task 9)
+    # RGB color at run level
     color_rgb = None
     try:
         if font.color.type is not None and hasattr(font.color, "rgb") and font.color.rgb is not None:
@@ -84,9 +153,46 @@ def extract_font_info(shape):
     except (AttributeError, TypeError):
         pass
 
+    family = font.name
+    size_pt = font.size.pt if font.size else None
+
+    # If any field is missing, walk XML inheritance chain
+    if None in (family, size_pt, weight, color_rgb):
+        inherited = {}
+        # 1. run's own rPr (in case python-pptx missed something)
+        rpr = run._r.find("a:rPr", _A_NS)
+        if rpr is not None:
+            inherited.update(_parse_rpr_element(rpr, theme_fonts, theme_colors))
+        # 2. paragraph's defRPr inside pPr
+        if tf.paragraphs[0]._pPr is not None:
+            p_defrpr = tf.paragraphs[0]._pPr.find("a:defRPr", _A_NS)
+            if p_defrpr is not None:
+                for k, v in _parse_rpr_element(p_defrpr, theme_fonts, theme_colors).items():
+                    inherited.setdefault(k, v)
+        # 3. text_frame's lstStyle (Keynote style)
+        lst_style = tf._txBody.find("a:lstStyle", _A_NS)
+        if lst_style is not None:
+            # Pick paragraph level (lvl1pPr for level 0, etc.)
+            para_level = tf.paragraphs[0].level or 0
+            lvl_tag = f"a:lvl{para_level + 1}pPr"
+            lvl_elem = lst_style.find(lvl_tag, _A_NS)
+            if lvl_elem is None:
+                lvl_elem = lst_style.find("a:lvl1pPr", _A_NS)  # fallback
+            if lvl_elem is not None:
+                defrpr = lvl_elem.find("a:defRPr", _A_NS)
+                if defrpr is not None:
+                    for k, v in _parse_rpr_element(defrpr, theme_fonts, theme_colors).items():
+                        inherited.setdefault(k, v)
+
+        # Apply inherited values where run-level was None
+        family = family or inherited.get("family")
+        size_pt = size_pt or inherited.get("size_pt")
+        weight = weight or inherited.get("weight")
+        color_rgb = color_rgb or inherited.get("color_rgb")
+
     return {
-        "family": font.name,
-        "size_pt": font.size.pt if font.size else None,
+        "family": family,
+        "size_pt": size_pt,
         "weight": weight,
         "color_rgb": color_rgb,
     }
@@ -141,6 +247,37 @@ def extract_theme_colors(pptx_path):
     return colors
 
 
+def extract_theme_fonts(pptx_path):
+    """Parse theme1.xml fontScheme to return major/minor font families.
+
+    Returns dict like {"major_latin": "Calibri Light", "minor_latin": "Calibri", ...}
+    Keys: major_latin, minor_latin, major_ea, minor_ea, major_cs, minor_cs (any may be absent).
+    """
+    with zipfile.ZipFile(str(pptx_path), "r") as z:
+        theme_files = [n for n in z.namelist() if n.startswith("ppt/theme/theme") and n.endswith(".xml")]
+        if not theme_files:
+            return {}
+        with z.open(theme_files[0]) as f:
+            tree = etree.parse(f)
+
+    font_scheme = tree.getroot().find(".//a:fontScheme", _THEME_NS)
+    if font_scheme is None:
+        return {}
+
+    result = {}
+    for role, elem_name in [("major", "majorFont"), ("minor", "minorFont")]:
+        parent = font_scheme.find(f"a:{elem_name}", _THEME_NS)
+        if parent is None:
+            continue
+        for script in ("latin", "ea", "cs"):
+            tag = parent.find(f"a:{script}", _THEME_NS)
+            if tag is not None:
+                tf_val = tag.get("typeface", "")
+                if tf_val:
+                    result[f"{role}_{script}"] = tf_val
+    return result
+
+
 def extract_shape_type(shape):
     """Categorize shape as: text_box, image, table, chart, group, placeholder, or other.
 
@@ -188,10 +325,12 @@ def iter_shapes_recursive(shapes):
         z += 1
 
 
-def extract_slide(slide, slide_number, slide_width_emu, slide_height_emu):
+def extract_slide(slide, slide_number, slide_width_emu, slide_height_emu,
+                  theme_fonts=None, theme_colors=None):
     """Extract complete structured info for a single slide.
 
     Returns dict with slide_number, shapes (list), inferred_role (None initially).
+    theme_fonts and theme_colors are passed to font extraction for inheritance resolution.
     """
     shapes_info = []
     for shape, z_order in iter_shapes_recursive(slide.shapes):
@@ -204,7 +343,7 @@ def extract_slide(slide, slide_number, slide_width_emu, slide_height_emu):
         if getattr(shape, "has_text_frame", False):
             text = shape.text_frame.text or ""
             shape_dict["text_sample"] = text[:200]  # cap at 200 chars
-            shape_dict["font"] = extract_font_info(shape)
+            shape_dict["font"] = extract_font_info(shape, theme_fonts, theme_colors)
             # Paragraph alignment
             if shape.text_frame.paragraphs:
                 pa = shape.text_frame.paragraphs[0].alignment
@@ -301,7 +440,7 @@ def infer_role(slide_info):
             return "quote-pullout"
 
     # Section divider: 1-2 text shapes, very large font, minimal content
-    if len(shapes) <= 2 and text_shapes and any((s.get("font") or {}).get("size_pt", 0) >= 60 for s in text_shapes):
+    if len(shapes) <= 2 and text_shapes and any(((s.get("font") or {}).get("size_pt") or 0) >= 60 for s in text_shapes):
         return "section-divider"
 
     # Assertion-evidence: 1 small/medium headline text at top + content below
@@ -342,16 +481,22 @@ def build_catalog(pptx_path, theme_name=None):
     pptx_path = Path(pptx_path)
     prs = load_presentation(pptx_path)
 
-    # Extract per-slide data
+    # Theme info loaded once for inheritance resolution during per-slide extraction
+    theme_colors = extract_theme_colors(pptx_path)
+    theme_fonts = extract_theme_fonts(pptx_path)
+
+    # Extract per-slide data (pass theme info for font inheritance)
     slides_data = []
     for i, slide in enumerate(prs.slides):
-        slide_info = extract_slide(slide, i + 1, prs.slide_width, prs.slide_height)
+        slide_info = extract_slide(
+            slide, i + 1, prs.slide_width, prs.slide_height,
+            theme_fonts=theme_fonts, theme_colors=theme_colors,
+        )
         slide_info["inferred_role"] = infer_role(slide_info)
         slides_data.append(slide_info)
 
-    # Detect global tokens
+    # Detect global tokens (now that fonts are resolved via inheritance)
     tokens = detect_dominant_tokens(slides_data)
-    theme_colors = extract_theme_colors(pptx_path)
     dimensions = get_slide_dimensions(prs)
 
     # Get python-pptx version
@@ -373,6 +518,7 @@ def build_catalog(pptx_path, theme_name=None):
             "dominant_colors": tokens["dominant_colors"],
             "dominant_fonts": tokens["dominant_fonts"],
             "theme_xml_colors": theme_colors,
+            "theme_xml_fonts": theme_fonts,
             "slide_dimensions": dimensions,
         },
         "slides": slides_data,

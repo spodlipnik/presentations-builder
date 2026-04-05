@@ -207,3 +207,73 @@ def test_write_catalog_yaml_produces_valid_yaml(multi_slide_pptx, tmp_path):
     with open(out_path) as f:
         loaded = yaml.safe_load(f)
     assert loaded["meta"]["slides_count"] == 3
+
+
+# ========================
+# Theme font inheritance tests
+# ========================
+
+from extract_references import extract_theme_fonts, _parse_rpr_element
+from lxml import etree
+
+_A = "http://schemas.openxmlformats.org/drawingml/2006/main"
+
+
+def test_extract_theme_fonts_returns_dict(simple_title_pptx):
+    fonts = extract_theme_fonts(simple_title_pptx)
+    # Default python-pptx theme has Calibri/Calibri Light
+    assert isinstance(fonts, dict)
+    assert "major_latin" in fonts
+    assert "minor_latin" in fonts
+
+
+def test_parse_rpr_element_extracts_size_and_concrete_family():
+    xml = f'''<a:defRPr xmlns:a="{_A}" sz="6300" b="1">
+        <a:latin typeface="Avenir Heavy"/>
+    </a:defRPr>'''
+    elem = etree.fromstring(xml)
+    result = _parse_rpr_element(elem)
+    assert result["size_pt"] == 63.0
+    assert result["weight"] == 700
+    assert result["family"] == "Avenir Heavy"
+
+
+def test_parse_rpr_element_resolves_theme_font_reference():
+    xml = f'''<a:defRPr xmlns:a="{_A}">
+        <a:latin typeface="+mn-lt"/>
+    </a:defRPr>'''
+    elem = etree.fromstring(xml)
+    result = _parse_rpr_element(elem, theme_fonts={"minor_latin": "Avenir Heavy"})
+    assert result["family"] == "Avenir Heavy"
+
+
+def test_parse_rpr_element_sym_typeface_wins_over_latin():
+    xml = f'''<a:defRPr xmlns:a="{_A}">
+        <a:latin typeface="+mn-lt"/>
+        <a:sym typeface="Avenir Heavy"/>
+    </a:defRPr>'''
+    elem = etree.fromstring(xml)
+    result = _parse_rpr_element(elem, theme_fonts={"minor_latin": "Calibri"})
+    assert result["family"] == "Avenir Heavy"
+
+
+def test_parse_rpr_element_resolves_scheme_color():
+    xml = f'''<a:defRPr xmlns:a="{_A}">
+        <a:solidFill>
+            <a:schemeClr val="accent2"/>
+        </a:solidFill>
+    </a:defRPr>'''
+    elem = etree.fromstring(xml)
+    result = _parse_rpr_element(elem, theme_colors={"accent2": "54595F"})
+    assert result["color_rgb"] == "54595F"
+
+
+def test_parse_rpr_element_direct_srgb_color():
+    xml = f'''<a:defRPr xmlns:a="{_A}">
+        <a:solidFill>
+            <a:srgbClr val="FF0000"/>
+        </a:solidFill>
+    </a:defRPr>'''
+    elem = etree.fromstring(xml)
+    result = _parse_rpr_element(elem)
+    assert result["color_rgb"] == "FF0000"
