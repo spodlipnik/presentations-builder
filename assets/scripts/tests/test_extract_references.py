@@ -109,3 +109,21 @@ def test_extract_slide_multiple_shapes(multi_slide_pptx):
     slide_info = extract_slide(prs.slides[1], 2, prs.slide_width, prs.slide_height)
     # Slide 2 has headline textbox + image placeholder textbox = 2 shapes
     assert len(slide_info["shapes"]) == 2
+
+
+def test_detect_dominant_tokens_returns_fonts_and_colors(multi_slide_pptx):
+    from extract_references import extract_slide, detect_dominant_tokens
+    prs = load_presentation(multi_slide_pptx)
+    slides_data = [
+        extract_slide(s, i+1, prs.slide_width, prs.slide_height)
+        for i, s in enumerate(prs.slides)
+    ]
+    tokens = detect_dominant_tokens(slides_data)
+    assert "dominant_fonts" in tokens
+    assert "dominant_colors" in tokens
+    assert isinstance(tokens["dominant_fonts"], list)
+    assert isinstance(tokens["dominant_colors"], list)
+    # Each entry should have count
+    if tokens["dominant_fonts"]:
+        assert "family" in tokens["dominant_fonts"][0]
+        assert "count" in tokens["dominant_fonts"][0]

@@ -10,6 +10,7 @@ from pptx import Presentation
 from pptx.util import Emu
 from pptx.enum.shapes import MSO_SHAPE_TYPE
 from lxml import etree
+from collections import Counter
 
 
 EMU_PER_INCH = 914400
@@ -221,4 +222,47 @@ def extract_slide(slide, slide_number, slide_width_emu, slide_height_emu):
         "slide_number": slide_number,
         "shapes": shapes_info,
         "inferred_role": None,  # filled in by role inference step
+    }
+
+
+def detect_dominant_tokens(slides_data):
+    """Count font families and colors across all shapes to identify dominant tokens.
+
+    Returns dict with dominant_fonts and dominant_colors (sorted by count, descending).
+    """
+    font_counter = Counter()
+    color_counter = Counter()
+    weight_per_family = {}  # family → Counter of weights
+
+    for slide in slides_data:
+        for shape in slide["shapes"]:
+            font = shape.get("font")
+            if not font:
+                continue
+            family = font.get("family")
+            if family:
+                font_counter[family] += 1
+                weight_per_family.setdefault(family, Counter())
+                if font.get("weight"):
+                    weight_per_family[family][font["weight"]] += 1
+            color = font.get("color_rgb")
+            if color:
+                color_counter[color] += 1
+
+    dominant_fonts = [
+        {
+            "family": family,
+            "count": count,
+            "weight_distribution": dict(weight_per_family.get(family, {})),
+        }
+        for family, count in font_counter.most_common(5)
+    ]
+    dominant_colors = [
+        {"hex": f"#{hex_str}", "count": count}
+        for hex_str, count in color_counter.most_common(10)
+    ]
+
+    return {
+        "dominant_fonts": dominant_fonts,
+        "dominant_colors": dominant_colors,
     }
