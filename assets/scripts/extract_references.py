@@ -4,9 +4,11 @@
 Usage:
     python3 extract_references.py --input ref.pptx --output catalog.yaml --theme-name my-theme
 """
+import zipfile
 from pathlib import Path
 from pptx import Presentation
 from pptx.util import Emu
+from lxml import etree
 
 
 EMU_PER_INCH = 914400
@@ -86,3 +88,52 @@ def extract_font_info(shape):
         "weight": weight,
         "color_rgb": color_rgb,
     }
+
+
+# OOXML namespaces for theme XML
+_THEME_NS = {
+    "a": "http://schemas.openxmlformats.org/drawingml/2006/main",
+}
+
+# Order of color roles in theme1.xml clrScheme element
+_THEME_COLOR_ORDER = [
+    "dk1", "lt1", "dk2", "lt2",
+    "accent1", "accent2", "accent3", "accent4", "accent5", "accent6",
+    "hlink", "folHlink",
+]
+
+
+def extract_theme_colors(pptx_path):
+    """Parse ppt/theme/theme1.xml from PPTX zip and return role→hex color map.
+
+    Returns dict like {"dk1": "000000", "lt1": "FFFFFF", "accent1": "4472C4", ...}
+    """
+    with zipfile.ZipFile(str(pptx_path), "r") as z:
+        # Find first theme file (most PPTX have exactly one)
+        theme_files = [n for n in z.namelist() if n.startswith("ppt/theme/theme") and n.endswith(".xml")]
+        if not theme_files:
+            return {}
+        with z.open(theme_files[0]) as f:
+            tree = etree.parse(f)
+
+    root = tree.getroot()
+    # Find <a:clrScheme> which contains the 12 theme colors in order
+    clr_scheme = root.find(".//a:clrScheme", _THEME_NS)
+    if clr_scheme is None:
+        return {}
+
+    colors = {}
+    # Each child of clrScheme is a color role: <a:dk1>, <a:lt1>, etc.
+    # Inside each is either <a:srgbClr val="HEX"/> or <a:sysClr lastClr="HEX"/>
+    for role_name in _THEME_COLOR_ORDER:
+        role_elem = clr_scheme.find(f"a:{role_name}", _THEME_NS)
+        if role_elem is None:
+            continue
+        srgb = role_elem.find("a:srgbClr", _THEME_NS)
+        sysclr = role_elem.find("a:sysClr", _THEME_NS)
+        if srgb is not None:
+            colors[role_name] = srgb.get("val", "").upper()
+        elif sysclr is not None:
+            colors[role_name] = sysclr.get("lastClr", "").upper()
+
+    return colors

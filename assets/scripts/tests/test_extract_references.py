@@ -56,3 +56,17 @@ def test_extract_font_info_returns_none_for_non_text_shape(simple_title_pptx):
         has_text_frame = False
 
     assert extract_font_info(FakeShape()) is None
+
+
+def test_extract_theme_colors_returns_dict(simple_title_pptx):
+    from extract_references import extract_theme_colors
+
+    colors = extract_theme_colors(simple_title_pptx)
+    assert isinstance(colors, dict)
+    # Default pptx theme has 12 color roles: dk1, lt1, dk2, lt2, accent1-6, hlink, folHlink
+    assert "dk1" in colors
+    assert "lt1" in colors
+    assert "accent1" in colors
+    # Values should be 6-char hex strings
+    assert len(colors["dk1"]) == 6
+    assert all(c in "0123456789ABCDEFabcdef" for c in colors["dk1"])
