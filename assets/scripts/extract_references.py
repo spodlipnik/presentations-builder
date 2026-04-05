@@ -34,3 +34,16 @@ def get_slide_dimensions(prs):
         "height_in": height_in,
         "aspect_ratio": aspect,
     }
+
+
+def extract_shape_box(shape, slide_width_emu, slide_height_emu):
+    """Return [x, y, w, h] as fractions (0-1) of slide dimensions.
+
+    Fractions are resolution-independent and readable.
+    """
+    return [
+        round(shape.left / slide_width_emu, 3),
+        round(shape.top / slide_height_emu, 3),
+        round(shape.width / slide_width_emu, 3),
+        round(shape.height / slide_height_emu, 3),
+    ]
