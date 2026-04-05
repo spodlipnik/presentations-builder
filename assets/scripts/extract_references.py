@@ -266,3 +266,64 @@ def detect_dominant_tokens(slides_data):
         "dominant_fonts": dominant_fonts,
         "dominant_colors": dominant_colors,
     }
+
+
+def infer_role(slide_info):
+    """Apply heuristics to guess which canonical role a slide represents.
+
+    Returns one of the 18 role IDs, or 'unknown' if no rule matches.
+    User validates/corrects in talk-theme-builder Fase 2.
+    """
+    shapes = slide_info.get("shapes", [])
+    if not shapes:
+        return "unknown"
+
+    # Classify shapes
+    text_shapes = [s for s in shapes if s["type"] == "text_box" and s.get("text_sample")]
+    image_or_empty_boxes = [s for s in shapes if s["type"] in ("image", "placeholder")
+                            or (s["type"] == "text_box" and not s.get("text_sample"))]
+
+    # Helper: large text if font size ≥ 36pt
+    def is_large(shape):
+        f = shape.get("font") or {}
+        return (f.get("size_pt") or 0) >= 36
+
+    # Title: single large text, centered, no other content
+    if len(text_shapes) == 1 and not image_or_empty_boxes and is_large(text_shapes[0]):
+        return "title"
+    if len(shapes) == 1 and text_shapes and is_large(text_shapes[0]):
+        return "title"
+
+    # Quote: large centered text, contains quote marks
+    if len(text_shapes) == 1 and is_large(text_shapes[0]):
+        txt = text_shapes[0].get("text_sample", "")
+        if '"' in txt or '"' in txt or '«' in txt:
+            return "quote-pullout"
+
+    # Section divider: 1-2 text shapes, very large font, minimal content
+    if len(shapes) <= 2 and text_shapes and any((s.get("font") or {}).get("size_pt", 0) >= 60 for s in text_shapes):
+        return "section-divider"
+
+    # Assertion-evidence: 1 small/medium headline text at top + content below
+    top_shapes = [s for s in shapes if s["box"][1] < 0.25]
+    bottom_shapes = [s for s in shapes if s["box"][1] >= 0.25]
+    if len(top_shapes) == 1 and top_shapes[0]["type"] == "text_box" and bottom_shapes:
+        return "assertion-evidence"
+
+    # Image gallery: multiple image/empty shapes
+    if len([s for s in shapes if s["type"] in ("image", "placeholder")]) >= 3:
+        return "image-gallery"
+
+    # Image-fullbleed: single large image covering most of slide
+    large_images = [s for s in shapes if s["type"] == "image"
+                    and s["box"][2] >= 0.8 and s["box"][3] >= 0.7]
+    if large_images:
+        return "image-fullbleed"
+
+    # Comparison: 2 shapes roughly side by side
+    if len(shapes) == 2:
+        s1, s2 = shapes[0], shapes[1]
+        if abs(s1["box"][1] - s2["box"][1]) < 0.1 and abs(s1["box"][3] - s2["box"][3]) < 0.1:
+            return "comparison"
+
+    return "unknown"

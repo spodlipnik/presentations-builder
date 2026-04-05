@@ -127,3 +127,54 @@ def test_detect_dominant_tokens_returns_fonts_and_colors(multi_slide_pptx):
     if tokens["dominant_fonts"]:
         assert "family" in tokens["dominant_fonts"][0]
         assert "count" in tokens["dominant_fonts"][0]
+
+
+def test_infer_role_title_single_large_text():
+    from extract_references import infer_role
+    # Single large text box, centered, big font → title
+    slide_info = {
+        "slide_number": 1,
+        "shapes": [
+            {
+                "type": "text_box",
+                "box": [0.1, 0.3, 0.8, 0.3],
+                "text_sample": "My Presentation",
+                "font": {"size_pt": 54, "weight": 700},
+                "alignment": "center",
+                "z_order": 0,
+            }
+        ],
+    }
+    assert infer_role(slide_info) == "title"
+
+
+def test_infer_role_assertion_evidence_headline_plus_image_area():
+    from extract_references import infer_role
+    # Small top text + large lower area → AE
+    slide_info = {
+        "slide_number": 3,
+        "shapes": [
+            {
+                "type": "text_box",
+                "box": [0.05, 0.05, 0.9, 0.15],
+                "text_sample": "La incidencia aumentó 5% anual",
+                "font": {"size_pt": 28, "weight": 700},
+                "alignment": "left",
+                "z_order": 0,
+            },
+            {
+                "type": "text_box",
+                "box": [0.1, 0.25, 0.8, 0.65],
+                "text_sample": "",
+                "font": None,
+                "z_order": 1,
+            },
+        ],
+    }
+    assert infer_role(slide_info) == "assertion-evidence"
+
+
+def test_infer_role_unknown_returns_unknown():
+    from extract_references import infer_role
+    slide_info = {"slide_number": 5, "shapes": []}
+    assert infer_role(slide_info) == "unknown"
