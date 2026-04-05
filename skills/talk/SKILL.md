@@ -89,6 +89,14 @@ If the working directory is empty (new project), start from `talk-briefing` and 
 
 If the user already provided useful information in their message (topic, duration, audience, occasion), acknowledge it and note that it will be carried into the briefing phase so they don't have to repeat themselves.
 
+### Theme detection
+
+After `talk-briefing`, check `docs/talk.yaml` for `theme:` field:
+- If empty → list themes in `${user_config.assets_path}/themes/`, suggest one or running `/talk-theme-builder create`
+- If set but theme directory doesn't exist → warn user, ask to create or change
+
+This check happens before `talk-slides` runs, so the user has time to create a theme if needed.
+
 ### 5. Detect _build/ directory
 
 If a `_build/` directory exists in the project and contains generation scripts (`.js` files), mention: "Previous generation scripts are available in `_build/` — these can be used to regenerate or modify the presentation."
