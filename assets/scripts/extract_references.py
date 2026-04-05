@@ -8,6 +8,7 @@ import zipfile
 from pathlib import Path
 from pptx import Presentation
 from pptx.util import Emu
+from pptx.enum.shapes import MSO_SHAPE_TYPE
 from lxml import etree
 
 
@@ -137,3 +138,50 @@ def extract_theme_colors(pptx_path):
             colors[role_name] = sysclr.get("lastClr", "").upper()
 
     return colors
+
+
+def extract_shape_type(shape):
+    """Categorize shape as: text_box, image, table, chart, group, placeholder, or other.
+
+    Handles SmartArt safely (returns 'other' without raising).
+    """
+    try:
+        st = shape.shape_type
+    except (AttributeError, NotImplementedError):
+        return "other"
+
+    # Check graphic frames first (tables/charts live inside these)
+    if getattr(shape, "has_table", False):
+        return "table"
+    if getattr(shape, "has_chart", False):
+        return "chart"
+    if st == MSO_SHAPE_TYPE.GROUP:
+        return "group"
+    if st == MSO_SHAPE_TYPE.PICTURE:
+        return "image"
+    if st == MSO_SHAPE_TYPE.PLACEHOLDER:
+        return "placeholder"
+    if getattr(shape, "has_text_frame", False):
+        return "text_box"
+    return "other"
+
+
+def iter_shapes_recursive(shapes):
+    """Yield all shapes, recursing into groups. Skips SmartArt safely.
+
+    Returns (shape, z_order) tuples. z_order is the iteration index (0-based,
+    first = back).
+    """
+    z = 0
+    for shape in shapes:
+        try:
+            if shape.shape_type == MSO_SHAPE_TYPE.GROUP:
+                for inner_shape, _ in iter_shapes_recursive(shape.shapes):
+                    yield inner_shape, z
+                    z += 1
+                continue
+        except (AttributeError, NotImplementedError):
+            # SmartArt or unsupported — skip gracefully
+            continue
+        yield shape, z
+        z += 1

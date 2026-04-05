@@ -70,3 +70,20 @@ def test_extract_theme_colors_returns_dict(simple_title_pptx):
     # Values should be 6-char hex strings
     assert len(colors["dk1"]) == 6
     assert all(c in "0123456789ABCDEFabcdef" for c in colors["dk1"])
+
+
+def test_extract_shape_type_text_box(simple_title_pptx):
+    from extract_references import extract_shape_type
+    prs = load_presentation(simple_title_pptx)
+    shape = prs.slides[0].shapes[0]
+    assert extract_shape_type(shape) == "text_box"
+
+
+def test_extract_shape_type_unknown_returns_other():
+    from extract_references import extract_shape_type
+    class FakeShape:
+        shape_type = 99  # unknown value
+        has_text_frame = False
+        has_table = False
+        has_chart = False
+    assert extract_shape_type(FakeShape()) == "other"
