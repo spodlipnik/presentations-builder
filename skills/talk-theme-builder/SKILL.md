@@ -59,4 +59,84 @@ Takes the user through 5 phases to build a complete theme.
 
 ---
 
-<!-- Phase implementations will be added in subsequent tasks -->
+## Phase 0: Input + Extracción
+
+**Goal:** Get the user's reference PPTX, extract its layout catalog, render thumbnails.
+
+### Steps
+
+**1. Confirm assets_path is configured**
+
+Read `~/.claude/config/talk-builder.yaml` or check userConfig. If not set, ask:
+
+> "No tengo configurado el directorio de tus presentaciones. ¿Dónde quieres guardar tus temas?
+> (ej: `~/Presentaciones/talk-themes/`)"
+
+Save the path as `ASSETS_PATH`.
+
+**2. Ask for reference PPTX**
+
+> "Para crear un tema, necesito un PPTX tuyo con 15-30 slides que representen tu estilo. ¿Cuál quieres usar?"
+
+If the user gives a path, verify it exists. If they don't have one ready:
+> "Necesitas al menos un PPTX para extraer tu estilo. Cuando lo tengas, vuelve a ejecutar `/talk-theme-builder create`."
+
+Exit gracefully.
+
+**3. Ask for theme ID (working name)**
+
+> "¿Qué nombre quieres darle a este tema? Usa kebab-case (ej: `derma-congresos-2026`, `teaching-residentes`). Puedes cambiarlo al final."
+
+Validate: `[a-z0-9-]+`. Save as `THEME_ID`.
+
+**4. Create theme directory**
+
+```bash
+THEME_DIR="${ASSETS_PATH}/themes/${THEME_ID}"
+mkdir -p "${THEME_DIR}/thumbnails"
+```
+
+**5. Copy reference PPTX and extract catalog**
+
+```bash
+cp "<user-pptx-path>" "${THEME_DIR}/reference-slides.pptx"
+python3 "${CLAUDE_PLUGIN_ROOT}/assets/scripts/extract_references.py" \
+  --input "${THEME_DIR}/reference-slides.pptx" \
+  --output "${THEME_DIR}/reference-catalog.yaml" \
+  --theme-name "${THEME_ID}"
+```
+
+**6. Render thumbnails**
+
+Check if LibreOffice is available:
+```bash
+which soffice
+```
+
+If YES:
+```bash
+bash "${CLAUDE_PLUGIN_ROOT}/assets/scripts/render_thumbnails.sh" \
+  "${THEME_DIR}/reference-slides.pptx" \
+  "${THEME_DIR}/thumbnails" \
+  100
+```
+
+If NO:
+> "⚠️ LibreOffice no está instalado. No podré mostrarte thumbnails visuales de tus slides. Puedo seguir con descripciones de texto de cada slide, pero recomiendo instalar LibreOffice para mejor experiencia: `brew install --cask libreoffice`. ¿Continuamos sin thumbnails?"
+
+Wait for user confirmation. If they accept, proceed without thumbnails (set `HAS_THUMBNAILS=false`). If they want to install first, exit gracefully.
+
+**7. Report what was extracted**
+
+Read the catalog and summarize:
+
+> "✅ Listo. Extraje:
+> - **N slides** de `reference-slides.pptx`
+> - **X fuentes** dominantes detectadas: {list top 3}
+> - **Y colores** dominantes detectados: {list top 3}
+> - **Tema del archivo**: major={major_latin}, minor={minor_latin}
+> - **Aspect ratio**: {16:9 | 4:3 | custom}
+>
+> Siguiente fase: agrupar slides similares en patrones."
+
+Then proceed to Phase 1.
