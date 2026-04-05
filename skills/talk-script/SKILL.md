@@ -1,6 +1,6 @@
 ---
 name: talk-script
-description: Use when generating the speaker script for a presentation — slide-by-slide delivery guide with preparation table and teleprompter format in Markdown. Triggers when /talk detects study-document.md exists but no speaker-script.md.
+description: Use when generating a teleprompter-format speaker script for a presentation. Optional — only needed if the speaker wants a line-by-line reading guide. Triggers when user asks for "teleprompter", "speaker script", or "guión".
 disable-model-invocation: true
 allowed-tools:
   - Read
@@ -8,75 +8,94 @@ allowed-tools:
   - Glob
 ---
 
-# Talk Builder — Speaker Script
+# Talk Builder — Teleprompter Script (Optional)
 
-Generate a comprehensive speaker script in Markdown with two sections: a preparation table and a teleprompter-formatted delivery script.
+Generate a teleprompter-format script from the approved narrative. This is an optional convenience tool — the narrative.md already contains full speaker text. This skill reformats it for on-screen reading during rehearsal or delivery.
 
 ## Important
 
-- Read `${CLAUDE_SKILL_DIR}/references/teleprompter-format.md` for formatting rules
-- Read `narrative.md` for slide structure, content, and connectors
-- Read `vision.md` for emotional intent
-- Read `talk.yaml` for language preference
-- Write in the language specified in config/talk.yaml
-- Use conversational, natural language — short sentences, no jargon unless necessary
-- The script must feel like natural speech, not written text
+- Read `narrative.md` — extract the Speaker field from every slide
+- Read `${user_config.assets_path}/config.yaml` for language
+- **Language priority:** Use the language the user writes in. Fall back to config.language.
+- This skill does NOT create new content. It reformats what's already in narrative.md.
+- If narrative.md doesn't exist, tell the user to complete the narrative phase first.
+
+## Teleprompter Format Rules
+
+Read `${CLAUDE_SKILL_DIR}/references/teleprompter-format.md` for the complete formatting specification.
+
+Key rules:
+- **5-7 words per line** — natural breath breaks
+- **[PAUSE]** markers where the speaker should pause
+- **[LONG PAUSE]** for dramatic moments
+- **KEY** words in CAPS (1-2 per paragraph) for emphasis
+- **`--- SLIDE [N]: [Title] ---`** slide markers
+- **[ADVANCE SLIDE]** cues before each new slide
+- **[TIME: X:XX]** cumulative timing markers at section starts
+- **[STAR MOMENT]** marker at the STAR moment
+- Short sentences. Natural speech. Not written text read aloud.
 
 ## Output: speaker-script.md
 
-### Section 1: Preparation Table
-
-A Markdown table with one row per slide:
-
 ```markdown
-| Slide | Title | What to Say | Bridge to Next | Timing |
-|---|---|---|---|---|
-| 1 | [Title] | [Natural prose — what to communicate, key phrases to use, emotional tone] | [The connector sentence/question leading to the next slide] | 45s |
-| 2 | [Title] | ... | ... | ... |
+# Teleprompter — [Talk Title]
+Duration: [X] min | Slides: [N]
+
+--- SLIDE 1: [Title] ---
+[TIME: 0:00]
+
+[First line of what to say,
+five to seven words per line,
+natural breathing rhythm.]
+
+[PAUSE]
+
+[Next thought begins here,
+KEY word emphasized,
+continue the idea.]
+
+[ADVANCE SLIDE]
+
+--- SLIDE 2: [Title] ---
+[TIME: 0:15]
+
+[Speaker text reformatted
+from narrative.md,
+keeping emotional cues.]
+
+[PAUSE]
+
+[Bridge to next slide
+as a natural question
+or transition.]
+
+[ADVANCE SLIDE]
+
+...
+
+--- SLIDE [N]: [STAR MOMENT] ---
+[TIME: X:XX]
+[STAR MOMENT]
+
+(slow, deliberate)
+[The key revelation,
+one short phrase per line,
+let it land.]
+
+[LONG PAUSE]
+
+...
 ```
 
-**Writing style for "What to Say" column:**
-- Conversational prose, as if explaining to a colleague
-- Include specific phrases the speaker might use
-- Note where to pause, where to speed up, where to make eye contact
-- Reference data points with exact numbers
-- Note emotional moments: "(slow down here)", "(make eye contact)", "(pause for effect)"
+## Quality Checks
 
-**Writing style for "Bridge to Next" column:**
-- The exact transition sentence or question
-- Must feel natural, not mechanical
-- Use connector types from storytelling-guide.md (narrative bridge, callback, rhetorical question, contrast)
-
-### Section 2: Teleprompter
-
-Full delivery script formatted according to `${CLAUDE_SKILL_DIR}/references/teleprompter-format.md`:
-
-- Short lines (5-7 words)
-- `[PAUSE]` markers
-- KEY words in CAPS
-- `--- SLIDE [N]: [Title] ---` markers
-- `[ADVANCE SLIDE]` cues
-- `[TIME: X:XX]` markers at section starts
-- Bridges between slides formatted naturally
-
-The teleprompter script must cover EVERY slide including:
-- Opening hook
-- All content slides
-- Transitions
-- STAR moment (mark with `[STAR MOMENT]`)
-- Closing
-
-### Quality Checks
-
-Before generating, verify:
-- [ ] Every slide has a bridge to the next (except the last)
-- [ ] Bridges are varied — not all the same type
-- [ ] Language matches config setting
-- [ ] Timing adds up to within the duration (with buffer)
-- [ ] Emotional beats from vision.md are reflected in the script
-- [ ] STAR moment is clearly marked and impactful
-- [ ] Opening and closing are connected (callback pattern)
+- [ ] Every slide from narrative.md has a corresponding section
+- [ ] Cumulative timing adds up correctly
+- [ ] STAR moment is marked
+- [ ] Bridges between slides are included
+- [ ] Language matches narrative.md
+- [ ] No new content invented — only reformatted from narrative
 
 ## After completion
 
-Tell the user: "Speaker script generated! Next phase: Slides — generating the PPTX presentation. Continue with /talk or /talk-slides."
+Tell the user: "Teleprompter script ready! Use it for rehearsal — practice reading it aloud at speaking pace. Next: slides generation. Continue with /talk or /talk-builder:talk-slides."
