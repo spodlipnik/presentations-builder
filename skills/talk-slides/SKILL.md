@@ -1,101 +1,76 @@
 ---
 name: talk-slides
-description: Use when generating the PPTX presentation file from an approved narrative structure. Applies the user's personal style and design principles. Triggers when /talk detects docs/speaker-script.md exists but no presentation.pptx.
-disable-model-invocation: true
+description: Use when generating the PPTX presentation file from an approved narrative structure and a theme. Reads docs/talk.yaml (theme reference), docs/narrative.md (structured slides), and the theme catalog from assets_path/themes/. Applies rubric-based variant selection, generates the PPTX via PptxGenJS, and writes layout decisions back to narrative.md with `# auto` markers.
 allowed-tools:
   - Read
   - Write
+  - Edit
   - Bash
   - Glob
+  - Grep
   - Skill
 ---
 
-# Talk Builder — PPTX Generation
+# Talk Slides — Generate PPTX from Theme + Narrative
 
-Generate the presentation file from the approved narrative structure, applying the user's personal style configuration and slide design principles.
+Consumes a theme (from `talk-theme-builder`) and a narrative (from `talk-narrative`) to generate a professional PPTX presentation.
 
-## Important
+## When this runs
 
-- Read `${CLAUDE_PLUGIN_ROOT}/references/slide-design-guide.md` before generating
-- Read the user's `config.yaml` for fonts, colors, and style analysis
-- Read `docs/talk.yaml` for any local style overrides
-- Read `docs/narrative.md` for the complete slide structure
-- Read `docs/speaker-script.md` to understand the full delivery context
-- Check `images/` for available visual assets
-- Check the user's `fixed-slides/` directory for reusable slides
+- After `talk-narrative` has produced `docs/narrative.md`
+- When user wants to generate or regenerate `presentation.pptx`
+- Triggers: "generar slides", "crear pptx", "generate the presentation", "hacer el pptx"
 
-The PPTX is a FIRST DRAFT. The user will fine-tune in Keynote. Focus on:
-- Correct structure and content placement
-- Proper fonts and colors from config
-- Image insertion where available
-- Clean, minimal design following slide-design-guide principles
+## Prerequisites
+
+- `docs/talk.yaml` exists with `theme:` field pointing to an existing theme
+- `docs/narrative.md` exists with slides using the 18 canonical roles
+- Theme exists at `${ASSETS_PATH}/themes/<theme-id>/theme.yaml`
+- Python 3 + Node.js + PptxGenJS installed (auto by hooks)
 
 ## Workflow
 
-### Step 1: Load configuration
+The skill proceeds through these phases:
 
-1. Read `config.yaml` from the user's assets path
-2. Read `docs/talk.yaml` for local overrides
-3. Merge: docs/talk.yaml overrides config.yaml for any shared fields
-4. Note the style_analysis for design decisions
+1. **Load** — read talk.yaml, narrative.md, theme.yaml; validate
+2. **Migrate** (if needed) — detect legacy narrative format and offer to update
+3. **Select** — apply rubric to pick a variant per slide, write back with `# auto`
+4. **Quality check** — LLM review of variant choices
+5. **Generate** — invoke PptxGenJS script to produce presentation.pptx
+6. **Protect** — detect Keynote edits, offer backup before overwrite
+7. **Report** — write layout-decisions.md with reasoning
 
-### Step 2: Generate PPTX
+---
 
-**Requires:** The official `pptx` skill from `claude-plugins-official` must be installed.
+## Phase 1: Load
 
-Use the **PptxGenJS approach** described in the official `pptx` skill to create the presentation from scratch. Refer to the `pptx` skill's `pptxgenjs.md` reference for the full API.
+**Step 1:** Read `docs/talk.yaml`. Check for `theme:` field.
+- If missing or empty → ask user:
+  > "`docs/talk.yaml` no tiene un `theme:` definido. ¿Cuál quieres usar? Temas disponibles en `${ASSETS_PATH}/themes/`:"
+  List available themes.
 
-**All generation files go in `_build/`:**
-
-1. Create `_build/` directory in the project root if it doesn't exist
-2. Write the generation script to `_build/generate_presentation.js`
-3. Run the script with persistent dependencies:
-   ```bash
-   NODE_PATH=${CLAUDE_PLUGIN_DATA}/node_modules node _build/generate_presentation.js
-   ```
-4. Output `presentation.pptx` to the **project root** (not inside `_build/`)
-
-If the script fails with a module not found error, reinstall dependencies:
+**Step 2:** Load and validate theme:
 ```bash
-cd ${CLAUDE_PLUGIN_DATA} && npm install
+python3 "${CLAUDE_PLUGIN_ROOT}/assets/scripts/load_theme.py" \
+  "${ASSETS_PATH}/themes/${THEME_ID}/theme.yaml"
+```
+If validation fails → report error and exit.
+
+**Step 3:** Parse narrative.md:
+```bash
+python3 -c "
+import sys, json
+sys.path.insert(0, '${CLAUDE_PLUGIN_ROOT}/assets/scripts')
+from parse_narrative import parse_narrative
+slides = parse_narrative('docs/narrative.md')
+json.dump(slides, open('/tmp/parsed_slides.json', 'w'), indent=2)
+print(f'Parsed {len(slides)} slides')
+"
 ```
 
-The `_build/` directory with scripts is **permanent** — it allows the user to re-generate or modify the presentation later. Dependencies (PptxGenJS) are managed by the plugin in `${CLAUDE_PLUGIN_DATA}` and shared across all projects.
-
-Key generation instructions:
-- Apply the user's fonts, colors, and background from `config.yaml` / `docs/talk.yaml`
-- Use the `pptx` skill's design guidance for layout, spacing, and visual hierarchy
-
-### Step 3: Visual QA (optional but recommended)
-
-If LibreOffice is available, follow the `pptx` skill's QA workflow:
-1. Convert PPTX to PDF via `soffice`
-2. Convert PDF to per-slide JPGs via `pdftoppm`
-3. Visually inspect each slide
-4. Fix any issues found
-
-### Step 4: Insert fixed slides
-
-If `docs/talk.yaml` specifies fixed slides (disclosures, contact, acknowledgments):
-- Read corresponding files from the user's `fixed-slides/` directory
-- Insert at appropriate positions (disclosures near start, contact at end)
-
-### Step 5: Present for review
-
-Tell the user:
-"PPTX generated at `presentation.pptx`. This is a first draft — open it in Keynote to:
-- Adjust image positions and sizes
-- Fine-tune layouts
-- Replace any placeholder images
-- Check the `images/image-map.md` for reference on which images go where"
-
-## After completion
-
-Tell the user: "Slides generated! Your Talk Builder project is complete. All outputs:
-- docs/study-document.md — comprehensive study reference
-- docs/narrative.md — full narrative structure with context
-- docs/speaker-script.md — teleprompter format (if generated)
-- presentation.pptx — open in Keynote for visual fine-tuning
-- _build/ — generation scripts (reusable for modifications)
-
-Run /talk to see the full project status."
+**Step 4:** Summary to user:
+> "✅ Cargado:
+> - Tema: `${THEME_ID}` con X roles + Y variantes
+> - Narrativa: N slides parseados
+>
+> Siguiente: {Migrate if legacy | Select variants}"
