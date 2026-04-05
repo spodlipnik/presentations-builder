@@ -123,3 +123,64 @@ if unknowns:
 - Apply changes via Edit tool, line by line
 
 **Step 4:** If no → proceed with warning that some slides may fail variant selection.
+
+---
+
+## Phase 3: Select Variants
+
+**Step 1:** Run selection logic:
+
+```bash
+python3 -c "
+import sys, json, yaml
+sys.path.insert(0, '${CLAUDE_PLUGIN_ROOT}/assets/scripts')
+from select_variant import select_variant
+
+slides = json.load(open('/tmp/parsed_slides.json'))
+theme = yaml.safe_load(open('${THEME_PATH}'))['theme']
+total = len(slides)
+decisions = {}
+reasons = {}
+previous = None
+for s in slides:
+    # Respect user-locked variants (has Variant: but not # auto)
+    if s.get('variant') and not s.get('variant_is_auto'):
+        decisions[s['slide_number']] = s['variant']
+        reasons[s['slide_number']] = 'user-locked (manual override)'
+    else:
+        chosen, reason = select_variant(s, theme, previous, total)
+        decisions[s['slide_number']] = chosen
+        reasons[s['slide_number']] = reason
+    previous = decisions[s['slide_number']]
+
+json.dump({'decisions': decisions, 'reasons': reasons}, open('/tmp/variant_decisions.json', 'w'), indent=2)
+print(f'Selected {len(decisions)} variants')
+" 2>&1
+```
+
+**Step 2:** Show user a summary:
+
+> "🎯 Variantes seleccionadas para {N} slides:
+>
+> | # | Type | Variant | Reason |
+> |---|---|---|---|
+> | 1 | title | title.centered | auto: first slide, no image |
+> | 2 | ae | ae.image-right | auto: image + short text |
+> | 5 | ae | ae.image-left | auto: pacing alternation |
+> | 8 | compare | compare.two-col-image | user-locked |
+>
+> ¿Aplicar estas decisiones al narrative.md? (yes/no/preview)"
+
+**Step 3:** If user approves, write back:
+
+```bash
+python3 -c "
+import sys, json
+sys.path.insert(0, '${CLAUDE_PLUGIN_ROOT}/assets/scripts')
+from update_narrative import update_narrative_variants
+data = json.load(open('/tmp/variant_decisions.json'))
+decisions = {int(k): v for k, v in data['decisions'].items() if v}
+update_narrative_variants('docs/narrative.md', decisions)
+print('narrative.md updated')
+"
+```
