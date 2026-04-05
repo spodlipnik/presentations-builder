@@ -35,7 +35,7 @@ Scan the current working directory for these files to determine project state:
 | `docs/research.md` | Research |
 | `docs/narrative.md` | Narrative |
 | `images/` (non-empty) | Assets |
-| `docs/study-document.md` + `article-summaries.md` | Study Docs |
+| `docs/study-document.md` | Study Docs |
 | `docs/speaker-script.md` | Script |
 | `presentation.pptx` | Slides |
 
