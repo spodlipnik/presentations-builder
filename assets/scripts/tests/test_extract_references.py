@@ -33,3 +33,26 @@ def test_extract_shape_box_returns_fractions(simple_title_pptx):
     assert abs(box[1] - 0.267) < 0.005  # y = 2/7.5
     assert abs(box[2] - 0.825) < 0.005  # w = 11/13.333
     assert abs(box[3] - 0.200) < 0.005  # h = 1.5/7.5
+
+
+def test_extract_font_info_returns_formatting(simple_title_pptx):
+    from extract_references import extract_font_info
+
+    prs = load_presentation(simple_title_pptx)
+    shape = prs.slides[0].shapes[0]
+    font = extract_font_info(shape)
+    assert font is not None
+    assert font["family"] == "Inter"
+    assert font["size_pt"] == 54.0
+    assert font["weight"] == 700  # bold
+    assert font["color_rgb"] == "1A1A1A"
+
+
+def test_extract_font_info_returns_none_for_non_text_shape(simple_title_pptx):
+    from extract_references import extract_font_info
+
+    # Title textbox IS a text shape; we test None path by passing fake shape
+    class FakeShape:
+        has_text_frame = False
+
+    assert extract_font_info(FakeShape()) is None

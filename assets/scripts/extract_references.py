@@ -47,3 +47,42 @@ def extract_shape_box(shape, slide_width_emu, slide_height_emu):
         round(shape.width / slide_width_emu, 3),
         round(shape.height / slide_height_emu, 3),
     ]
+
+
+def extract_font_info(shape):
+    """Extract font info from first run of first paragraph of a text shape.
+
+    Returns None if shape has no text frame or no runs.
+    Returns dict with family, size_pt, weight, color_rgb (may have None values).
+    """
+    if not getattr(shape, "has_text_frame", False):
+        return None
+    tf = shape.text_frame
+    if not tf.paragraphs or not tf.paragraphs[0].runs:
+        return None
+
+    run = tf.paragraphs[0].runs[0]
+    font = run.font
+
+    # Weight: python-pptx gives bool bold; convert to OpenType weight
+    if font.bold is True:
+        weight = 700
+    elif font.bold is False:
+        weight = 400
+    else:
+        weight = None  # inherited
+
+    # Color: only extract RGB, not theme colors (handled separately in Task 9)
+    color_rgb = None
+    try:
+        if font.color.type is not None and hasattr(font.color, "rgb") and font.color.rgb is not None:
+            color_rgb = str(font.color.rgb)
+    except (AttributeError, TypeError):
+        pass
+
+    return {
+        "family": font.name,
+        "size_pt": font.size.pt if font.size else None,
+        "weight": weight,
+        "color_rgb": color_rgb,
+    }
