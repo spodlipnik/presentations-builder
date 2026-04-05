@@ -5,11 +5,15 @@
         "hooks": [
           {
             "type": "command",
-            "command": "missing=\"\"; which pdftoppm >/dev/null 2>&1 || missing=\"${missing:+$missing, }poppler (brew install poppler)\"; which node >/dev/null 2>&1 || missing=\"${missing:+$missing, }Node.js (brew install node)\"; if [ -n \"$missing\" ]; then printf '{\"result\": \"warn\", \"message\": \"Talk Builder: missing system dependencies: %s\"}' \"$missing\"; fi"
+            "command": "missing=\"\"; which pdftoppm >/dev/null 2>&1 || missing=\"${missing:+$missing, }poppler (brew install poppler)\"; which node >/dev/null 2>&1 || missing=\"${missing:+$missing, }Node.js (brew install node)\"; which python3 >/dev/null 2>&1 || missing=\"${missing:+$missing, }Python 3 (brew install python)\"; if [ -n \"$missing\" ]; then printf '{\"result\": \"warn\", \"message\": \"Talk Builder: missing system dependencies: %s\"}' \"$missing\"; fi"
           },
           {
             "type": "command",
             "command": "diff -q \"${CLAUDE_PLUGIN_ROOT}/assets/package.json\" \"${CLAUDE_PLUGIN_DATA}/package.json\" >/dev/null 2>&1 || (cp \"${CLAUDE_PLUGIN_ROOT}/assets/package.json\" \"${CLAUDE_PLUGIN_DATA}/\" && cd \"${CLAUDE_PLUGIN_DATA}\" && npm install --silent) || rm -f \"${CLAUDE_PLUGIN_DATA}/package.json\""
+          },
+          {
+            "type": "command",
+            "command": "python3 -c 'import pptx, yaml, lxml' 2>/dev/null || python3 -m pip install --quiet --user -r \"${CLAUDE_PLUGIN_ROOT}/assets/scripts/requirements.txt\" 2>/dev/null || printf '{\"result\": \"warn\", \"message\": \"Talk Builder: failed to install Python dependencies (python-pptx, PyYAML, lxml). Run manually: pip3 install -r assets/scripts/requirements.txt\"}'"
           }
         ]
       }
