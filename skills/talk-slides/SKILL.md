@@ -213,3 +213,39 @@ Report findings:
 If apply → update decisions and re-run write-back.
 If ignore → continue.
 If review → pause for user input per-issue.
+
+---
+
+## Phase 5-preamble: Keynote Edit Protection
+
+**Before running the generator**, check if an existing `presentation.pptx` was edited in Keynote (modified after last generation).
+
+**Step 1:** Check file timestamps:
+
+```bash
+if [ -f presentation.pptx ] && [ -f _build/generate_presentation.js ]; then
+    PPTX_MTIME=$(stat -f %m presentation.pptx)
+    SCRIPT_MTIME=$(stat -f %m _build/generate_presentation.js)
+    if [ "$PPTX_MTIME" -gt "$SCRIPT_MTIME" ]; then
+        echo "WARNING: presentation.pptx modified after last generation"
+    fi
+fi
+```
+
+**Step 2:** If warning triggers, ask user:
+
+> "⚠️ `presentation.pptx` fue editado después de la última generación (probablemente en Keynote).
+>
+> Regenerar lo va a sobrescribir. Opciones:
+> - **(a) Continuar** — regenerar (perdería ediciones Keynote)
+> - **(b) Backup primero** — copiar a `presentation.backup-YYYY-MM-DD-HHMM.pptx` y regenerar
+> - **(c) Cancelar** — no regenerar"
+
+**Step 3:** If backup:
+```bash
+TIMESTAMP=$(date +%Y-%m-%d-%H%M)
+cp presentation.pptx "presentation.backup-${TIMESTAMP}.pptx"
+echo "Backup: presentation.backup-${TIMESTAMP}.pptx"
+```
+
+Then proceed to generation.
