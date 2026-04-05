@@ -6,8 +6,31 @@ Usage:
 """
 from pathlib import Path
 from pptx import Presentation
+from pptx.util import Emu
+
+
+EMU_PER_INCH = 914400
 
 
 def load_presentation(pptx_path):
     """Load a PPTX file and return the Presentation object."""
     return Presentation(str(pptx_path))
+
+
+def get_slide_dimensions(prs):
+    """Return slide dimensions as dict with width_in, height_in, aspect_ratio."""
+    width_in = round(prs.slide_width / EMU_PER_INCH, 3)
+    height_in = round(prs.slide_height / EMU_PER_INCH, 3)
+    ratio = width_in / height_in
+    # Common ratios
+    if abs(ratio - 16/9) < 0.01:
+        aspect = "16:9"
+    elif abs(ratio - 4/3) < 0.01:
+        aspect = "4:3"
+    else:
+        aspect = f"{width_in}:{height_in}"
+    return {
+        "width_in": width_in,
+        "height_in": height_in,
+        "aspect_ratio": aspect,
+    }
