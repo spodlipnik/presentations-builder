@@ -178,3 +178,32 @@ def test_infer_role_unknown_returns_unknown():
     from extract_references import infer_role
     slide_info = {"slide_number": 5, "shapes": []}
     assert infer_role(slide_info) == "unknown"
+
+
+import yaml
+from datetime import datetime
+from extract_references import build_catalog, write_catalog_yaml
+
+
+def test_build_catalog_returns_complete_structure(multi_slide_pptx):
+    catalog = build_catalog(multi_slide_pptx, theme_name="test-theme")
+    assert "meta" in catalog
+    assert catalog["meta"]["source_file"].endswith(".pptx")
+    assert catalog["meta"]["slides_count"] == 3
+    assert "theme_detection" in catalog
+    assert "slide_dimensions" in catalog["theme_detection"]
+    assert catalog["theme_detection"]["slide_dimensions"]["aspect_ratio"] == "16:9"
+    assert len(catalog["slides"]) == 3
+    # First slide should be inferred as title (single large text)
+    assert catalog["slides"][0]["inferred_role"] in ("title", "assertion-evidence", "unknown")
+
+
+def test_write_catalog_yaml_produces_valid_yaml(multi_slide_pptx, tmp_path):
+    catalog = build_catalog(multi_slide_pptx, theme_name="test-theme")
+    out_path = tmp_path / "catalog.yaml"
+    write_catalog_yaml(catalog, out_path)
+    assert out_path.exists()
+    # Round-trip: should parse back as valid YAML
+    with open(out_path) as f:
+        loaded = yaml.safe_load(f)
+    assert loaded["meta"]["slides_count"] == 3

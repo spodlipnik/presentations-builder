@@ -327,3 +327,79 @@ def infer_role(slide_info):
             return "comparison"
 
     return "unknown"
+
+
+import yaml
+import argparse
+from datetime import datetime
+
+
+def build_catalog(pptx_path, theme_name=None):
+    """Build complete catalog dict from a PPTX file.
+
+    This is the main orchestration function that combines all extraction steps.
+    """
+    pptx_path = Path(pptx_path)
+    prs = load_presentation(pptx_path)
+
+    # Extract per-slide data
+    slides_data = []
+    for i, slide in enumerate(prs.slides):
+        slide_info = extract_slide(slide, i + 1, prs.slide_width, prs.slide_height)
+        slide_info["inferred_role"] = infer_role(slide_info)
+        slides_data.append(slide_info)
+
+    # Detect global tokens
+    tokens = detect_dominant_tokens(slides_data)
+    theme_colors = extract_theme_colors(pptx_path)
+    dimensions = get_slide_dimensions(prs)
+
+    # Get python-pptx version
+    try:
+        import pptx
+        pptx_version = pptx.__version__
+    except AttributeError:
+        pptx_version = "unknown"
+
+    return {
+        "meta": {
+            "source_file": pptx_path.name,
+            "extracted_at": datetime.utcnow().isoformat() + "Z",
+            "slides_count": len(slides_data),
+            "python_pptx_version": pptx_version,
+            "theme_name": theme_name,
+        },
+        "theme_detection": {
+            "dominant_colors": tokens["dominant_colors"],
+            "dominant_fonts": tokens["dominant_fonts"],
+            "theme_xml_colors": theme_colors,
+            "slide_dimensions": dimensions,
+        },
+        "slides": slides_data,
+    }
+
+
+def write_catalog_yaml(catalog, output_path):
+    """Write catalog dict to YAML file."""
+    output_path = Path(output_path)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    with open(output_path, "w", encoding="utf-8") as f:
+        yaml.safe_dump(catalog, f, sort_keys=False, allow_unicode=True, default_flow_style=False)
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        description="Extract structured layout catalog from a PPTX reference file."
+    )
+    parser.add_argument("--input", "-i", required=True, help="Input PPTX file path")
+    parser.add_argument("--output", "-o", required=True, help="Output YAML file path")
+    parser.add_argument("--theme-name", help="Optional theme name to include in metadata")
+    args = parser.parse_args()
+
+    catalog = build_catalog(args.input, theme_name=args.theme_name)
+    write_catalog_yaml(catalog, args.output)
+    print(f"Extracted {catalog['meta']['slides_count']} slides \u2192 {args.output}")
+
+
+if __name__ == "__main__":
+    main()
