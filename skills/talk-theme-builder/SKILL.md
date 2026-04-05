@@ -140,3 +140,66 @@ Read the catalog and summarize:
 > Siguiente fase: agrupar slides similares en patrones."
 
 Then proceed to Phase 1.
+
+---
+
+## Phase 1: Clustering + Mapping
+
+**Goal:** Group similar slides into variant candidates and map each group to a canonical role.
+
+### Steps
+
+**1. Run clustering**
+
+```bash
+python3 "${CLAUDE_PLUGIN_ROOT}/assets/scripts/cluster_slides.py" \
+  --input "${THEME_DIR}/reference-catalog.yaml" \
+  --output "${THEME_DIR}/clusters.yaml" \
+  --bucket 0.05
+```
+
+**2. Load clusters and role-taxonomy**
+
+Read `${THEME_DIR}/clusters.yaml` → list of clusters (each has: role, count, slide_numbers, signature).
+
+Read `${CLAUDE_PLUGIN_ROOT}/references/role-taxonomy.md` to know the 18 canonical roles.
+
+**3. Group clusters by inferred role**
+
+Build a map `{role_id: [cluster1, cluster2, ...]}`.
+
+Example result:
+```
+title: [cluster_A (1 slide)]
+assertion-evidence: [cluster_B (12 slides), cluster_C (8 slides)]
+image-gallery: [cluster_D (5 slides), cluster_E (3 slides)]
+quote-pullout: [cluster_F (2 slides)]
+unknown: [cluster_G (4 slides)]
+```
+
+**4. Report to user**
+
+> "🔍 Encontré **N variantes** cubriendo **M roles**:
+>
+> | Rol | Variantes | Slides |
+> |---|---|---|
+> | title | 1 | #1 |
+> | assertion-evidence | 2 | 12 + 8 |
+> | image-gallery | 2 | 5 + 3 |
+> | quote-pullout | 1 | 2 |
+> | unknown | 1 | 4 |
+>
+> **Roles sin cobertura** (faltan): disclosure, agenda, section-divider, patient-case, methodology, data-chart, data-table, comparison, image-fullbleed, timeline-process, key-takeaway, poll-question, contact, closing.
+>
+> En Fase 2 vamos a revisar cada rol juntos y decidir qué variantes conservar. Los roles sin cobertura se **omitirán** en esta versión (podrás añadirlos más tarde con `talk-theme-builder edit`).
+>
+> ¿Continuamos con la revisión rol-por-rol?"
+
+Wait for confirmation. If user says "no" or "stop", save current state to `${THEME_DIR}/state.yaml` and exit.
+
+**5. Handle clusters with role="unknown"**
+
+For each cluster with `role="unknown"`, show the representative slide and ask:
+> "Este cluster ({count} slides) no se pudo clasificar automáticamente. ¿Qué rol asignarle? Opciones: title, disclosure, agenda, section-divider, assertion-evidence, patient-case, methodology, data-chart, data-table, comparison, quote-pullout, image-fullbleed, image-gallery, timeline-process, key-takeaway, poll-question, contact, closing, SKIP."
+
+If user says SKIP, remove the cluster. Otherwise, update the cluster's role.
