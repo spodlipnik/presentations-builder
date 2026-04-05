@@ -68,3 +68,36 @@ Creates dated backup of theme.yaml, keeps last 5.
 ```bash
 bash backup_theme.sh path/to/theme.yaml
 ```
+
+## Plan 3 Scripts (talk-slides)
+
+### load_theme.py
+Loads and validates a theme.yaml file.
+```python
+from load_theme import load_theme
+theme = load_theme("path/to/theme.yaml")
+```
+
+### parse_narrative.py
+Parses a narrative.md into structured slide dicts.
+```python
+from parse_narrative import parse_narrative
+slides = parse_narrative("docs/narrative.md")
+```
+
+### select_variant.py
+Applies rubric-based variant selection for a slide.
+```python
+from select_variant import select_variant
+variant_id, reason = select_variant(slide, theme, previous_variant=None, total_slides=10)
+```
+
+### update_narrative.py
+Writes Variant: decisions back to narrative.md (respects user-locked).
+```python
+from update_narrative import update_narrative_variants
+update_narrative_variants("docs/narrative.md", {1: "title.centered", 2: "ae.image-right"})
+```
+
+### generate_presentation_template.js
+PptxGenJS template for presentation generation. Copied to `_build/` by talk-slides skill.
