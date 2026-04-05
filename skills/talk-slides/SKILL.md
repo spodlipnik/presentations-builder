@@ -74,3 +74,52 @@ print(f'Parsed {len(slides)} slides')
 > - Narrativa: N slides parseados
 >
 > Siguiente: {Migrate if legacy | Select variants}"
+
+---
+
+## Phase 2: Migrate (only if legacy format detected)
+
+**Detection:** A narrative is legacy if any slide has a `Type:` value NOT in the 18 canonical roles (see `references/role-taxonomy.md`).
+
+**Step 1:** Check all slides' types:
+```bash
+python3 -c "
+import sys
+sys.path.insert(0, '${CLAUDE_PLUGIN_ROOT}/assets/scripts')
+from parse_narrative import parse_narrative
+slides = parse_narrative('docs/narrative.md')
+canonical = {'title','disclosure','agenda','section-divider','assertion-evidence',
+             'patient-case','methodology','data-chart','data-table','comparison',
+             'quote-pullout','image-fullbleed','image-gallery','timeline-process',
+             'key-takeaway','poll-question','contact','closing'}
+unknowns = [(s['slide_number'], s.get('type','')) for s in slides if s.get('type') not in canonical]
+if unknowns:
+    for sn, t in unknowns:
+        print(f'Slide {sn}: {t!r}')
+"
+```
+
+**Step 2:** If unknowns exist, ask user:
+
+> "Esta presentación usa formato anterior. Detecté Types no canónicos:
+> {list}
+>
+> ¿Migrar al sistema nuevo? Esto:
+> - Mapea Types viejos a los 18 roles canónicos
+> - Crea backup en `docs/narrative.legacy-backup.md`
+> - Te muestra cambios propuestos antes de aplicar
+>
+> (yes/no/cancel)"
+
+**Step 3:** If yes:
+- Create backup: `cp docs/narrative.md docs/narrative.legacy-backup.md`
+- For each unknown Type, propose mapping based on semantic similarity:
+  - "bullets", "list" → `agenda` or `key-takeaway`
+  - "intro" → `title`
+  - "divider", "section" → `section-divider`
+  - "conclusion", "summary" → `key-takeaway`
+  - (catch-all) → ask user per slide
+- Show proposed changes as a table, ask for confirmation
+- Apply changes via Edit tool, line by line
+
+**Step 4:** If no → proceed with warning that some slides may fail variant selection.
