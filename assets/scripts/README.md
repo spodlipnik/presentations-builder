@@ -45,3 +45,26 @@ python3 -m pytest tests/ -v
 - SmartArt is skipped gracefully (not supported by python-pptx).
 - Group shapes are flattened recursively into their constituent shapes.
 - Inferred roles are heuristic best-guesses — the user validates/corrects them in `talk-theme-builder` Fase 2.
+
+## Additional Scripts (Plan 2A)
+
+### cluster_slides.py
+Groups similar slides from a reference catalog into variant patterns.
+
+```bash
+python3 cluster_slides.py --input catalog.yaml --output clusters.yaml [--bucket 0.05]
+```
+
+### render_thumbnails.sh
+Converts a PPTX to per-slide JPGs (requires LibreOffice + poppler).
+
+```bash
+bash render_thumbnails.sh input.pptx output-dir [dpi]
+```
+
+### backup_theme.sh
+Creates dated backup of theme.yaml, keeps last 5.
+
+```bash
+bash backup_theme.sh path/to/theme.yaml
+```
