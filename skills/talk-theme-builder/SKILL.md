@@ -203,3 +203,144 @@ For each cluster with `role="unknown"`, show the representative slide and ask:
 > "Este cluster ({count} slides) no se pudo clasificar automáticamente. ¿Qué rol asignarle? Opciones: title, disclosure, agenda, section-divider, assertion-evidence, patient-case, methodology, data-chart, data-table, comparison, quote-pullout, image-fullbleed, image-gallery, timeline-process, key-takeaway, poll-question, contact, closing, SKIP."
 
 If user says SKIP, remove the cluster. Otherwise, update the cluster's role.
+
+---
+
+## Phase 2: Review rol-por-rol
+
+**Goal:** Walk through each role's variant candidates with the user, validating or rejecting each, refining specs, naming final variants.
+
+**This is the heart of the skill.** It's conversational and takes time. Save state after every role.
+
+### Global flow
+
+Iterate through roles in this order (following narrative importance):
+
+1. `title`
+2. `disclosure`
+3. `agenda`
+4. `section-divider`
+5. `assertion-evidence`
+6. `patient-case`
+7. `methodology`
+8. `data-chart`
+9. `data-table`
+10. `comparison`
+11. `quote-pullout`
+12. `image-fullbleed`
+13. `image-gallery`
+14. `timeline-process`
+15. `key-takeaway`
+16. `poll-question`
+17. `contact`
+18. `closing`
+
+For each role:
+- If the role has clusters → review each cluster as a variant candidate
+- If no clusters (role not detected) → skip (Plan 2A scope), note in summary
+
+### Per-role review loop
+
+For role `R` with clusters `[C1, C2, ...]`:
+
+**1. Introduce the role to user**
+
+> "### Rol: `R`
+>
+> {Brief description from role-taxonomy.md}
+>
+> Detecté **{len(clusters)} variantes** para este rol:"
+
+**2. For each cluster, present the representative slide**
+
+If `HAS_THUMBNAILS=true`:
+> "**Variante candidata 1**: slide #{representative_slide_number} (aparece {count} veces)
+>
+> Mírala aquí: `{THEME_DIR}/thumbnails/slide-{NN}.jpg`
+>
+> Layout: {N shapes}
+> {For each shape: type, position, font (if text)}"
+
+If `HAS_THUMBNAILS=false`:
+> "**Variante candidata 1**: slide #{representative_slide_number} (aparece {count} veces)
+>
+> {Describe the layout textually: shape types, rough positions, font info}"
+
+**3. Ask user to decide**
+
+> "Para esta variante:
+> - **(a) ACEPTAR** — la conservamos como variante del rol `R`
+> - **(r) REFINAR** — conservarla pero ajustar algo (font size, position, color)
+> - **(x) RECHAZAR** — descartarla
+> - **(s) SKIP** — dejar de revisar este rol"
+
+**4. Handle user choice**
+
+**If ACEPTAR:**
+- Ask for variant ID: "¿Nombre de la variante? Sugerencia: `{role-short}.{descriptor}` (ej: `ae.image-right`, `title.centered`)"
+- Validate ID format: `[a-z0-9-]+\.[a-z0-9-]+`
+- Build the variant entry with: id, description (ask user), slots (infer from shapes), layout (from signature boxes), thumbnail path.
+- Append to the theme's `roles.{R}.variants[]` list.
+- **Save state immediately** to `${THEME_DIR}/theme.yaml.wip`.
+
+**If REFINAR:**
+- Ask: "¿Qué quieres ajustar? Opciones: font size, position, color, alignment, padding, o describe el cambio en palabras."
+- Apply the change to the variant's layout.
+- Show the updated spec and ask "¿Así está bien? (yes/no)"
+- Loop until user approves. Then save as in ACEPTAR.
+
+**If RECHAZAR:**
+- Skip this cluster, move to next.
+
+**If SKIP:**
+- Stop reviewing this role, move to next role.
+
+**5. After all clusters for role reviewed**
+
+Report:
+> "Rol `R` completado: {N} variantes aprobadas — {list of variant IDs}. Siguiente rol: `{next_role}`."
+
+**6. State persistence**
+
+After every variant approval or refinement, write current state to `${THEME_DIR}/theme.yaml.wip`. This allows resumption if the session is interrupted.
+
+### Token extraction from first few variants
+
+**During review of the first 2-3 variants**, also capture the theme's tokens. Ask user:
+
+> "Antes de seguir, confirmemos los tokens del tema (los colores y fuentes que usarás en TODAS las variantes).
+>
+> Detecté estas fuentes en tus slides:
+> - {font1} ({count1} usos)
+> - {font2} ({count2} usos)
+> ...
+>
+> ¿Cuál quieres como fuente principal para TÍTULOS? ¿Y para CUERPO DE TEXTO?"
+
+Save user's choices as `tokens.typography.heading` and `tokens.typography.body`.
+
+> "Para los colores, detecté:
+> - {color1} ({count1} usos) — {hex}
+> - {color2} ({count2} usos) — {hex}
+> ...
+>
+> ¿Cuál es tu color primario (el de la marca)? ¿Y el de acento? ¿Y el texto base?"
+
+Save as `tokens.color.primary`, `tokens.color.accent`, `tokens.color.text`.
+
+**Auto-detect background**: usually white (#FFFFFF). If detected otherwise, confirm with user.
+
+### Completion check
+
+When done with all roles:
+
+> "🎉 Fase 2 completada. Resumen:
+> - **Tokens**: {heading font}, {body font}, {primary color}, {accent color}
+> - **Roles con variantes**: {count}
+> - **Variantes totales**: {sum}
+>
+> Roles sin variantes (omitidos en esta versión): {list}.
+>
+> Podrás añadir esos roles con `talk-theme-builder edit` más adelante.
+>
+> Siguiente: guardar el tema (Fase 5)."
