@@ -52,8 +52,8 @@ claude --plugin-dir ./presentations-builder
 | `/talk-assets` | Extract figures from PDFs, propose AI image prompts |
 | `/talk-narrative` | Build slide structure with storytelling arc and timing |
 | `/talk-slides` | Generate PPTX presentation file |
-| `/talk-study-doc` | Create study document and article summaries |
-| `/talk-script` | Generate speaker script with teleprompter format |
+| `/talk-study-doc` | Create comprehensive study document with active recall |
+| `/talk-script` | Generate teleprompter-format speaker script (optional) |
 
 ## How It Works
 
@@ -61,20 +61,22 @@ Each presentation is a directory. Talk Builder detects your progress by checking
 
 | File | Phase |
 |---|---|
-| `talk.yaml` | Briefing complete |
-| `vision.md` | Vision defined |
-| `research.md` | Research complete |
+| `docs/talk.yaml` | Briefing complete |
+| `docs/vision.md` | Vision defined |
+| `docs/research.md` | Research complete |
+| `docs/narrative.md` | Narrative approved |
 | `images/` (non-empty) | Assets ready |
-| `narrative.md` | Narrative approved |
-| `study-document.md` | Study docs complete |
-| `speaker-script.md` | Script ready |
+| `docs/study-document.md` | Study docs complete |
+| `docs/speaker-script.md` | Script ready |
 | `presentation.pptx` | Slides generated |
+
+The project root stays clean — only `presentation.pptx` lives there. All working documents are in `docs/`, images in `images/`, and research papers in `pdfs/`.
 
 Run `/talk` at any point to see your status and continue from where you left off.
 
 ## Configuration
 
-Personal style is stored in a `config.yaml` at a path you choose during setup. Per-project overrides go in `talk.yaml`.
+Personal style is stored in a `config.yaml` at a path you choose during setup. Per-project overrides go in `docs/talk.yaml`.
 
 See `config.example.yaml` for all available options.
 

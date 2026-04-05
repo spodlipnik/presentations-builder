@@ -92,9 +92,9 @@ Tell the user:
 ## After completion
 
 Tell the user: "Slides generated! Your Talk Builder project is complete. All outputs:
-- docs/study-document.md — comprehensive reference document
-- article-summaries.md — quick reference per paper
-- docs/speaker-script.md — delivery guide with teleprompter
+- docs/study-document.md — comprehensive study reference
+- docs/narrative.md — full narrative structure with context
+- docs/speaker-script.md — teleprompter format (if generated)
 - presentation.pptx — open in Keynote for visual fine-tuning
 - _build/ — generation scripts (reusable for modifications)
 
