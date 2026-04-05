@@ -1,0 +1,14 @@
+"""Tests for extract_references.py — uses real PPTX fixtures, no mocks."""
+import sys
+from pathlib import Path
+
+# Add scripts dir to path so we can import the module under test
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
+from extract_references import load_presentation
+
+
+def test_load_presentation_returns_presentation(simple_title_pptx):
+    prs = load_presentation(simple_title_pptx)
+    assert prs is not None
+    assert len(prs.slides) == 1
