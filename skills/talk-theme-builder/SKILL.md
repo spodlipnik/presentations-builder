@@ -1,7 +1,6 @@
 ---
 name: talk-theme-builder
 description: Use when user wants to create, edit, or manage presentation themes for the Talk Builder system. Triggers when user says "crear tema", "create theme", "nuevo tema", "edit theme", "talk-theme-builder", or similar. Walks user through co-creation of themes from their reference PPTX slides.
-disable-model-invocation: true
 allowed-tools:
   - Read
   - Write
