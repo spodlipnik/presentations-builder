@@ -185,3 +185,40 @@ def iter_shapes_recursive(shapes):
             continue
         yield shape, z
         z += 1
+
+
+def extract_slide(slide, slide_number, slide_width_emu, slide_height_emu):
+    """Extract complete structured info for a single slide.
+
+    Returns dict with slide_number, shapes (list), inferred_role (None initially).
+    """
+    shapes_info = []
+    for shape, z_order in iter_shapes_recursive(slide.shapes):
+        shape_dict = {
+            "type": extract_shape_type(shape),
+            "box": extract_shape_box(shape, slide_width_emu, slide_height_emu),
+            "z_order": z_order,
+        }
+        # Text content + font (if applicable)
+        if getattr(shape, "has_text_frame", False):
+            text = shape.text_frame.text or ""
+            shape_dict["text_sample"] = text[:200]  # cap at 200 chars
+            shape_dict["font"] = extract_font_info(shape)
+            # Paragraph alignment
+            if shape.text_frame.paragraphs:
+                pa = shape.text_frame.paragraphs[0].alignment
+                shape_dict["alignment"] = str(pa).split(".")[-1].lower() if pa else None
+        # Placeholder info
+        if getattr(shape, "is_placeholder", False):
+            shape_dict["is_placeholder"] = True
+            try:
+                shape_dict["placeholder_type"] = str(shape.placeholder_format.type).split(".")[-1].lower()
+            except AttributeError:
+                shape_dict["placeholder_type"] = None
+        shapes_info.append(shape_dict)
+
+    return {
+        "slide_number": slide_number,
+        "shapes": shapes_info,
+        "inferred_role": None,  # filled in by role inference step
+    }

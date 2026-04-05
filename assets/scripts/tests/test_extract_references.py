@@ -87,3 +87,25 @@ def test_extract_shape_type_unknown_returns_other():
         has_table = False
         has_chart = False
     assert extract_shape_type(FakeShape()) == "other"
+
+
+def test_extract_slide_returns_structured_dict(simple_title_pptx):
+    from extract_references import extract_slide
+    prs = load_presentation(simple_title_pptx)
+    slide_info = extract_slide(prs.slides[0], 1, prs.slide_width, prs.slide_height)
+    assert slide_info["slide_number"] == 1
+    assert len(slide_info["shapes"]) == 1
+    shape = slide_info["shapes"][0]
+    assert shape["type"] == "text_box"
+    assert shape["text_sample"] == "Sample Title"
+    assert shape["font"]["family"] == "Inter"
+    assert shape["font"]["size_pt"] == 54.0
+    assert shape["z_order"] == 0
+
+
+def test_extract_slide_multiple_shapes(multi_slide_pptx):
+    from extract_references import extract_slide
+    prs = load_presentation(multi_slide_pptx)
+    slide_info = extract_slide(prs.slides[1], 2, prs.slide_width, prs.slide_height)
+    # Slide 2 has headline textbox + image placeholder textbox = 2 shapes
+    assert len(slide_info["shapes"]) == 2
