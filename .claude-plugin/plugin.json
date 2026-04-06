@@ -11,7 +11,9 @@
   "keywords": ["presentations", "academic", "medical", "storytelling", "slides", "pptx", "speaker-script"],
   "userConfig": {
     "assets_path": {
+      "title": "Assets path",
       "description": "Path to your Talk Builder assets folder (e.g. ~/Documents/talk-builder). This is where your personal style config, fixed slides, and example slides live.",
+      "type": "directory",
       "sensitive": false
     }
   }
