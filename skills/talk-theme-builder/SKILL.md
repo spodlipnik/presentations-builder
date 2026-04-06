@@ -66,12 +66,7 @@ Takes the user through 5 phases to build a complete theme.
 
 **1. Confirm assets_path is configured**
 
-Read `~/.claude/config/talk-builder.yaml` or check userConfig. If not set, ask:
-
-> "No tengo configurado el directorio de tus presentaciones. ¿Dónde quieres guardar tus temas?
-> (ej: `~/Presentaciones/talk-themes/`)"
-
-Save the path as `ASSETS_PATH`.
+Check `${user_config.assets_path}`. If not set, tell the user to configure it via plugin settings or run `/talk-builder:talk-setup`.
 
 **2. Ask for reference PPTX**
 
@@ -91,7 +86,7 @@ Validate: `[a-z0-9-]+`. Save as `THEME_ID`.
 **4. Create theme directory**
 
 ```bash
-THEME_DIR="${ASSETS_PATH}/themes/${THEME_ID}"
+THEME_DIR="${user_config.assets_path}/themes/${THEME_ID}"
 mkdir -p "${THEME_DIR}/thumbnails"
 ```
 
@@ -358,7 +353,7 @@ When done with all roles:
 
 If changes, validate format ([a-z0-9-]+) and rename directory:
 ```bash
-mv "${ASSETS_PATH}/themes/${OLD_ID}" "${ASSETS_PATH}/themes/${NEW_ID}"
+mv "${user_config.assets_path}/themes/${OLD_ID}" "${user_config.assets_path}/themes/${NEW_ID}"
 ```
 
 **2. Ask for description**

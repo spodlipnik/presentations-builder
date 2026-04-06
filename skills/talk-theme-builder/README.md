@@ -41,12 +41,12 @@ User walks through each role's variant candidates. For each: approve, refine, or
 ### Fase 4: Sampler deck (deferred to Plan 2B)
 
 ### Fase 5: Save + naming
-Final theme.yaml written to `${ASSETS_PATH}/themes/<theme-id>/`. Initial backup created.
+Final theme.yaml written to `${user_config.assets_path}/themes/<theme-id>/`. Initial backup created.
 
 ## Output structure
 
 ```
-${ASSETS_PATH}/themes/<theme-id>/
+${user_config.assets_path}/themes/<theme-id>/
 ├── theme.yaml                  # the final catalog
 ├── reference-slides.pptx       # user's source file
 ├── reference-catalog.yaml      # extractor output

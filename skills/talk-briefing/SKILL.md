@@ -101,7 +101,7 @@ complexity: "<level>"
 has_existing_pdfs: <true/false>
 literature_search: "<yes/no/review>"
 is_new: <true/false>
-theme: derma-congresos-2026   # ID del tema visual (de talk-theme-builder)
+theme: ""                      # ID del tema visual (de talk-theme-builder), empty if none yet
 fixed_slides:
   disclosures: <true/false>
   contact: <true/false>

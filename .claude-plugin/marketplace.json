@@ -19,6 +19,7 @@
         "./skills/talk-assets",
         "./skills/talk-narrative",
         "./skills/talk-slides",
+        "./skills/talk-theme-builder",
         "./skills/talk-study-doc",
         "./skills/talk-script"
       ]

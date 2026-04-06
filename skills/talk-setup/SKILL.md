@@ -45,9 +45,7 @@ If anything is missing, tell the user what to install and why:
 - poppler: `brew install poppler` — needed to extract figures from research papers
 - Node.js: `brew install node` — needed to generate PPTX files
 
-Also mention: "Talk Builder uses the official PPTX skill from Anthropic. If you haven't installed it yet, you can do so later via `/plugin` → `claude-plugins-official` → `pptx`."
-
-**LibreOffice** (optional): only mention if the user asks about visual QA.
+**LibreOffice** (optional, for thumbnail generation in `talk-theme-builder`): only mention if the user asks about visual QA.
 
 Do not block setup if dependencies are missing — the user can install them later before they need those specific features.
 
@@ -59,7 +57,8 @@ Create the chosen directory with subdirectories:
 <chosen-path>/
 ├── config.yaml
 ├── example-slides/
-└── fixed-slides/
+├── fixed-slides/
+└── themes/
 ```
 
 ### 4. Collect style preferences (one question at a time)

@@ -25,7 +25,7 @@ Consumes a theme (from `talk-theme-builder`) and a narrative (from `talk-narrati
 
 - `docs/talk.yaml` exists with `theme:` field pointing to an existing theme
 - `docs/narrative.md` exists with slides using the 18 canonical roles
-- Theme exists at `${ASSETS_PATH}/themes/<theme-id>/theme.yaml`
+- Theme exists at `${user_config.assets_path}/themes/<theme-id>/theme.yaml`
 - Python 3 + Node.js + PptxGenJS installed (auto by hooks)
 
 ## Workflow
@@ -46,13 +46,13 @@ The skill proceeds through these phases:
 
 **Step 1:** Read `docs/talk.yaml`. Check for `theme:` field.
 - If missing or empty → ask user:
-  > "`docs/talk.yaml` no tiene un `theme:` definido. ¿Cuál quieres usar? Temas disponibles en `${ASSETS_PATH}/themes/`:"
+  > "`docs/talk.yaml` no tiene un `theme:` definido. ¿Cuál quieres usar? Temas disponibles en `${user_config.assets_path}/themes/`:"
   List available themes.
 
 **Step 2:** Load and validate theme:
 ```bash
 python3 "${CLAUDE_PLUGIN_ROOT}/assets/scripts/load_theme.py" \
-  "${ASSETS_PATH}/themes/${THEME_ID}/theme.yaml"
+  "${user_config.assets_path}/themes/${THEME_ID}/theme.yaml"
 ```
 If validation fails → report error and exit.
 
@@ -264,7 +264,7 @@ cp "${CLAUDE_PLUGIN_ROOT}/assets/scripts/generate_presentation_template.js" _bui
 **Step 2:** Fill in the template variables. Use sed or manual Edit:
 
 ```bash
-THEME_PATH="${ASSETS_PATH}/themes/${THEME_ID}/theme.yaml"
+THEME_PATH="${user_config.assets_path}/themes/${THEME_ID}/theme.yaml"
 SLIDES_JSON="/tmp/parsed_slides.json"
 IMAGES_DIR="$(pwd)/images"
 OUTPUT="$(pwd)/presentation.pptx"
