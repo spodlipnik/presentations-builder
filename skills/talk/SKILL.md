@@ -24,6 +24,64 @@ Before doing anything else, check the config path:
 3. **If the directory exists but `config.yaml` is missing**: Tell the user: "Your assets folder exists but has no `config.yaml`. Run `/talk-builder:talk-setup` to complete the configuration." Then stop.
 4. **If `config.yaml` exists**: Read it and confirm to the user: "Config loaded from `[path]` (language: [lang], style: [primary color])." Then continue with phase detection.
 
+## Environment Check
+
+After loading config successfully, run a quick environment verification **before** showing project status. Run all checks silently via Bash and present a single summary table.
+
+### Checks to run
+
+```bash
+# 1. Python venv
+VENV="${CLAUDE_PLUGIN_DATA}/venv/bin/python3"
+if [ -x "$VENV" ] && "$VENV" -c 'import pptx, yaml, lxml' 2>/dev/null; then
+  echo "PYTHON_OK"
+else
+  echo "PYTHON_FAIL"
+fi
+
+# 2. Node deps
+if [ -f "${CLAUDE_PLUGIN_DATA}/node_modules/pptxgenjs/package.json" ]; then
+  echo "NODE_OK"
+else
+  echo "NODE_FAIL"
+fi
+
+# 3. System deps
+which pdftoppm >/dev/null 2>&1 && echo "POPPLER_OK" || echo "POPPLER_FAIL"
+which node >/dev/null 2>&1 && echo "NODE_BIN_OK" || echo "NODE_BIN_FAIL"
+which soffice >/dev/null 2>&1 && echo "SOFFICE_OK" || echo "SOFFICE_MISSING"
+
+# 4. Themes directory
+THEMES_DIR="${user_config.assets_path}/themes"
+if [ -d "$THEMES_DIR" ] && [ "$(ls -A "$THEMES_DIR" 2>/dev/null)" ]; then
+  echo "THEMES_OK:$(ls -d "$THEMES_DIR"/*/ 2>/dev/null | xargs -I{} basename {} | tr '\n' ',')"
+else
+  echo "THEMES_EMPTY"
+fi
+```
+
+### Display format
+
+Present results as a compact status block before the project status. Use checkmarks for passing, warnings for non-critical missing items, and errors for blockers:
+
+```
+Talk Builder — Environment:
+  ✓ Config: en, Avenir Next, #101010/#59815F
+  ✓ Python venv (python-pptx, PyYAML, lxml)
+  ✓ Node deps (pptxgenjs)
+  ✓ System: poppler ✓, node ✓, soffice ✓
+  ⚠ themes/ empty — create one with /talk-builder:talk-theme-builder create
+
+```
+
+Rules:
+- **Python venv missing** → error, suggest: `python3 -m venv ~/.claude/plugins/data/talk-builder/venv && ~/.claude/plugins/data/talk-builder/venv/bin/pip install python-pptx PyYAML lxml`
+- **Node deps missing** → error, suggest: `cd ~/.claude/plugins/data/talk-builder && npm install`
+- **poppler/node missing** → error, suggest `brew install poppler` / `brew install node`
+- **soffice missing** → warning only (optional, for talk-theme-builder thumbnails)
+- **themes/ empty** → warning only (not needed until talk-slides phase)
+- Do NOT block the workflow for warnings, only for errors.
+
 ## Phase Detection
 
 Scan the current working directory for these files to determine project state:
