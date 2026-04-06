@@ -26,7 +26,8 @@ Consumes a theme (from `talk-theme-builder`) and a narrative (from `talk-narrati
 - `docs/talk.yaml` exists with `theme:` field pointing to an existing theme
 - `docs/narrative.md` exists with slides using the 18 canonical roles
 - Theme exists at `${user_config.assets_path}/themes/<theme-id>/theme.yaml`
-- Python 3 + Node.js + PptxGenJS installed (auto by hooks)
+- Python 3 via plugin venv: always use `${CLAUDE_PLUGIN_DATA}/venv/bin/python3` (auto-created by SessionStart hook). Fall back to `python3` only if venv is unavailable.
+- Node.js + PptxGenJS installed (auto by hooks)
 
 ## Workflow
 

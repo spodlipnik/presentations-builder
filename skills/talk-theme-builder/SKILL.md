@@ -26,7 +26,7 @@ Interactive skill to create and manage presentation themes. A theme is a reusabl
 Before running `create`:
 - User must have a reference PPTX with 15-30 slides representing their style
 - LibreOffice must be installed (`which soffice`) for thumbnail generation
-- Python deps installed (python-pptx, PyYAML, lxml) — auto-installed by hooks
+- Python deps in plugin venv: always use `${CLAUDE_PLUGIN_DATA}/venv/bin/python3` (auto-created by SessionStart hook, includes python-pptx, PyYAML, lxml). Fall back to `python3` only if venv is unavailable.
 
 ## Workflow: `create`
 

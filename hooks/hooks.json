@@ -13,7 +13,7 @@
           },
           {
             "type": "command",
-            "command": "python3 -c 'import pptx, yaml, lxml' 2>/dev/null || python3 -m pip install --quiet --user -r \"${CLAUDE_PLUGIN_ROOT}/assets/scripts/requirements.txt\" 2>/dev/null || printf '{\"result\": \"warn\", \"message\": \"Talk Builder: failed to install Python dependencies (python-pptx, PyYAML, lxml). Run manually: pip3 install -r assets/scripts/requirements.txt\"}'"
+            "command": "VENV=\"${CLAUDE_PLUGIN_DATA}/venv\"; if [ -d \"$VENV\" ] && \"$VENV/bin/python3\" -c 'import pptx, yaml, lxml' 2>/dev/null; then exit 0; fi; python3 -m venv \"$VENV\" 2>/dev/null && \"$VENV/bin/pip\" install --quiet -r \"${CLAUDE_PLUGIN_ROOT}/assets/scripts/requirements.txt\" 2>/dev/null || printf '{\"result\": \"warn\", \"message\": \"Talk Builder: failed to install Python dependencies. Run manually: python3 -m venv ~/.claude/plugins/data/talk-builder/venv && ~/.claude/plugins/data/talk-builder/venv/bin/pip install python-pptx PyYAML lxml\"}'"
           }
         ]
       }
