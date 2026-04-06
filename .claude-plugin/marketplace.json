@@ -8,21 +8,7 @@
     {
       "name": "talk-builder",
       "description": "Complete presentation building skills suite — orchestrator, research, narrative, slides, documents, and speaker scripts",
-      "source": "./",
-      "strict": false,
-      "skills": [
-        "./skills/talk",
-        "./skills/talk-setup",
-        "./skills/talk-briefing",
-        "./skills/talk-vision",
-        "./skills/talk-research",
-        "./skills/talk-assets",
-        "./skills/talk-narrative",
-        "./skills/talk-slides",
-        "./skills/talk-theme-builder",
-        "./skills/talk-study-doc",
-        "./skills/talk-script"
-      ]
+      "source": "./"
     }
   ]
 }
