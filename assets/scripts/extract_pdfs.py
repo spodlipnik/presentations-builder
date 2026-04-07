@@ -3,7 +3,7 @@
 import os
 import re
 import sys
-import logging
+
 import multiprocessing
 from datetime import datetime, timezone
 from pathlib import Path
@@ -119,7 +119,7 @@ def extract_single_pdf(args: tuple) -> dict:
 
         # Count structural elements from the markdown
         lines = markdown.split("\n")
-        result["sections"] = sum(1 for l in lines if l.startswith("#"))
+        result["sections"] = [l.lstrip("#").strip() for l in lines if l.startswith("## ") and not l.startswith("### ")]
         result["tables"] = markdown.count("|---")  # rough heuristic
 
         # Extract images if the document exposes them
@@ -214,11 +214,13 @@ def main() -> int:
             safe = sanitize_filename(str(p))
             md = extracted_dir / f"{safe}.md"
             if md.exists():
+                md_content = md.read_text(encoding="utf-8")
+                sections = [l.lstrip("#").strip() for l in md_content.split("\n") if l.startswith("## ") and not l.startswith("### ")]
                 existing.append({
                     "filename": p.name,
                     "title": p.stem,
                     "pages": 0,
-                    "sections": 0,
+                    "sections": sections,
                     "tables": 0,
                     "figures": 0,
                     "images_extracted": 0,
@@ -250,11 +252,13 @@ def main() -> int:
             safe = sanitize_filename(str(p))
             md = extracted_dir / f"{safe}.md"
             if md.exists():
+                md_content = md.read_text(encoding="utf-8")
+                sections = [l.lstrip("#").strip() for l in md_content.split("\n") if l.startswith("## ") and not l.startswith("### ")]
                 results.append({
                     "filename": p.name,
                     "title": p.stem,
                     "pages": 0,
-                    "sections": 0,
+                    "sections": sections,
                     "tables": 0,
                     "figures": 0,
                     "images_extracted": 0,

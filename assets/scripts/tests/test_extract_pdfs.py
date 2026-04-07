@@ -151,7 +151,7 @@ class TestWriteIndex:
                 "filename": "paper.pdf",
                 "title": "paper",
                 "pages": 10,
-                "sections": 5,
+                "sections": ["Introduction", "Methods", "Results", "Discussion", "Conclusion"],
                 "tables": 2,
                 "figures": 3,
                 "images_extracted": 3,
