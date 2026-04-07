@@ -5,6 +5,7 @@ disable-model-invocation: true
 allowed-tools:
   - Read
   - Write
+  - Bash
   - Glob
   - Grep
   - WebSearch
@@ -27,6 +28,7 @@ Iterative research phase that builds a comprehensive evidence base for the prese
 - The user can add PDFs to `pdfs/` at ANY point during this phase.
 - Every claim in `docs/research.md` MUST have a verifiable reference (DOI or PMID).
 - **NEVER invent or fabricate references.** If you cannot find a source, say so explicitly. If a DOI cannot be confirmed, mark it as "[DOI: UNVERIFIED — check manually]". A missing reference is always better than a fake one. This is a medical presentation — incorrect citations damage the speaker's credibility with specialists who know the literature.
+- **NEVER read PDF files directly with the Read tool.** Always use the pre-extracted markdown from `pdfs/extracted/`. If the extraction hasn't been run, run `extract_pdfs.py` first (see Step 6). The ONLY exception is viewing a specific page for visual figure inspection (using the `pages` parameter). Reading full PDFs directly wastes tokens and risks context overflow.
 - **Reference quality matters.** Prioritize high-impact journals and high-evidence-level studies. A meta-analysis in Lancet carries more weight than a case series in a low-tier journal. Note the journal and evidence level for each reference.
 
 ## Tool Availability Check
@@ -145,42 +147,70 @@ Take your time — when you've added any extra PDFs to `pdfs/`, just tell me 're
 
 **Wait for the user to come back.** Do not proceed until they confirm. They might need minutes or hours to search Scopus — that's fine.
 
-### Step 6: Deep-read all PDFs
+### Step 6: Extract and read PDFs
 
-Once the user confirms all PDFs are in place, read EVERY PDF in `pdfs/`:
+**IMPORTANT: NEVER read PDF files directly. Use the pre-extracted markdown.**
 
-For each paper, extract:
+**6a. Run Docling extraction**
+
+Check if `pdfs/extracted/_index.yaml` exists:
+
+If missing OR if any PDF in `pdfs/` is newer than its corresponding `.md` in `pdfs/extracted/`, run the extraction script:
+
+```bash
+${CLAUDE_PLUGIN_DATA}/venv/bin/python3 \
+  ${CLAUDE_PLUGIN_ROOT}/assets/scripts/extract_pdfs.py \
+  pdfs/
+```
+
+This processes all PDFs in parallel using multiprocessing (~2-3 minutes for 35 papers). Wait for it to complete. Report results to user:
+
+> "Extracted [N] papers ([M] pages total) in [X] seconds.
+> [E] errors (see `pdfs/extracted/_extraction_errors.log`)"
+
+If this is the first run ever, Docling will download ML models (~1GB). Warn the user: "First-time setup: downloading Docling ML models (~1GB). This only happens once."
+
+**6b. Read the extraction index**
+
+Read `pdfs/extracted/_index.yaml` to see all available papers. Show the user a summary:
+
+> "Papers extracted:
+> | # | Title | Pages | Sections | Tables | Figures |
+> |---|-------|-------|----------|--------|---------|
+> | 1 | [title] | [N] | [list] | [N] | [N] |
+> ..."
+
+**6c. Read extracted markdown files**
+
+Read each `pdfs/extracted/<filename>.md` using the Read tool. These are structured markdown with headings, tables (as markdown tables), and figure captions.
+
+DO NOT read the original PDF files. ONLY read the extracted `.md` files.
+
+For each paper, extract from the markdown:
 - **Exact numbers** — sample sizes, effect sizes, p-values, confidence intervals, hazard ratios
 - **Methodology** — study design, population, follow-up duration
 - **Key conclusions** — in the authors' own words
 - **Limitations** — what the authors themselves acknowledge
-- **Visual elements catalog** — for EVERY figure, table, and illustration in the paper that could be relevant, describe:
-  - What it is (figure type: boxplot, KM curve, forest plot, flowchart, photograph, diagram, table...)
-  - What it shows (specific data, with numbers when visible)
-  - Visual quality (clear/cluttered, color/BW, resolution, self-explanatory or needs context)
-  - Potential use in the talk (which narrative point it could support)
 
-**Example of a good visual catalog entry:**
+**6d. Visual figure inspection (selective, max 10-15 pages total)**
+
+After reading all extracted markdown, identify figures that need visual description for the visual elements catalog (e.g., Kaplan-Meier curves, forest plots, clinical photographs, PRISMA diagrams).
+
+For ONLY those specific figures, use the Read tool with the `pages` parameter to view the specific page in the original PDF:
+
 ```
-p.4 Fig 3 (Kaplan-Meier): PFS curves by fecal diversity (high vs low).
-  Shows dramatic separation starting at month 6. High diversity 
-  median PFS 12.4 mo vs 3.8 mo. Clean figure, two colors, 
-  publication-quality. Self-explanatory with minimal annotation.
-  → STAR moment candidate: "your gut bacteria predict if immunotherapy works"
-
-p.5 Table 2: Enriched taxa in responders vs non-responders with 
-  adjusted p-values. 8 rows, clear format.
-  → Supporting evidence for mechanism slide, or backup for Q&A
-
-p.6 Fig 4 (Illustration): FMT experimental design diagram. 
-  Shows donor → germ-free mice → tumor challenge → ICI workflow.
-  Color-coded steps, very didactic, explains mechanism visually.
-  → Could be adapted/redrawn for a mechanism slide
+Read(file_path="pdfs/paper.pdf", pages="9")
 ```
 
-Don't catalog every single element — only those relevant to the talk's narrative. Skip generic demographic tables, supplementary figures that repeat main findings, and figures about aspects not covered in the talk.
+This should be rare — only for figures where the extracted caption alone doesn't provide enough information. Limit to maximum 10-15 page reads across ALL papers.
 
-**Write a COMPREHENSIVE summary per paper, not just bullet points.** Each paper summary should be a mini-review that gives the speaker enough context to talk about the paper confidently in front of specialists. Include:
+**6e. Use pre-extracted images**
+
+Check `pdfs/extracted/<paper_name>/` for extracted figure images (fig-001.png, etc.). Reference these in the visual elements catalog instead of describing from PDF pages when possible.
+
+**6f. Write comprehensive paper summaries**
+
+For each paper, write a comprehensive summary following this template:
 
 ```
 ## [Author Year] — [Short Title]
@@ -191,52 +221,30 @@ Don't catalog every single element — only those relevant to the talk's narrati
 
 **Key Findings:**
 [Paragraph-form narrative covering main results with exact numbers —
-sample sizes, effect sizes, p-values, CIs, HRs. Not just "significant 
-difference" but the actual numbers. Include primary and secondary endpoints.]
+sample sizes, effect sizes, p-values, CIs, HRs.]
 
 **What this means in plain language:**
-[Translate the numbers into something the speaker can say out loud. 
-"HR 0.58 means that for every 2 patients who die without probiotics, 
-roughly 1 survives with them." This helps the speaker visceralize data 
-for the audience without oversimplifying.]
+[Translate the numbers into something the speaker can say out loud.]
 
 **Mechanism/Rationale:**
-[What the authors propose as explanation. The biological or clinical 
-reasoning. Important for the speaker to understand WHY, not just WHAT.]
+[What the authors propose as explanation.]
 
 **Key quotes from the paper:**
-[2-3 exact sentences from the paper that the speaker could cite directly.
-Choose quotes that capture the most important insight or the most 
-impactful phrasing. Include page numbers.]
+[2-3 exact sentences from the paper. Include page/section reference.]
 
 **Connections to other papers in this research:**
-[How this paper relates to others in the evidence base. Does it confirm, 
-contradict, or extend another study? "Confirms Gopalakrishnan 2018 
-findings in a European cohort" or "Contradicts Spencer 2021 — but in 
-humans vs mice, which explains the difference."]
+[How this paper relates to others in the evidence base.]
 
 **Limitations:**
-[What the authors themselves acknowledge. What a specialist in the 
-audience might challenge. Known methodological weaknesses.]
-
-**Impact:** [citation count if notable, how it influenced the field, 
-what studies it spawned or enabled]
+[What the authors acknowledge. What specialists might challenge.]
 
 **Relevance to YOUR talk:**
-[How this paper specifically serves your core message and narrative.
-Which slide or narrative section it belongs to.]
+[How this paper serves the narrative.]
 
 **Visual Elements:**
-[Catalog of figures/tables/illustrations as described above]
+[Catalog of figures/tables. For each: page, type, description, quality, potential use.
+Use pre-extracted images from pdfs/extracted/<paper>/ when available.]
 ```
-
-This depth is essential because:
-- The narrative phase needs rich context to build compelling stories around data
-- The study document phase draws directly from these summaries
-- The speaker needs to answer specialist Q&A confidently
-- Abstracts alone lead to imprecise claims and embarrassing errors on stage
-
-Present a summary per paper: "I've read [N] papers. Here's what I found in each..."
 
 ### Step 7: Consolidate docs/research.md
 
