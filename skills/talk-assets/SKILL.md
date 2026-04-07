@@ -39,9 +39,10 @@ This skill has four ways to create visuals, each for a different need:
 
 ### EXTRACT — Figures from published papers
 **When:** The paper has a published figure that's better than anything we could recreate (original data, clinical photos, histology, complex charts from the study itself)
-**How:** `pdftoppm` for PNG (300dpi) + `pdfseparate` for PDF vector
+**How (prefer pre-extracted):** Check `pdfs/extracted/<paper_name>/` first — Docling may have already extracted figure images as `fig-*.png` during the research phase. If suitable images exist there, copy them to `images/` with proper naming. Only fall back to `pdftoppm` + `pdfseparate` if pre-extracted images are missing or insufficient quality.
+**How (fallback):** `pdftoppm` for PNG (300dpi) + `pdfseparate` for PDF vector
 **Naming:** `author-year-pN-description.png` (e.g., `gopalakrishnan2018-p4-survival.png`)
-**Always:** PNG + PDF pair per figure
+**Always:** PNG + PDF pair per figure when using pdftoppm. Pre-extracted images are PNG only.
 
 ### CHART — Data visualizations with SVG
 **When:** You need a clean chart with specific data from the research (bar chart, comparison, simplified forest plot, timeline, trend line). Better than using a cluttered paper figure when you only need 3 data points from a table of 20.
