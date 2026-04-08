@@ -1,7 +1,6 @@
 ---
 name: talk-study-doc
 description: Use when generating the study document for a presentation — a comprehensive reference document for the speaker to study and refresh their knowledge. Triggers when /talk detects docs/narrative.md exists but no docs/study-document.md.
-disable-model-invocation: true
 allowed-tools:
   - Read
   - Write

@@ -1,7 +1,6 @@
 ---
 name: talk-narrative
 description: Use when building the slide structure and storytelling arc for a presentation. Creates docs/narrative.md with slide-by-slide plan including timing, connectors, and storytelling elements. Triggers when /talk detects docs/research.md exists but no docs/narrative.md.
-disable-model-invocation: true
 allowed-tools:
   - Read
   - Write

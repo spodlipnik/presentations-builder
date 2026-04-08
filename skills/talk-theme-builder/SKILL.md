@@ -87,16 +87,33 @@ Validate: `[a-z0-9-]+`. Save as `THEME_ID`.
 
 ```bash
 THEME_DIR="${user_config.assets_path}/themes/${THEME_ID}"
-mkdir -p "${THEME_DIR}/thumbnails"
+mkdir -p "${THEME_DIR}/assets" "${THEME_DIR}/_dev" "${THEME_DIR}/_reference/thumbnails"
+```
+
+Theme directory structure:
+```
+{THEME_ID}/
+├── theme.yaml              ← the theme catalog (only thing that matters long-term)
+├── assets/                 ← personal assets: presenter photo, QR, logos
+├── .backups/               ← automatic backups
+├── _dev/                   ← generated scripts + outputs (gitignore-friendly)
+│   ├── generate_sampler.js
+│   ├── sampler.pptx
+│   └── sampler_thumbs/
+└── _reference/             ← extraction data (do not modify)
+    ├── reference-slides.pptx
+    ├── reference-catalog.yaml
+    ├── clusters.yaml
+    └── thumbnails/
 ```
 
 **5. Copy reference PPTX and extract catalog**
 
 ```bash
-cp "<user-pptx-path>" "${THEME_DIR}/reference-slides.pptx"
+cp "<user-pptx-path>" "${THEME_DIR}/_reference/reference-slides.pptx"
 python3 "${CLAUDE_PLUGIN_ROOT}/assets/scripts/extract_references.py" \
-  --input "${THEME_DIR}/reference-slides.pptx" \
-  --output "${THEME_DIR}/reference-catalog.yaml" \
+  --input "${THEME_DIR}/_reference/reference-slides.pptx" \
+  --output "${THEME_DIR}/_reference/reference-catalog.yaml" \
   --theme-name "${THEME_ID}"
 ```
 
@@ -110,8 +127,8 @@ which soffice
 If YES:
 ```bash
 bash "${CLAUDE_PLUGIN_ROOT}/assets/scripts/render_thumbnails.sh" \
-  "${THEME_DIR}/reference-slides.pptx" \
-  "${THEME_DIR}/thumbnails" \
+  "${THEME_DIR}/_reference/reference-slides.pptx" \
+  "${THEME_DIR}/_reference/thumbnails" \
   100
 ```
 
@@ -147,14 +164,14 @@ Then proceed to Phase 1.
 
 ```bash
 python3 "${CLAUDE_PLUGIN_ROOT}/assets/scripts/cluster_slides.py" \
-  --input "${THEME_DIR}/reference-catalog.yaml" \
-  --output "${THEME_DIR}/clusters.yaml" \
+  --input "${THEME_DIR}/_reference/reference-catalog.yaml" \
+  --output "${THEME_DIR}/_reference/clusters.yaml" \
   --bucket 0.05
 ```
 
 **2. Load clusters and role-taxonomy**
 
-Read `${THEME_DIR}/clusters.yaml` → list of clusters (each has: role, count, slide_numbers, signature).
+Read `${THEME_DIR}/_reference/clusters.yaml` → list of clusters (each has: role, count, slide_numbers, signature).
 
 Read `${CLAUDE_PLUGIN_ROOT}/references/role-taxonomy.md` to know the 18 canonical roles.
 
@@ -250,7 +267,7 @@ For role `R` with clusters `[C1, C2, ...]`:
 If `HAS_THUMBNAILS=true`:
 > "**Variante candidata 1**: slide #{representative_slide_number} (aparece {count} veces)
 >
-> Mírala aquí: `{THEME_DIR}/thumbnails/slide-{NN}.jpg`
+> Mírala aquí: `{THEME_DIR}/_reference/thumbnails/slide-{NN}.jpg`
 >
 > Layout: {N shapes}
 > {For each shape: type, position, font (if text)}"
@@ -298,6 +315,41 @@ Report:
 
 After every variant approval or refinement, write current state to `${THEME_DIR}/theme.yaml.wip`. This allows resumption if the session is interrupted.
 
+### Slot defaults (assets/)
+
+Slots in variant definitions can have a `default:` field that points to a file in `assets/` or a text string. This allows recurring content (presenter photo, QR, logos, contact info) to be pre-filled automatically in every presentation without requiring narrative specification.
+
+**When building variant entries**, for slots that typically have recurring content, ask the user:
+
+> "Este slot (`photo`) se repite en varias variantes. ¿Tienes una imagen que quieras usar siempre? Si es así, colócala en `assets/` y la configuro como default."
+
+**Slot default examples in theme.yaml:**
+
+```yaml
+contact.card-centered:
+  slots:
+    photo:
+      type: image
+      position: { x: 0.05, y: 0.15, w: 0.25, h: 0.7 }
+      fit: cover
+      default: "assets/presenter-photo.png"    # auto-filled
+    qr:
+      type: image
+      position: { x: 0.75, y: 0.3, w: 0.2, h: 0.35 }
+      fit: contain
+      default: "assets/qr-code.png"
+    name:
+      type: text
+      default: "Dr. Sebastian Podlipnik"
+    email:
+      type: text
+      default: "s.podlipnik@example.com"
+```
+
+**Roles that benefit most from defaults:** `title`, `contact`, `disclosure`, `closing`.
+
+**Rule:** Defaults are overridden if the narrative specifies a value for that slot. If no value in narrative AND no default → slot is left empty (placeholder).
+
 ### Token extraction from first few variants
 
 **During review of the first 2-3 variants**, also capture the theme's tokens. Ask user:
@@ -338,6 +390,55 @@ When done with all roles:
 > Podrás añadir esos roles con `talk-theme-builder edit` más adelante.
 >
 > Siguiente: guardar el tema (Fase 5)."
+
+---
+
+## Phase 4: Real-Asset Preview (optional)
+
+**Goal:** Generate a PPTX with real images (not colored rectangles) for visual QA of key variants.
+
+**When to trigger:** After Phase 2 completion, if the user has placed assets in `assets/` (photo, QR, logos), offer:
+
+> "¿Quieres ver una preview con los assets reales (foto, QR, logos) para las slides de título y contacto? Esto te dará una idea más fiel del resultado final."
+
+If user accepts:
+
+**1. Create preview script per variant:**
+
+Write `_dev/preview_{variant_id}.js` for each requested variant. The script:
+- Reads `../theme.yaml` (from `_dev/` parent)
+- Resolves `default:` values for each slot (images → `../assets/...`, text → hardcoded defaults)
+- Generates PPTX with real images at exact normalized coordinates
+- Uses correct `sizing.type` (see rules below)
+- Outputs to `_dev/preview_{variant_id}.pptx`
+
+**2. Image placement rules:**
+
+```javascript
+// Normalized [0-1] → inches for LAYOUT_16x9 (SW=10.0, SH=5.625)
+const x = slot.position.x * SW;
+const y = slot.position.y * SH;
+const w = slot.position.w * SW;
+const h = slot.position.h * SH;
+
+// fit: cover → fills box, crops to maintain ratio (for photos)
+slide.addImage({ path, x, y, w, h, sizing: { type: "cover" } });
+
+// fit: contain → fits inside box, letterboxed (for QR, logos)
+slide.addImage({ path, x, y, w, h, sizing: { type: "contain" } });
+```
+
+**3. Convert to PNG for review:**
+
+```bash
+soffice --headless --convert-to png --outdir "${THEME_DIR}/_dev" "${THEME_DIR}/_dev/preview_{variant_id}.pptx"
+```
+
+Then show the PNG to the user with Read tool for visual feedback.
+
+**Variants that benefit most:** `title.*` (photo + QR + logos), `contact.*` (photo + QR + logos), any variant with `default:` image assets.
+
+**4. Iterate:** If user wants adjustments, modify the variant in `theme.yaml.wip` and regenerate preview.
 
 ---
 
@@ -396,11 +497,13 @@ bash "${CLAUDE_PLUGIN_ROOT}/assets/scripts/backup_theme.sh" "${THEME_DIR}/theme.
 > "🎉 Tema `{THEME_ID}` guardado en `${THEME_DIR}`.
 >
 > **Archivos generados:**
-> - `theme.yaml` — el catálogo
-> - `reference-slides.pptx` — fuente original
-> - `reference-catalog.yaml` — datos crudos de extracción
-> - `thumbnails/` — {N} JPGs de tus slides
-> - `clusters.yaml` — agrupación de slides
+> - `theme.yaml` — el catálogo del tema
+> - `assets/` — tus assets personales (foto, QR, logos)
+> - `_reference/reference-slides.pptx` — fuente original
+> - `_reference/reference-catalog.yaml` — datos crudos de extracción
+> - `_reference/thumbnails/` — {N} JPGs de tus slides
+> - `_reference/clusters.yaml` — agrupación de slides
+> - `_dev/` — scripts y outputs generados
 > - `.backups/` — backup inicial
 >
 > **Para usarlo en una presentación**: en tu `docs/talk.yaml`, añade `theme: {THEME_ID}` y corre `/talk-slides`.

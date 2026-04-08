@@ -1,7 +1,6 @@
 ---
 name: talk-script
 description: Use when generating a teleprompter-format speaker script for a presentation. Optional — only needed if the speaker wants a line-by-line reading guide. Triggers when user asks for "teleprompter", "speaker script", or "guión".
-disable-model-invocation: true
 allowed-tools:
   - Read
   - Write

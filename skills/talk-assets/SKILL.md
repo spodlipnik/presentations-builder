@@ -1,7 +1,6 @@
 ---
 name: talk-assets
 description: Use when creating and preparing visual assets for a presentation. Collaborative visual creation — extracts figures from PDFs, generates data charts (SVG), creates diagrams, and proposes AI illustration prompts. Triggers when /talk detects docs/narrative.md exists but images/ is empty.
-disable-model-invocation: true
 allowed-tools:
   - Read
   - Write
@@ -19,8 +18,10 @@ The goal is NOT to extract every figure from every PDF. It's to create a focused
 
 - Read `docs/narrative.md` first — it defines what each slide needs
 - Read `docs/research.md` for the Visual Elements Catalog (what figures exist in papers)
-- Read `${user_config.assets_path}/config.yaml` for colors, fonts, and style
-- Read `docs/talk.yaml` and `docs/vision.md` for topic and intent context
+- Read `docs/talk.yaml` for topic, intent context, and `theme:` field
+- Read `docs/vision.md` for the speaker's personal angle
+- Read `${user_config.assets_path}/themes/<theme-id>/theme.yaml` for colors, fonts, and style tokens (the theme is the single source of truth for visual style)
+- Read `${user_config.assets_path}/config.yaml` for language preference
 - **Language priority:** Use the language the user writes in. Fall back to config.language for ambiguous messages.
 - **Every visual must be didactic** — it must teach, explain, or make data tangible. No decorative images.
 - **Quality over quantity** — a 20-minute talk needs ~10-15 visuals max. 100 images is failure, not thoroughness.
@@ -46,13 +47,13 @@ This skill has four ways to create visuals, each for a different need:
 
 ### CHART — Data visualizations with SVG
 **When:** You need a clean chart with specific data from the research (bar chart, comparison, simplified forest plot, timeline, trend line). Better than using a cluttered paper figure when you only need 3 data points from a table of 20.
-**How:** Claude writes inline SVG code with config.yaml colors → convert to PNG via sharp:
+**How:** Claude writes inline SVG code with theme.yaml colors → convert to PNG via sharp:
 ```bash
 node -e "const sharp = require('/opt/homebrew/lib/node_modules/sharp'); sharp('images/chart.svg').png({density: 300}).toFile('images/chart.png')"
 ```
 **Style rules:**
 - Use primary color for main data, accent for highlights
-- Background: transparent or config background color
+- Background: transparent or theme background color
 - 16:9 aspect ratio (1920x1080 viewBox)
 - Large text (min 24pt equivalent) — readable from back of auditorium
 - Annotated: labels, arrows, key numbers highlighted
@@ -63,14 +64,14 @@ node -e "const sharp = require('/opt/homebrew/lib/node_modules/sharp'); sharp('i
 **How — Simple (SVG):** For clean diagrams with boxes, arrows, text, connections. Claude writes SVG directly.
 **How — Complex (HTML artifact):** For multi-layered diagrams, interactive elements, or designs that benefit from CSS layout. Claude creates an HTML file, user opens in browser, screenshots to PNG.
 **Style rules:**
-- Same color palette as CHART (config.yaml)
+- Same color palette as CHART (theme.yaml)
 - Self-explanatory — the diagram should make sense without the speaker
 - Labeled clearly — no ambiguous arrows
 - Clean, minimal — avoid visual clutter
 
 ### ILLUSTRATE — Prompts for AI image generation
 **When:** You need something Claude cannot draw — photorealistic images, artistic illustrations, complex biological mechanisms with 3D depth, medical illustrations. These require Gemini, DALL-E, or similar tools.
-**How:** Generate a detailed prompt file `[GENERATE]-description.txt` with style context from config.yaml. The user generates the image externally and places it in `images/`.
+**How:** Generate a detailed prompt file `[GENERATE]-description.txt` with style context from theme.yaml. The user generates the image externally and places it in `images/`.
 **Important:** This is the LAST resort. Before proposing ILLUSTRATE, ask: "Can I create this as a DIAGRAM instead?" Most conceptual visuals work better as clean diagrams than as AI-generated illustrations.
 
 ## Workflow
@@ -213,7 +214,7 @@ Every visual created by this skill must pass these checks:
 
 - **Didactic:** Does it teach something? Would the audience understand the concept better WITH this visual than without it?
 - **Self-explanatory:** Can someone understand the main point without the speaker talking? (Labels, annotations, clear structure)
-- **Consistent:** Same color palette (config.yaml), same style across all created visuals
+- **Consistent:** Same color palette (theme.yaml), same style across all created visuals
 - **Readable:** Large enough text to read from the back of the auditorium (think billboard test)
 - **Minimal:** No unnecessary elements. If removing something doesn't weaken understanding, remove it.
 - **16:9:** Correct aspect ratio for slide insertion

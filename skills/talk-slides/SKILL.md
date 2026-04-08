@@ -15,6 +15,39 @@ allowed-tools:
 
 Consumes a theme (from `talk-theme-builder`) and a narrative (from `talk-narrative`) to generate a professional PPTX presentation.
 
+## Important — PptxGenJS Rules
+
+### Layout dimensions (16:9)
+
+PptxGenJS has two 16:9 layouts with DIFFERENT dimensions. Always use the correct one:
+
+| Layout | Width | Height | Use case |
+|---|---|---|---|
+| `LAYOUT_16x9` | 10.0" | 5.625" | Standard (default) |
+| `LAYOUT_WIDE` | 13.333" | 7.5" | Widescreen |
+
+**Rule:** When using `LAYOUT_16x9`, set `SW=10.0, SH=5.625`. All coordinates and sizes must be proportional to these dimensions. Using 13.333 with LAYOUT_16x9 causes elements to be off-center and clipped. Adjust `CONTENT_Y_OFFSET` proportionally when switching between layouts.
+
+### Image sizing (cover/contain/crop)
+
+```javascript
+// CORRECT — cover: fills box, crops to maintain aspect ratio
+slide.addImage({ path, x, y, w, h, sizing: { type: "cover" } });
+
+// CORRECT — contain: fits inside box, letterboxed, maintains aspect ratio
+slide.addImage({ path, x, y, w, h, sizing: { type: "contain" } });
+
+// CORRECT — crop: uses w/h/x/y INSIDE sizing to define crop area
+slide.addImage({ path, x, y, w, h, sizing: { type: "crop", x: 0, y: 0, w: 100, h: 100 } });
+
+// WRONG — w/h inside sizing ignored for cover/contain, causes distortion
+slide.addImage({ path, x, y, w, h, sizing: { type: "cover", w: bw, h: bh } });
+```
+
+**Rule:** `sizing.type` accepts `"cover"`, `"contain"`, or `"crop"`. Only `"crop"` uses `w/h/x/y` inside the `sizing` object. For `cover` and `contain`, dimensions come from the root-level `w` and `h`.
+
+---
+
 ## When this runs
 
 - After `talk-narrative` has produced `docs/narrative.md`

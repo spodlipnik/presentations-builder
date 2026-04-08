@@ -1,7 +1,6 @@
 ---
 name: talk-research
 description: Use when researching evidence for a presentation. Iterative phase that searches PubMed, Consensus, reads PDFs, and builds a consolidated research document. Triggers when /talk detects docs/vision.md exists but no docs/research.md.
-disable-model-invocation: true
 allowed-tools:
   - Read
   - Write

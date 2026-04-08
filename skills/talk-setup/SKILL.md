@@ -1,7 +1,6 @@
 ---
 name: talk-setup
 description: Use when setting up Talk Builder for the first time or reconfiguring personal style preferences. Triggers on first /talk invocation if no config exists, or when user says "configure talk builder", "setup talk builder", "change my presentation style".
-disable-model-invocation: true
 allowed-tools:
   - Read
   - Write
@@ -61,9 +60,11 @@ Create the chosen directory with subdirectories:
 └── themes/
 ```
 
-### 4. Collect style preferences (one question at a time)
+### 4. Collect user preferences (one question at a time)
 
 Ask these questions sequentially, one per message. Adapt your language to match the user's — if they write in Spanish, ask in Spanish.
+
+**Note:** Fonts and colors are NOT configured here. They live exclusively in the theme (`theme.yaml`), created via `/talk-theme-builder create`. This avoids duplication.
 
 **Question 1 — Language (ask this first, it determines the language for remaining questions):**
 "What language do you usually present in?"
@@ -71,35 +72,7 @@ Ask these questions sequentially, one per message. Adapt your language to match 
 - Spanish
 - Other (specify)
 
-**Question 2 — Title font:**
-"What font do you use for slide titles? Some popular choices for presentations:"
-- **Montserrat Bold** — modern, clean
-- **Helvetica Neue Bold** — classic, professional
-- **Playfair Display** — elegant, editorial
-- **Arial Black** — safe, universal
-- Or type any font name you prefer
-
-**Question 3 — Body font:**
-"What font for body text? It should pair well with [their title font choice]:"
-- **Open Sans** — pairs well with most title fonts
-- **Lato** — friendly, readable
-- **Source Sans Pro** — clean, technical
-- **Calibri** — safe default
-- Or type any font name
-
-**Question 4 — Colors:**
-"What are your brand/presentation colors? You can:"
-- a) Give me hex codes if you know them (e.g., #1A365D)
-- b) Describe them ("dark navy blue and a warm red")
-- c) Choose a preset:
-  - **Classic** — navy #1A365D + red #E53E3E
-  - **Medical** — teal #0D9488 + orange #F97316
-  - **Modern** — dark gray #1F2937 + blue #3B82F6
-  - **Elegant** — black #111827 + gold #D97706
-
-If the user describes colors in words, convert to the closest hex values. Also ask: "Do you prefer light backgrounds (white/cream) or dark backgrounds?"
-
-**Question 5 — Complexity default:**
+**Question 2 — Complexity default:**
 "When you give talks, what's your typical audience level? This helps calibrate how much jargon and technical depth to use by default:"
 - **Basic** — general audience, minimal jargon, focus on concepts
 - **Moderate** — professionals in related fields, some technical terms okay
@@ -123,22 +96,13 @@ If the user confirms they have placed files there, read and analyze them to gene
 
 ### 7. Generate config.yaml
 
-Write the config file at `<chosen-path>/config.yaml` with all collected information:
+Write the config file at `<chosen-path>/config.yaml` with user preferences only (NO fonts/colors — those live in theme.yaml):
 
 ```yaml
-assets_path: "<chosen-path>"
-
-style:
-  fonts:
-    title: "<user-answer>"
-    body: "<user-answer>"
-  colors:
-    primary: "<user-answer>"
-    accent: "<user-answer>"
-    background: "<user-answer — #FFFFFF or dark>"
-  language: "<user-answer>"
-  narrative_style: "conversational"
-  complexity_default: "<user-answer>"
+language: "<user-answer>"
+narrative_style: "conversational"
+complexity_default: "<user-answer>"
+default_theme: ""
 
 style_analysis:
   layout: "<analyzed or empty>"
@@ -149,9 +113,11 @@ style_analysis:
   notes: "<analyzed or empty>"
 ```
 
+**Important:** `config.yaml` stores WHO the user is (language, complexity, narrative style). All visual tokens (fonts, colors, layouts) live exclusively in `theme.yaml`. This prevents duplication — there is one single source of truth for visual style.
+
 ### 8. Confirm completion
 
-Show the user a visual summary of their configuration — display the colors as hex codes with their names, the fonts, and the language. End with: "You're all set! Start a new presentation anytime with `/talk-builder:talk`."
+Show the user a summary of their configuration — the language, complexity level, and narrative style. Then suggest: "Next step: create a theme with `/talk-builder:talk-theme-builder create` to define your visual style (fonts, colors, layouts). Start a new presentation anytime with `/talk-builder:talk`."
 
 ## Reconfiguration
 

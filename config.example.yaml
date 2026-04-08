@@ -1,20 +1,15 @@
 # Talk Builder — Personal Configuration
 # Copy this file to your assets directory as config.yaml
 # Run /talk-setup to generate this interactively
+#
+# NOTE: Fonts and colors are NOT stored here.
+# They live in your theme: themes/<name>/theme.yaml
+# Create a theme with /talk-theme-builder create
 
-assets_path: "~/Documents/talk-builder"   # Path chosen during /talk-setup
-
-style:
-  fonts:
-    title: "Montserrat Bold"
-    body: "Open Sans"
-  colors:
-    primary: "#1A365D"
-    accent: "#E53E3E"
-    background: "#FFFFFF"
-  language: "en"
-  narrative_style: "conversational"
-  complexity_default: "moderate"
+language: "en"
+narrative_style: "conversational"
+complexity_default: "moderate"
+default_theme: ""   # Set to your theme ID (e.g., "derma-congresos-2026")
 
 style_analysis:
   # Generated automatically by /talk-setup when analyzing example slides
