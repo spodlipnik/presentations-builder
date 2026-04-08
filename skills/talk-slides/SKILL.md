@@ -28,23 +28,84 @@ PptxGenJS has two 16:9 layouts with DIFFERENT dimensions. Always use the correct
 
 **Rule:** When using `LAYOUT_16x9`, set `SW=10.0, SH=5.625`. All coordinates and sizes must be proportional to these dimensions. Using 13.333 with LAYOUT_16x9 causes elements to be off-center and clipped. Adjust `CONTENT_Y_OFFSET` proportionally when switching between layouts.
 
-### Image sizing (cover/contain/crop)
+### Image placement — DO NOT use `sizing` property
+
+**`sizing: { type: "cover" }` and `sizing: { type: "contain" }` are broken in pptxgenjs.** The XML generated does not produce the expected behavior in PowerPoint. Images get distorted regardless of how you configure the sizing object.
+
+**Also broken:** Plain `addImage({ path, x, y, w, h })` stretches the image to fill the box exactly, ignoring aspect ratio.
+
+Instead, use these three strategies based on the `fit:` field in theme.yaml:
+
+#### Strategy A — `fit: cover` (galleries, grids, symmetric photos)
+
+Pre-crop the image to the exact box ratio with PIL before inserting. Use `smart_crop.py`:
 
 ```javascript
-// CORRECT — cover: fills box, crops to maintain aspect ratio
-slide.addImage({ path, x, y, w, h, sizing: { type: "cover" } });
+const VENV_PYTHON = `${process.env.CLAUDE_PLUGIN_DATA}/venv/bin/python3`;
+const PLUGIN_ROOT = process.env.CLAUDE_PLUGIN_ROOT;
 
-// CORRECT — contain: fits inside box, letterboxed, maintains aspect ratio
-slide.addImage({ path, x, y, w, h, sizing: { type: "contain" } });
-
-// CORRECT — crop: uses w/h/x/y INSIDE sizing to define crop area
-slide.addImage({ path, x, y, w, h, sizing: { type: "crop", x: 0, y: 0, w: 100, h: 100 } });
-
-// WRONG — w/h inside sizing ignored for cover/contain, causes distortion
-slide.addImage({ path, x, y, w, h, sizing: { type: "cover", w: bw, h: bh } });
+function imgCover(slide, imgPath, bx, by, bw, bh) {
+  const b = { x: bx * SW, y: by * SH, w: bw * SW, h: bh * SH };
+  const tmpPath = `/tmp/cover_${path.basename(imgPath,
+    path.extname(imgPath))}_${Math.round(b.w*100)}x${Math.round(b.h*100)}.jpg`;
+  execSync(`${VENV_PYTHON} "${PLUGIN_ROOT}/assets/scripts/smart_crop.py" "${imgPath}" ${b.w} ${b.h} "${tmpPath}"`);
+  slide.addImage({ path: tmpPath, x: b.x, y: b.y, w: b.w, h: b.h });
+}
 ```
 
-**Rule:** `sizing.type` accepts `"cover"`, `"contain"`, or `"crop"`. Only `"crop"` uses `w/h/x/y` inside the `sizing` object. For `cover` and `contain`, dimensions come from the root-level `w` and `h`.
+Result: image center-cropped to box ratio, fills box exactly, no distortion.
+
+#### Strategy B — `fit: contain` (charts, diagrams, tables, single clinical photos)
+
+Calculate display dimensions from the image's real aspect ratio and center within the box:
+
+```javascript
+function imgContain(slide, imgPath, bx, by, bw, bh) {
+  const b = { x: bx * SW, y: by * SH, w: bw * SW, h: bh * SH };
+  const out = execSync(
+    `${VENV_PYTHON} -c "from PIL import Image; im=Image.open('${imgPath}'); print(im.width, im.height)"`
+  ).toString().trim();
+  const [iw, ih] = out.split(" ").map(Number);
+  const imgRatio = ih / iw;
+  const boxRatio = b.h / b.w;
+  let dw, dh;
+  if (imgRatio > boxRatio) { dh = b.h; dw = b.h / imgRatio; }
+  else                      { dw = b.w; dh = b.w * imgRatio; }
+  slide.addImage({
+    path: imgPath,
+    x: b.x + (b.w - dw) / 2,
+    y: b.y + (b.h - dh) / 2,
+    w: dw, h: dh
+  });
+}
+```
+
+Result: full image visible, centered in box, no distortion. May have whitespace around edges.
+
+#### Strategy C — Fullbleed backgrounds
+
+For images that cover the entire slide, use `slide.background` instead of `addImage`. PowerPoint handles this natively without distortion:
+
+```javascript
+// For dividers, ae.fullbleed-bg, full.no-caption
+slide.background = { path: "/absolute/path/to/image.jpg" };
+```
+
+#### Cleanup
+
+At the end of the generation script, remove temporary cropped files:
+
+```javascript
+execSync('rm -f /tmp/cover_*.jpg');
+```
+
+#### theme.yaml `fit:` mapping
+
+```yaml
+fit: cover    # → imgCover()   — gallery, timeline, compare, symmetric photos
+fit: contain  # → imgContain() — charts, tables, diagrams, single image
+# no image slot — use slide.background for fullbleed backgrounds
+```
 
 ---
 

@@ -409,24 +409,22 @@ Write `_dev/preview_{variant_id}.js` for each requested variant. The script:
 - Reads `../theme.yaml` (from `_dev/` parent)
 - Resolves `default:` values for each slot (images → `../assets/...`, text → hardcoded defaults)
 - Generates PPTX with real images at exact normalized coordinates
-- Uses correct `sizing.type` (see rules below)
+- Uses `imgCover()` / `imgContain()` helpers (NOT pptxgenjs `sizing` — it's broken)
 - Outputs to `_dev/preview_{variant_id}.pptx`
 
 **2. Image placement rules:**
 
+DO NOT use `sizing: { type: "cover" }` or `sizing: { type: "contain" }` — they are broken in pptxgenjs. Use the helper functions from talk-slides instead:
+
 ```javascript
-// Normalized [0-1] → inches for LAYOUT_16x9 (SW=10.0, SH=5.625)
-const x = slot.position.x * SW;
-const y = slot.position.y * SH;
-const w = slot.position.w * SW;
-const h = slot.position.h * SH;
+// fit: cover → pre-crop with smart_crop.py, then insert flat
+imgCover(slide, imgPath, slot.position.x, slot.position.y, slot.position.w, slot.position.h);
 
-// fit: cover → fills box, crops to maintain ratio (for photos)
-slide.addImage({ path, x, y, w, h, sizing: { type: "cover" } });
-
-// fit: contain → fits inside box, letterboxed (for QR, logos)
-slide.addImage({ path, x, y, w, h, sizing: { type: "contain" } });
+// fit: contain → calculate dimensions manually, center in box
+imgContain(slide, imgPath, slot.position.x, slot.position.y, slot.position.w, slot.position.h);
 ```
+
+See `skills/talk-slides/SKILL.md` → "Image placement" section for full implementation of these helpers.
 
 **3. Convert to PNG for review:**
 
