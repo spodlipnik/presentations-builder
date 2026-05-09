@@ -30,6 +30,8 @@ The goal is NOT to extract every figure from every PDF. It's to create a focused
 
 - `poppler-utils` for PDF extraction (`pdftoppm`, `pdfseparate`). Install: `brew install poppler`
 - `cairosvg` (Python, in `${CLAUDE_PLUGIN_DATA}/venv`) for SVG → PNG conversion. Auto-installed by SessionStart hook.
+  - **System lib required:** `cairo` (`brew install cairo`). The Python wrapper depends on libcairo at runtime.
+  - **macOS quirk:** macOS Python (CommandLineTools) cannot find Homebrew's libcairo by default. Skills must invoke cairosvg with `DYLD_FALLBACK_LIBRARY_PATH=/opt/homebrew/lib:/usr/local/lib:/opt/local/lib` prepended (see CHART command below).
 - Python with Pillow for raster compositing (if needed). Already in venv.
 
 Check dependencies at start. Warn about missing ones but don't block — some visual types don't need all tools.
@@ -47,9 +49,9 @@ This skill has four ways to create visuals, each for a different need:
 
 ### CHART — Data visualizations with SVG
 **When:** You need a clean chart with specific data from the research (bar chart, comparison, simplified forest plot, timeline, trend line). Better than using a cluttered paper figure when you only need 3 data points from a table of 20.
-**How:** Claude writes inline SVG code using design_tokens colors from config.yaml → convert to PNG via cairosvg:
+**How:** Claude writes inline SVG code using design_tokens colors from config.yaml → convert to PNG via cairosvg. The `DYLD_FALLBACK_LIBRARY_PATH` prepend is mandatory on macOS (otherwise libcairo from Homebrew is not found by the CLT Python):
 ```bash
-${CLAUDE_PLUGIN_DATA}/venv/bin/python3 -c "import cairosvg; cairosvg.svg2png(url='images/chart.svg', write_to='images/chart.png', dpi=300, output_width=1920)"
+DYLD_FALLBACK_LIBRARY_PATH=/opt/homebrew/lib:/usr/local/lib:/opt/local/lib ${CLAUDE_PLUGIN_DATA}/venv/bin/python3 -c "import cairosvg; cairosvg.svg2png(url='images/chart.svg', write_to='images/chart.png', dpi=300, output_width=1920)"
 ```
 **Style rules:**
 - Use primary color for main data, accent for highlights

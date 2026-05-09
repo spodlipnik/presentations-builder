@@ -16,6 +16,7 @@ A Claude Code plugin for building academic and medical presentations with struct
 
 - **Claude Code** (latest version)
 - **poppler** — PDF image extraction: `brew install poppler`
+- **cairo** — SVG→PNG conversion in `talk-assets` (used by Python `cairosvg`): `brew install cairo`
 - **`document-skills:pptx` skill** — official Anthropic skill for PPTX generation. Install: `/plugin install document-skills` from `claude-plugins-official` marketplace.
 - **Recommended**: PubMed and Consensus MCP servers (claude.ai > Settings > MCP Servers) for `talk-research`
 

@@ -37,6 +37,13 @@ which pdftoppm && which pdfseparate
 
 If missing, tell the user: `poppler: brew install poppler` — needed to extract figures from research papers.
 
+**cairo** (for SVG→PNG conversion in `talk-assets`):
+```bash
+[ -f /opt/homebrew/lib/libcairo.2.dylib ] || [ -f /usr/local/lib/libcairo.2.dylib ] || [ -f /opt/local/lib/libcairo.2.dylib ]
+```
+
+If missing, tell the user: `cairo: brew install cairo` — needed by Python `cairosvg` to render charts and diagrams. Without it, `talk-assets` SVG → PNG conversion fails with `OSError: no library called "cairo-2"`.
+
 LibreOffice and Node.js are no longer required by talk-builder itself (PPTX generation is delegated to the official document-skills:pptx skill, which manages its own deps).
 
 ### 3. Create directory structure

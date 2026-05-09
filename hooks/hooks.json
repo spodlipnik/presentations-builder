@@ -5,11 +5,11 @@
         "hooks": [
           {
             "type": "command",
-            "command": "missing=\"\"; which pdftoppm >/dev/null 2>&1 || missing=\"${missing:+$missing, }poppler (brew install poppler)\"; which python3 >/dev/null 2>&1 || missing=\"${missing:+$missing, }Python 3 (brew install python)\"; if [ -n \"$missing\" ]; then printf '{\"result\": \"warn\", \"message\": \"Talk Builder: missing system dependencies: %s\"}' \"$missing\"; fi"
+            "command": "missing=\"\"; which pdftoppm >/dev/null 2>&1 || missing=\"${missing:+$missing, }poppler (brew install poppler)\"; which python3 >/dev/null 2>&1 || missing=\"${missing:+$missing, }Python 3 (brew install python)\"; { [ -f /opt/homebrew/lib/libcairo.2.dylib ] || [ -f /usr/local/lib/libcairo.2.dylib ] || [ -f /opt/local/lib/libcairo.2.dylib ]; } || missing=\"${missing:+$missing, }cairo (brew install cairo) — needed by cairosvg for SVG→PNG\"; if [ -n \"$missing\" ]; then printf '{\"result\": \"warn\", \"message\": \"Talk Builder: missing system dependencies: %s\"}' \"$missing\"; fi"
           },
           {
             "type": "command",
-            "command": "VENV=\"${CLAUDE_PLUGIN_DATA}/venv\"; if [ -d \"$VENV\" ] && \"$VENV/bin/python3\" -c 'import pptx, yaml, lxml, docling, cairosvg' 2>/dev/null; then exit 0; fi; python3 -m venv \"$VENV\" 2>/dev/null && \"$VENV/bin/pip\" install --quiet -r \"${CLAUDE_PLUGIN_ROOT}/assets/scripts/requirements.txt\" 2>/dev/null || printf '{\"result\": \"warn\", \"message\": \"Talk Builder: failed to install Python dependencies. Run manually: python3 -m venv ~/.claude/plugins/data/talk-builder/venv && ~/.claude/plugins/data/talk-builder/venv/bin/pip install -r .../assets/scripts/requirements.txt\"}'"
+            "command": "VENV=\"${CLAUDE_PLUGIN_DATA}/venv\"; export DYLD_FALLBACK_LIBRARY_PATH=\"/opt/homebrew/lib:/usr/local/lib:/opt/local/lib:${DYLD_FALLBACK_LIBRARY_PATH}\"; if [ -d \"$VENV\" ] && \"$VENV/bin/python3\" -c 'import pptx, yaml, lxml, docling, cairosvg' 2>/dev/null; then exit 0; fi; python3 -m venv \"$VENV\" 2>/dev/null && \"$VENV/bin/pip\" install --quiet -r \"${CLAUDE_PLUGIN_ROOT}/assets/scripts/requirements.txt\" 2>/dev/null && \"$VENV/bin/python3\" -c 'import pptx, yaml, lxml, docling, cairosvg' 2>/dev/null || printf '{\"result\": \"warn\", \"message\": \"Talk Builder: Python deps unavailable. If error mentions libcairo, run: brew install cairo. If cairo IS installed but cairosvg fails, set DYLD_FALLBACK_LIBRARY_PATH to include /opt/homebrew/lib (skills already do this when invoking cairosvg).\"}'"
           }
         ]
       }

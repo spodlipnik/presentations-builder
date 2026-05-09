@@ -109,7 +109,7 @@ This is the most detailed step. For EACH slide, specify these fields:
 
 **Design principles for each slide:**
 - One message per slide — if you need two messages, make two slides
-- Assertion-evidence titles on all content slides (exception: dramatic/emotional slides)
+- Full-sentence assertion headlines on all evidence slides (`assertion-evidence`, `assertion-evidence-left`, `chart`). Other types (dividers, fullbleeds, callouts, quotes, closing) use their own native form (section title, big number, attributed quote, etc.).
 - Dark backgrounds for emotional/dramatic moments, light for evidence/data
 - Big numbers deserve their own slide — don't bury "65% ORR" in a bullet list
 - Empty or near-empty slides are powerful for pauses and transitions
@@ -161,7 +161,7 @@ At approximately the 10-minute mark, plan a deliberate attention reset — a mom
 Before presenting to user, verify:
 - [ ] Rule of Three: no more than 3 key messages for the entire talk
 - [ ] One message per slide
-- [ ] Assertion-evidence titles on all content slides
+- [ ] Full-sentence assertion headlines on all evidence slides (`assertion-evidence`, `assertion-evidence-left`, `chart`)
 - [ ] Attention reset planned every 10 minutes (for talks > 10 min)
 - [ ] STAR moment placed at ~2/3
 - [ ] Opening and closing are connected (callback)

@@ -1,3 +1,11 @@
+# Talk Builder Python dependencies. Auto-installed by SessionStart hook into ${CLAUDE_PLUGIN_DATA}/venv.
+#
+# SYSTEM LIBRARY required for cairosvg:
+#   brew install cairo
+#
+# macOS quirk: CLT Python does not search /opt/homebrew/lib by default. Skills that import cairosvg
+# must prepend DYLD_FALLBACK_LIBRARY_PATH=/opt/homebrew/lib:/usr/local/lib:/opt/local/lib to the
+# python invocation. See skills/talk-assets/SKILL.md (CHART section) for the canonical command.
 python-pptx>=1.0.2
 PyYAML>=6.0
 lxml>=4.9.0

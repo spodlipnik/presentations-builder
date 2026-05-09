@@ -29,6 +29,13 @@ evals/                  Skill eval JSON files (gitignored)
 
 Skills that shell out to Python **must** prefer `${CLAUDE_PLUGIN_DATA}/venv/bin/python3`, falling back to system `python3` only when the venv is unavailable. There are no Node deps owned by this plugin.
 
+### cairosvg / libcairo gotcha (macOS)
+
+`cairosvg` (the Python lib used by `talk-assets` for SVG→PNG) is a wrapper around the system `libcairo`. On macOS:
+
+1. The system lib must be installed: `brew install cairo`. The SessionStart hook checks for it and warns if missing.
+2. macOS Python (CommandLineTools) does NOT search `/opt/homebrew/lib` by default, so even with libcairo present, `import cairosvg` raises `OSError: no library called "cairo-2"`. **Skills that invoke cairosvg MUST prepend `DYLD_FALLBACK_LIBRARY_PATH=/opt/homebrew/lib:/usr/local/lib:/opt/local/lib`** to the Python command. See `skills/talk-assets/SKILL.md` CHART section for the canonical incantation.
+
 ### User config substrate
 
 The plugin's `userConfig.assets_path` (set per user via Claude Code plugin settings) points to the user's external assets dir — this is where `config.yaml`, `example-slides/`, and `fixed-slides/` live. There is no `themes/` directory in v2.0+.
