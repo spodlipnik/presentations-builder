@@ -5,8 +5,8 @@
   "author": {
     "name": "Sebastian Podlipnik"
   },
-  "homepage": "https://github.com/sebastianpodlipnik/talk-builder",
-  "repository": "https://github.com/sebastianpodlipnik/talk-builder",
+  "homepage": "https://github.com/spodlipnik/presentations-builder",
+  "repository": "https://github.com/spodlipnik/presentations-builder",
   "license": "MIT",
   "keywords": ["presentations", "academic", "medical", "storytelling", "slides", "pptx", "speaker-script"],
   "userConfig": {
