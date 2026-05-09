@@ -1,21 +1,22 @@
 # Talk Builder — Personal Configuration
 # Copy this file to your assets directory as config.yaml
 # Run /talk-setup to generate this interactively
-#
-# NOTE: Fonts and colors are NOT stored here.
-# They live in your theme: themes/<name>/theme.yaml
-# Create a theme with /talk-theme-builder create
 
 language: "en"
 narrative_style: "conversational"
 complexity_default: "moderate"
-default_theme: ""   # Set to your theme ID (e.g., "derma-congresos-2026")
 
-style_analysis:
-  # Generated automatically by /talk-setup when analyzing example slides
-  layout: ""
-  title_style: ""
-  color_usage: ""
-  typography: ""
-  visual_density: ""
-  notes: ""
+# Design tokens — applied to every chart/diagram (talk-assets) and every
+# slide (talk-slides delegates to document-skills:pptx with these values).
+# Keep colors and fonts coherent — this is the single source of truth for
+# visual style.
+design_tokens:
+  color:
+    primary: "#0B3D91"      # dominant brand color
+    accent: "#E63946"       # highlights, section labels (use sparingly)
+    text: "#1A1A1A"         # default body text
+    background: "#FFFFFF"   # default slide background
+    muted: "#6C757D"        # captions, attributions, secondary text
+  typography:
+    heading_font: "Avenir Heavy"   # slide titles, headlines, big numbers
+    body_font: "Avenir Book"       # body text, captions

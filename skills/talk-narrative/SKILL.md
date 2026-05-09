@@ -98,9 +98,10 @@ The closing MUST connect to the opening for narrative completeness. The audience
 
 This is the most detailed step. For EACH slide, specify these fields:
 
-- **Type line** — combines slide type, section label, timing, and sparkline in one line: `evidence | SECTION · SUBTOPIC | 60s | CB`. Types: `divider`, `evidence`, `emotional`, `data`, `content`, `opening`, `closing`. The `/talk-slides` skill uses the type to decide visual design (dark/light, layout, typography). Narrative does NOT specify visual design — that's the slides skill's job.
-- **Content** — what appears on the slide: the visible text, data, visual description. Reference specific files from `docs/research.md`'s Visual Elements Catalog when available.
-- **Image** — reference to specific file from Visual Elements Catalog, or `[GENERATE]` for assets to create, or `[SPEAKER ADDS IN KEYNOTE]` for clinical photos only the speaker has.
+- **type** — one of the 12 canonical types (see "Slide types and field schema" below). Required.
+- **type_line** (optional metadata, not used by talk-slides) — combines section label, timing, sparkline: `evidence | SECTION · SUBTOPIC | 60s | CB`. For your own pacing notes only.
+- **typed content fields** — depend on the `type`. See the schema table below.
+- **Image paths** — reference specific files from `docs/research.md`'s Visual Elements Catalog, or `[GENERATE]` for assets to be created in `/talk-assets`, or `[SPEAKER ADDS IN KEYNOTE]` for clinical photos only the speaker has.
 - **Speaker** — actual draft dialogue. Write it as the speaker would say it on stage: conversational, with emotional cues (pause), (slow down), (eye contact), (dramatic). Include exact data points with numbers. This becomes the raw material for the speaker script phase.
 - **Context** — the comprehensive backstory for this slide. Study design, N patients, exact results with p-values, mechanism, why it matters for the narrative, limitations, connections to other slides. The speaker should be able to read ONLY this field and fully understand everything behind the slide — without opening `docs/research.md` or any paper. Write 3-6 sentences minimum for evidence slides. This is what the speaker reads on the plane before the conference to refresh their knowledge.
 - **Ref** — author, journal, year, DOI if available. For the speaker to cite on stage.
@@ -115,28 +116,38 @@ This is the most detailed step. For EACH slide, specify these fields:
 - Split layouts work well for image + text combinations
 - **Every word on the slide must earn its place.** Text is not decoration — it must reinforce the speaker's message or anchor a key concept for the audience. If removing a word doesn't weaken understanding, remove it. The slide supports the speaker, not the other way around. Test: "Would the audience understand the slide's message in 3 seconds?" If not, simplify.
 
-### Slide Type (obligatorio) — 18 roles canónicos
+### Slide types and field schema (12 canonical types)
 
-Cada slide debe tener un `Type:` que corresponde a uno de los 18 roles:
+Every slide must have a `type:` set to one of these 12 values. Each type defines its own required and optional content fields.
 
-`title`, `disclosure`, `agenda`, `section-divider`, `assertion-evidence`, `patient-case`, `methodology`, `data-chart`, `data-table`, `comparison`, `quote-pullout`, `image-fullbleed`, `image-gallery`, `timeline-process`, `key-takeaway`, `poll-question`, `contact`, `closing`.
+| `type` | Purpose | Required fields | Optional fields |
+|---|---|---|---|
+| `title` | Opening slide | `title`, `author`, `affiliation` | `subtitle`, `date` |
+| `text-list` | Disclosure / agenda / takeaways | `title`, `items` (list) | — |
+| `divider` | Section transition (dark bg) | `section_label`, `section_title` | `teaser` |
+| `assertion-evidence` | Headline + image right (workhorse) | `headline`, `image` | `caption` |
+| `assertion-evidence-left` | Headline + image left (variety) | `headline`, `image` | `caption` |
+| `chart` | Headline + chart fullwidth | `headline`, `chart_image` | `caption` |
+| `callout` | Big stat / number | `big_text`, `sub_label` | — |
+| `quote` | Pullout quote with attribution | `quote_text`, `attribution` | — |
+| `comparison` | Two-column A vs B | `headline`, `left_label`, `left_content`, `right_label`, `right_content` | — |
+| `gallery` | 2×2 image grid | `headline`, `image_1`, `image_2`, `image_3`, `image_4` | `caption` |
+| `fullbleed` | Single dominant image | `image_full` | `overlay_text` |
+| `closing` | Q&A / thanks / contact | `main_text`, `contact_info` | — |
 
-Ver `${CLAUDE_PLUGIN_ROOT}/references/role-taxonomy.md` para descripción de cada rol.
+#### Choosing a type
 
-### Slide Variant (opcional) — elección específica de layout
+- Most evidence slides → `assertion-evidence` (alternate with `assertion-evidence-left` for visual variety on long sequences).
+- Patient case → `assertion-evidence` (clinical photo as the image).
+- Study methodology, flowcharts, timelines → `chart` (the diagram is the `chart_image`).
+- Tables → `chart` if the table is rendered as an image; `comparison` if it's truly two columns.
+- COI, agenda, key takeaways → `text-list`.
+- STAR moments with a single number/stat → `callout`.
+- Guideline citations or patient quotes → `quote`.
 
-Si quieres controlar qué variante usar, añade `Variant:` con el ID de la variante definida en tu tema:
+#### No "Variant" syntax
 
-```
-## Slide 5
-Type: assertion-evidence
-Variant: ae.image-right       ← elección explícita
-Content: ...
-```
-
-Si omites `Variant:`, `talk-slides` lo elige automáticamente usando la rúbrica del tema y escribe la elección de vuelta como `Variant: X # auto`. Puedes cambiarla editando el archivo.
-
-Para LOCKEAR una variante (para que auto no la sobrescriba), simplemente quita el sufijo ` # auto`.
+Earlier versions of Talk Builder had a `Variant:` field with rubric-based auto-selection (`# auto`). This was removed in v2.0 — there is one layout per type, defined in `talk-slides`. Do not write `Variant:` lines in narrative.md.
 
 ### Step 6: Plan attention reset (for talks > 10 min)
 
@@ -163,7 +174,8 @@ Before presenting to user, verify:
 - [ ] Section divider slides between major sections (where appropriate)
 - [ ] Section labels defined for content slides
 - [ ] Every word on every slide earns its place — text supports the message, doesn't decorate
-- [ ] Slide types correctly assigned (divider/evidence/emotional/data/content)
+- [ ] Every slide's 'type:' is one of the 12 canonical types.
+- [ ] Every slide has all required fields for its type (no empty 'image:' on assertion-evidence, etc.).
 
 ### Step 8: Present and save for review
 
@@ -236,21 +248,16 @@ Generate `docs/narrative.md`:
 - **Type:** divider | [SECTION LABEL] | 5-10s
 - **Content:** "[Section title or question]" large text. Optional teaser subtitle.
 
-### Slide N+1: [Assertion-evidence title]
-- **Type:** [evidence/emotional/data/content] | [SECTION · SUBTOPIC] | [seconds] | [IS/CB/STAR]
-- **Content:** [what appears on screen — text, data, visual description]
-- **Image:** [images/filename.png or [GENERATE]-description or [SPEAKER ADDS]]
-- **Speaker:** "[Full draft dialogue with (emotional cues). Include exact 
-  numbers and data points. Write as natural speech, not notes. This is 
-  what you say on stage.]"
-- **Context:** [Comprehensive context for this slide. Include: study design, 
-  N patients, center(s), key results with exact numbers and p-values, 
-  mechanism/rationale, why this matters for the narrative, limitations, 
-  connections to other slides. The speaker should be able to read this 
-  and fully understand the slide without opening any other document. 
-  2-4 sentences minimum, more if the evidence is complex.]
-- **Ref:** [Author et al., Journal Year; DOI if available]
-- **Bridge:** "[exact transition sentence/question to next slide]"
+### Slide N+1: [Short title for the index]
+- **type:** assertion-evidence
+- **type_line:** evidence | SECTION · SUBTOPIC | 60s | CB
+- **headline:** "Full-sentence assertion (20-140 chars)"
+- **image:** images/filename.png    # or [GENERATE]-description, or [SPEAKER ADDS]
+- **caption:** "Optional caption text"
+- **speaker:** "[Full draft dialogue with (emotional cues)...]"
+- **context:** "[Comprehensive context — study design, N, results, mechanism, limitations...]"
+- **ref:** [Author et al., Journal Year; DOI]
+- **bridge:** "[exact transition sentence to next slide]"
 
 ### Slide N+2: ...
 
