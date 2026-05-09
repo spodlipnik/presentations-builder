@@ -22,7 +22,7 @@ Before doing anything else, check the config path:
 1. **If `${user_config.assets_path}` is empty or not set**: Tell the user: "No assets path configured. Run `/talk-builder:talk-setup` to set up your personal style and preferences." Then stop.
 2. **If the path is set but the directory doesn't exist**: Tell the user: "Your assets folder `[path]` doesn't exist. Run `/talk-builder:talk-setup` to set it up again, or update the path in your plugin settings." Then stop.
 3. **If the directory exists but `config.yaml` is missing**: Tell the user: "Your assets folder exists but has no `config.yaml`. Run `/talk-builder:talk-setup` to complete the configuration." Then stop.
-4. **If `config.yaml` exists**: Read it and confirm to the user: "Config loaded from `[path]` (language: [lang], complexity: [level], default theme: [theme or 'not set'])." Then continue with phase detection.
+4. **If `config.yaml` exists**: Read it and confirm to the user: "Config loaded from `[path]` (language: [lang], complexity: [level], design_tokens: [primary color] / [heading font])." Then continue with phase detection.
 
 ## Environment Check
 
@@ -31,33 +31,19 @@ After loading config successfully, run a quick environment verification **before
 ### Checks to run
 
 ```bash
-# 1. Python venv
+# 1. Python venv (with cairosvg added in v2.0)
 VENV="${CLAUDE_PLUGIN_DATA}/venv/bin/python3"
-if [ -x "$VENV" ] && "$VENV" -c 'import pptx, yaml, lxml' 2>/dev/null; then
+if [ -x "$VENV" ] && "$VENV" -c 'import pptx, yaml, lxml, cairosvg' 2>/dev/null; then
   echo "PYTHON_OK"
 else
   echo "PYTHON_FAIL"
 fi
 
-# 2. Node deps
-if [ -f "${CLAUDE_PLUGIN_DATA}/node_modules/pptxgenjs/package.json" ]; then
-  echo "NODE_OK"
-else
-  echo "NODE_FAIL"
-fi
-
-# 3. System deps
+# 2. System deps
 which pdftoppm >/dev/null 2>&1 && echo "POPPLER_OK" || echo "POPPLER_FAIL"
-which node >/dev/null 2>&1 && echo "NODE_BIN_OK" || echo "NODE_BIN_FAIL"
-which soffice >/dev/null 2>&1 && echo "SOFFICE_OK" || echo "SOFFICE_MISSING"
 
-# 4. Themes directory
-THEMES_DIR="${user_config.assets_path}/themes"
-if [ -d "$THEMES_DIR" ] && [ "$(ls -A "$THEMES_DIR" 2>/dev/null)" ]; then
-  echo "THEMES_OK:$(ls -d "$THEMES_DIR"/*/ 2>/dev/null | xargs -I{} basename {} | tr '\n' ',')"
-else
-  echo "THEMES_EMPTY"
-fi
+# 3. document-skills:pptx availability (best-effort — the Skill tool will fail gracefully if missing)
+# No reliable shell check exists; talk-slides handles this at delegation time.
 ```
 
 ### Display format
@@ -66,20 +52,15 @@ Present results as a compact status block before the project status. Use checkma
 
 ```
 Talk Builder — Environment:
-  ✓ Config: en, moderate, theme: derma-congresos-2026
-  ✓ Python venv (python-pptx, PyYAML, lxml)
-  ✓ Node deps (pptxgenjs)
-  ✓ System: poppler ✓, node ✓, soffice ✓
-  ⚠ themes/ empty — create one with /talk-builder:talk-theme-builder create
+  ✓ Config: en, moderate, design_tokens: #0B3D91 / Avenir Heavy
+  ✓ Python venv (python-pptx, PyYAML, lxml, cairosvg)
+  ✓ System: poppler ✓
 
 ```
 
 Rules:
-- **Python venv missing** → error, suggest: `python3 -m venv ~/.claude/plugins/data/talk-builder/venv && ~/.claude/plugins/data/talk-builder/venv/bin/pip install python-pptx PyYAML lxml`
-- **Node deps missing** → error, suggest: `cd ~/.claude/plugins/data/talk-builder && npm install`
-- **poppler/node missing** → error, suggest `brew install poppler` / `brew install node`
-- **soffice missing** → warning only (optional, for talk-theme-builder thumbnails)
-- **themes/ empty** → warning only (not needed until talk-slides phase)
+- **Python venv missing** → error, suggest: `python3 -m venv ~/.claude/plugins/data/talk-builder/venv && ~/.claude/plugins/data/talk-builder/venv/bin/pip install -r <plugin>/assets/scripts/requirements.txt`
+- **poppler missing** → error, suggest `brew install poppler`
 - Do NOT block the workflow for warnings, only for errors.
 
 ## Phase Detection
@@ -147,17 +128,6 @@ If the working directory is empty (new project), start from `talk-briefing` and 
 
 If the user already provided useful information in their message (topic, duration, audience, occasion), acknowledge it and note that it will be carried into the briefing phase so they don't have to repeat themselves.
 
-### Theme detection
-
-After `talk-briefing`, check `docs/talk.yaml` for `theme:` field:
-- If empty → list themes in `${user_config.assets_path}/themes/`, suggest one or running `/talk-theme-builder create`
-- If set but theme directory doesn't exist → warn user, ask to create or change
-
-This check happens before `talk-slides` runs, so the user has time to create a theme if needed.
-
-### 5. Detect _build/ directory
-
-If a `_build/` directory exists in the project and contains generation scripts (`.js` files), mention: "Previous generation scripts are available in `_build/` — these can be used to regenerate or modify the presentation."
 
 ## Config Path Resolution
 
