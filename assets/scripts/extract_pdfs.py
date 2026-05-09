@@ -1,15 +1,13 @@
 """Extract PDFs to structured markdown + images using IBM Docling with multiprocessing."""
 
+import multiprocessing
 import os
 import re
 import sys
-
-import multiprocessing
 from datetime import datetime, timezone
 from pathlib import Path
 
 import yaml
-
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -90,8 +88,8 @@ def extract_single_pdf(args: tuple) -> dict:
         # Try the richer API first; fall back to bare converter
         try:
             from docling.datamodel.base_models import InputFormat
-            from docling.document_converter import PdfFormatOption
             from docling.datamodel.pipeline_options import PdfPipelineOptions
+            from docling.document_converter import PdfFormatOption
 
             pipeline_options = PdfPipelineOptions()
             pipeline_options.do_table_structure = True
@@ -119,7 +117,7 @@ def extract_single_pdf(args: tuple) -> dict:
 
         # Count structural elements from the markdown
         lines = markdown.split("\n")
-        result["sections"] = [l.lstrip("#").strip() for l in lines if l.startswith("## ") and not l.startswith("### ")]
+        result["sections"] = [line.lstrip("#").strip() for line in lines if line.startswith("## ") and not line.startswith("### ")]
         result["tables"] = markdown.count("|---")  # rough heuristic
 
         # Extract images if the document exposes them
@@ -215,7 +213,7 @@ def main() -> int:
             md = extracted_dir / f"{safe}.md"
             if md.exists():
                 md_content = md.read_text(encoding="utf-8")
-                sections = [l.lstrip("#").strip() for l in md_content.split("\n") if l.startswith("## ") and not l.startswith("### ")]
+                sections = [line.lstrip("#").strip() for line in md_content.split("\n") if line.startswith("## ") and not line.startswith("### ")]
                 existing.append({
                     "filename": p.name,
                     "title": p.stem,
@@ -253,7 +251,7 @@ def main() -> int:
             md = extracted_dir / f"{safe}.md"
             if md.exists():
                 md_content = md.read_text(encoding="utf-8")
-                sections = [l.lstrip("#").strip() for l in md_content.split("\n") if l.startswith("## ") and not l.startswith("### ")]
+                sections = [line.lstrip("#").strip() for line in md_content.split("\n") if line.startswith("## ") and not line.startswith("### ")]
                 results.append({
                     "filename": p.name,
                     "title": p.stem,

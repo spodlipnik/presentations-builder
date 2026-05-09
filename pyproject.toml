@@ -1,0 +1,23 @@
+[tool.ruff]
+target-version = "py39"
+line-length = 100
+extend-exclude = [
+    ".claude/worktrees",
+    "talk-workspace",
+    "talk-vision-workspace",
+    "talk-narrative-workspace",
+    "talk-assets-workspace",
+]
+
+[tool.ruff.lint]
+# Sensible defaults: pycodestyle (E), pyflakes (F), import order (I), bugbear (B),
+# pyupgrade (UP), simplify (SIM). Skip docstring rules — Python helpers are scripts.
+select = ["E", "F", "I", "B", "UP", "SIM"]
+ignore = [
+    "E501",  # line too long (line-length governs, but allow long literals)
+    "B008",  # function call in argument default — common pattern in our scripts
+]
+
+[tool.ruff.lint.per-file-ignores]
+"assets/scripts/tests/*.py" = ["B011"]  # assert False is fine in tests
+"tools/*.py" = []
