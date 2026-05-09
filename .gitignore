@@ -6,3 +6,8 @@ docs/superpowers/
 evals/
 talk-workspace/
 talk-*-workspace/
+
+# Tool caches
+__pycache__/
+.ruff_cache/
+.pytest_cache/
