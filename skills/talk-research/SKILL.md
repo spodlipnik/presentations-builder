@@ -358,4 +358,4 @@ Before finalizing, verify:
 
 ## After completion
 
-Tell the user: "Research complete! Next phase: Assets — extracting and preparing visual materials. Continue with /talk or /talk-builder:talk-assets."
+Tell the user: "Research complete! Next phase: Narrative — designing the slide structure and storytelling arc. Continue with /talk or /talk-builder:talk-narrative."

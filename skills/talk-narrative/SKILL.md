@@ -245,8 +245,11 @@ Generate `docs/narrative.md`:
 ## [SECTION NAME] (slides N-M, ~X:XX)
 
 ### Slide N: [DIVIDER — Section title/question]
-- **Type:** divider | [SECTION LABEL] | 5-10s
-- **Content:** "[Section title or question]" large text. Optional teaser subtitle.
+- **type:** divider
+- **type_line:** divider | [SECTION LABEL] | 5-10s
+- **section_label:** "[uppercase short label, e.g. 'QUESTION 3']"
+- **section_title:** "[Section title or question — large text]"
+- **teaser:** "[Optional smaller subtitle in italic]"
 
 ### Slide N+1: [Short title for the index]
 - **type:** assertion-evidence
