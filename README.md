@@ -4,11 +4,11 @@ A Claude Code plugin for building academic and medical presentations with struct
 
 ## Features
 
-- **10-skill orchestrated workflow**: briefing, vision, research, assets, narrative, slides, study documents, speaker script
+- **9-skill orchestrated workflow**: briefing, vision, research, assets, narrative, slides, study documents, speaker script
 - **Evidence-based research**: PubMed and Consensus integration with DOI/PMID verification
 - **Storytelling frameworks**: ABT, Sparkline, STAR moments, assertion-evidence design
-- **Personal style config**: fonts, colors, layout preferences applied consistently
-- **PPTX generation**: automated slide creation with PptxGenJS
+- **Personal style config**: `design_tokens` (color palette + fonts) applied consistently across all generated visuals
+- **PPTX generation**: delegates to the official `document-skills:pptx` skill — inherits design improvements automatically
 - **Study documents**: comprehensive review-article-style reference and per-paper summaries
 - **Speaker scripts**: preparation table + teleprompter format
 
@@ -16,9 +16,8 @@ A Claude Code plugin for building academic and medical presentations with struct
 
 - **Claude Code** (latest version)
 - **poppler** — PDF image extraction: `brew install poppler`
-- **Node.js** — PPTX generation: `brew install node`
-- **PPTX plugin** from `claude-plugins-official` marketplace
-- **Recommended**: PubMed and Consensus MCP servers (claude.ai > Settings > MCP Servers)
+- **`document-skills:pptx` skill** — official Anthropic skill for PPTX generation. Install: `/plugin install document-skills` from `claude-plugins-official` marketplace.
+- **Recommended**: PubMed and Consensus MCP servers (claude.ai > Settings > MCP Servers) for `talk-research`
 
 ## Installation
 
@@ -45,13 +44,13 @@ claude --plugin-dir ./presentations-builder
 | Skill | Purpose |
 |---|---|
 | `/talk` | Main orchestrator — detects phase and guides workflow |
-| `/talk-setup` | One-time style and environment configuration |
+| `/talk-setup` | One-time setup of `config.yaml` (language, complexity, design_tokens) |
 | `/talk-briefing` | Collect topic, duration, audience, preferences |
 | `/talk-vision` | Define personal angle, message, emotional intent |
-| `/talk-research` | Search literature, read PDFs, build evidence base |
-| `/talk-assets` | Extract figures from PDFs, propose AI image prompts |
-| `/talk-narrative` | Build slide structure with storytelling arc and timing |
-| `/talk-slides` | Generate PPTX presentation file |
+| `/talk-research` | Search PubMed/Consensus, read PDFs, build evidence base |
+| `/talk-assets` | Extract figures from PDFs, generate SVG charts/diagrams, propose AI prompts |
+| `/talk-narrative` | Build slide structure (12 canonical types) with storytelling arc |
+| `/talk-slides` | Generate `presentation.pptx` by delegating to `document-skills:pptx` |
 | `/talk-study-doc` | Create comprehensive study document with active recall |
 | `/talk-script` | Generate teleprompter-format speaker script (optional) |
 
@@ -76,7 +75,9 @@ Run `/talk` at any point to see your status and continue from where you left off
 
 ## Configuration
 
-Personal style is stored in a `config.yaml` at a path you choose during setup. Per-project overrides go in `docs/talk.yaml`.
+Personal style — language, narrative preferences, and `design_tokens` (color palette + fonts) — is stored in a `config.yaml` at a path you choose during setup. Per-project overrides go in `docs/talk.yaml`.
+
+`design_tokens` are passed to `document-skills:pptx` at every PPTX generation, so all your decks share the same visual identity.
 
 See `config.example.yaml` for all available options.
 
