@@ -1,434 +1,205 @@
 ---
 name: talk-slides
-description: Use when generating the PPTX presentation file from an approved narrative structure and a theme. Reads docs/talk.yaml (theme reference), docs/narrative.md (structured slides), and the theme catalog from assets_path/themes/. Applies rubric-based variant selection, generates the PPTX via PptxGenJS, and writes layout decisions back to narrative.md with `# auto` markers.
+description: Use when generating the PPTX presentation file from an approved narrative. Reads docs/narrative.md and config.yaml's design_tokens, builds a per-slide brief, and delegates to document-skills:pptx for generation.
 allowed-tools:
   - Read
   - Write
-  - Edit
   - Bash
   - Glob
-  - Grep
   - Skill
 ---
 
-# Talk Slides — Generate PPTX from Theme + Narrative
+# Talk Slides — Generate PPTX via Official PPTX Skill
 
-Consumes a theme (from `talk-theme-builder`) and a narrative (from `talk-narrative`) to generate a professional PPTX presentation.
+Consumes a narrative (from `talk-narrative`) and design tokens (from the user's `config.yaml`) to generate a professional PPTX. **All actual PPTX generation is delegated** to the official `document-skills:pptx` skill — this skill is a thin orchestrator that produces a structured brief and hands off.
 
-## Important — PptxGenJS Rules
-
-### Layout dimensions (16:9)
-
-PptxGenJS has two 16:9 layouts with DIFFERENT dimensions. Always use the correct one:
-
-| Layout | Width | Height | Use case |
-|---|---|---|---|
-| `LAYOUT_16x9` | 10.0" | 5.625" | Standard (default) |
-| `LAYOUT_WIDE` | 13.333" | 7.5" | Widescreen |
-
-**Rule:** When using `LAYOUT_16x9`, set `SW=10.0, SH=5.625`. All coordinates and sizes must be proportional to these dimensions. Using 13.333 with LAYOUT_16x9 causes elements to be off-center and clipped. Adjust `CONTENT_Y_OFFSET` proportionally when switching between layouts.
-
-### Image placement — DO NOT use `sizing` property
-
-**`sizing: { type: "cover" }` and `sizing: { type: "contain" }` are broken in pptxgenjs.** The XML generated does not produce the expected behavior in PowerPoint. Images get distorted regardless of how you configure the sizing object.
-
-**Also broken:** Plain `addImage({ path, x, y, w, h })` stretches the image to fill the box exactly, ignoring aspect ratio.
-
-Instead, use these three strategies based on the `fit:` field in theme.yaml:
-
-#### Strategy A — `fit: cover` (galleries, grids, symmetric photos)
-
-Pre-crop the image to the exact box ratio with PIL before inserting. Use `smart_crop.py`:
-
-```javascript
-const VENV_PYTHON = `${process.env.CLAUDE_PLUGIN_DATA}/venv/bin/python3`;
-const PLUGIN_ROOT = process.env.CLAUDE_PLUGIN_ROOT;
-
-function imgCover(slide, imgPath, bx, by, bw, bh) {
-  const b = { x: bx * SW, y: by * SH, w: bw * SW, h: bh * SH };
-  const tmpPath = `/tmp/cover_${path.basename(imgPath,
-    path.extname(imgPath))}_${Math.round(b.w*100)}x${Math.round(b.h*100)}.jpg`;
-  execSync(`${VENV_PYTHON} "${PLUGIN_ROOT}/assets/scripts/smart_crop.py" "${imgPath}" ${b.w} ${b.h} "${tmpPath}"`);
-  slide.addImage({ path: tmpPath, x: b.x, y: b.y, w: b.w, h: b.h });
-}
-```
-
-Result: image center-cropped to box ratio, fills box exactly, no distortion.
-
-#### Strategy B — `fit: contain` (charts, diagrams, tables, single clinical photos)
-
-Calculate display dimensions from the image's real aspect ratio and center within the box:
-
-```javascript
-function imgContain(slide, imgPath, bx, by, bw, bh) {
-  const b = { x: bx * SW, y: by * SH, w: bw * SW, h: bh * SH };
-  const out = execSync(
-    `${VENV_PYTHON} -c "from PIL import Image; im=Image.open('${imgPath}'); print(im.width, im.height)"`
-  ).toString().trim();
-  const [iw, ih] = out.split(" ").map(Number);
-  const imgRatio = ih / iw;
-  const boxRatio = b.h / b.w;
-  let dw, dh;
-  if (imgRatio > boxRatio) { dh = b.h; dw = b.h / imgRatio; }
-  else                      { dw = b.w; dh = b.w * imgRatio; }
-  slide.addImage({
-    path: imgPath,
-    x: b.x + (b.w - dw) / 2,
-    y: b.y + (b.h - dh) / 2,
-    w: dw, h: dh
-  });
-}
-```
-
-Result: full image visible, centered in box, no distortion. May have whitespace around edges.
-
-#### Strategy C — Fullbleed backgrounds
-
-For images that cover the entire slide, use `slide.background` instead of `addImage`. PowerPoint handles this natively without distortion:
-
-```javascript
-// For dividers, ae.fullbleed-bg, full.no-caption
-slide.background = { path: "/absolute/path/to/image.jpg" };
-```
-
-#### Cleanup
-
-At the end of the generation script, remove temporary cropped files:
-
-```javascript
-execSync('rm -f /tmp/cover_*.jpg');
-```
-
-#### theme.yaml `fit:` mapping
-
-```yaml
-fit: cover    # → imgCover()   — gallery, timeline, compare, symmetric photos
-fit: contain  # → imgContain() — charts, tables, diagrams, single image
-# no image slot — use slide.background for fullbleed backgrounds
-```
-
----
+The official skill is *guidance-style*: it returns PptxGenJS tutorials. After invoking it, you (Claude) write a per-deck `build.js` script following its patterns, run it via Node, and run the visual QA loop.
 
 ## When this runs
 
 - After `talk-narrative` has produced `docs/narrative.md`
 - When user wants to generate or regenerate `presentation.pptx`
-- Triggers: "generar slides", "crear pptx", "generate the presentation", "hacer el pptx"
+- Triggers: "generar slides", "crear pptx", "generate the presentation"
 
 ## Prerequisites
 
-- `docs/talk.yaml` exists with `theme:` field pointing to an existing theme
-- `docs/narrative.md` exists with slides using the 18 canonical roles
-- Theme exists at `${user_config.assets_path}/themes/<theme-id>/theme.yaml`
-- Python 3 via plugin venv: always use `${CLAUDE_PLUGIN_DATA}/venv/bin/python3` (auto-created by SessionStart hook). Fall back to `python3` only if venv is unavailable.
-- Node.js + PptxGenJS installed (auto by hooks)
+- `docs/narrative.md` exists with slides using the 12 canonical types (see `talk-narrative` reference)
+- `${user_config.assets_path}/config.yaml` exists with a `design_tokens:` section
+- The `document-skills:pptx` skill is available in the session (ships with the `claude-plugins-official` `document-skills` plugin)
+- Node.js + globally installed `pptxgenjs` (per the official skill's setup: `npm install -g pptxgenjs`)
+- `${CLAUDE_PLUGIN_DATA}/venv/bin/python3` available with `python-pptx` (used for output verification)
 
 ## Workflow
 
-The skill proceeds through these phases:
+### Phase 1: Load and validate
 
-1. **Load** — read talk.yaml, narrative.md, theme.yaml; validate
-2. **Migrate** (if needed) — detect legacy narrative format and offer to update
-3. **Select** — apply rubric to pick a variant per slide, write back with `# auto`
-4. **Quality check** — LLM review of variant choices
-5. **Generate** — invoke PptxGenJS script to produce presentation.pptx
-6. **Protect** — detect Keynote edits, offer backup before overwrite
-7. **Report** — write layout-decisions.md with reasoning
+**Step 1.1:** Read `docs/talk.yaml` for topic, duration, language.
 
----
+**Step 1.2:** Read `${user_config.assets_path}/config.yaml`. Extract the `design_tokens:` block. If missing, abort with:
 
-## Phase 1: Load
+> "❌ Tu `config.yaml` no tiene una sección `design_tokens:`. Corre `/talk-builder:talk-setup` para configurar colores y fuentes, o edita el archivo a mano."
 
-**Step 1:** Read `docs/talk.yaml`. Check for `theme:` field.
-- If missing or empty → ask user:
-  > "`docs/talk.yaml` no tiene un `theme:` definido. ¿Cuál quieres usar? Temas disponibles en `${user_config.assets_path}/themes/`:"
-  List available themes.
+**Step 1.3:** Read `docs/narrative.md`. Parse each slide as a record with:
+- `type` (one of the 12 canonical types — see "Valid types" below)
+- typed content fields per type (see "Field schema by type")
+- speaker-facing fields (`speaker`, `context`, `bridge`, `ref`, `section`, `type_line`) — read but not used in the brief
 
-**Step 2:** Load and validate theme:
-```bash
-python3 "${CLAUDE_PLUGIN_ROOT}/assets/scripts/load_theme.py" \
-  "${user_config.assets_path}/themes/${THEME_ID}/theme.yaml"
-```
-If validation fails → report error and exit.
+**Step 1.4:** Validate every slide:
+- `type` must be one of the 12 canonical types
+- All required fields for that type must be present and non-empty
+- All `image` / `chart_image` / `image_*` / `image_full` paths must point to existing files (resolve relative to CWD, then convert to absolute paths for the brief)
 
-**Step 3:** Parse narrative.md:
-```bash
-python3 -c "
-import sys, json
-sys.path.insert(0, '${CLAUDE_PLUGIN_ROOT}/assets/scripts')
-from parse_narrative import parse_narrative
-slides = parse_narrative('docs/narrative.md')
-json.dump(slides, open('/tmp/parsed_slides.json', 'w'), indent=2)
-print(f'Parsed {len(slides)} slides')
-"
-```
+**If validation fails**, list every error grouped by slide and abort. Example:
 
-**Step 4:** Summary to user:
-> "✅ Cargado:
-> - Tema: `${THEME_ID}` con X roles + Y variantes
-> - Narrativa: N slides parseados
+> "❌ Errores en `docs/narrative.md`:
+>  - Slide 5 (type=assertion-evidence): falta `image`
+>  - Slide 8 (type=patient-case): tipo legacy. Mapea a `assertion-evidence` (ver CHANGELOG 2.0).
+>  - Slide 12 (type=chart): `chart_image` apunta a `images/missing.png` (no existe).
 >
-> Siguiente: {Migrate if legacy | Select variants}"
+> Edita docs/narrative.md y volvé a correr /talk-slides."
 
----
+### Phase 2: Keynote-edit protection
 
-## Phase 2: Migrate (only if legacy format detected)
+If `presentation.pptx` exists in CWD and was modified after the last generation (compare mtime against `docs/slides-decisions.md` mtime if it exists, otherwise just warn):
 
-**Detection:** A narrative is legacy if any slide has a `Type:` value NOT in the 18 canonical roles (see `references/role-taxonomy.md`).
+> "⚠️ `presentation.pptx` parece editado a mano (probablemente Keynote).
+>  Regenerar lo va a sobrescribir. Opciones:
+>  - **(a) Continuar** — perdés ediciones manuales
+>  - **(b) Backup primero** — copio a `presentation.backup-YYYY-MM-DD-HHMM.pptx`
+>  - **(c) Cancelar**"
 
-**Step 1:** Check all slides' types:
-```bash
-python3 -c "
-import sys
-sys.path.insert(0, '${CLAUDE_PLUGIN_ROOT}/assets/scripts')
-from parse_narrative import parse_narrative
-slides = parse_narrative('docs/narrative.md')
-canonical = {'title','disclosure','agenda','section-divider','assertion-evidence',
-             'patient-case','methodology','data-chart','data-table','comparison',
-             'quote-pullout','image-fullbleed','image-gallery','timeline-process',
-             'key-takeaway','poll-question','contact','closing'}
-unknowns = [(s['slide_number'], s.get('type','')) for s in slides if s.get('type') not in canonical]
-if unknowns:
-    for sn, t in unknowns:
-        print(f'Slide {sn}: {t!r}')
-"
+If (b): `cp presentation.pptx "presentation.backup-$(date +%Y-%m-%d-%H%M).pptx"` then continue.
+
+### Phase 3: Build the brief
+
+For each slide, build a brief entry. The complete brief format is documented inline below.
+
+**Brief structure (passed as prose to the official skill):**
+
+```
+Create a PPTX file at <ABSOLUTE_PATH>/presentation.pptx with N slides.
+
+Use these design tokens for ALL slides:
+  - primary color: <design_tokens.color.primary>
+  - accent color: <design_tokens.color.accent>
+  - text color: <design_tokens.color.text>
+  - background color: <design_tokens.color.background>
+  - muted color: <design_tokens.color.muted>
+  - heading font: <design_tokens.typography.heading_font>
+  - body font: <design_tokens.typography.body_font>
+
+Use slide layout 'LAYOUT_WIDE' (13.333" × 7.5") for all slides.
+
+General rules:
+  - Do not add accent lines under titles (this is a hallmark of AI-generated slides)
+  - Do not add decorative elements that weren't requested
+  - One message per slide
+  - Use the heading font for all titles, headlines, and big numbers
+  - Use the body font for all body text, captions, attributions
+  - Default text color is the text token; muted color is for secondary text only
+  - For images: compute width/height manually from source aspect ratio. Never use pptxgenjs `sizing: { type: 'cover' | 'contain' }` — it produces broken XML.
+
+Slides:
+
+1. <type>:
+   <fields rendered as instructions per type — see field-rendering rules>
+
+2. <type>:
+   ...
 ```
 
-**Step 2:** If unknowns exist, ask user:
+**Field-rendering rules per type** (each type expands to instruction prose):
 
-> "Esta presentación usa formato anterior. Detecté Types no canónicos:
-> {list}
->
-> ¿Migrar al sistema nuevo? Esto:
-> - Mapea Types viejos a los 18 roles canónicos
-> - Crea backup en `docs/narrative.legacy-backup.md`
-> - Te muestra cambios propuestos antes de aplicar
->
-> (yes/no/cancel)"
+- `title`: instructions for a title slide with `title` (large, heading font, primary color), `author` (medium, text color, body font), `affiliation` (small, muted), optional `subtitle` (between title and author), optional `date` (small, muted, bottom).
+- `text-list`: a slide with `title` at top (heading font, primary color) and a numbered list of `items` below (body font, text color).
+- `divider`: dark background slide. `section_label` small at top (accent color, heading font, uppercase). `section_title` large centered (heading font, white or background-inverted color). Optional `teaser` smaller below in muted italic.
+- `assertion-evidence`: full-sentence `headline` at top (~32pt, heading font, text color), `image` on the right ~40% width (contained, no distortion, no stretching), optional `caption` below image (10pt, muted, body font).
+- `assertion-evidence-left`: same as above but image on the left.
+- `chart`: `headline` at top, `chart_image` fullwidth below (contained). Optional `caption`.
+- `callout`: `big_text` huge centered (60-80pt, heading font, accent or primary color), `sub_label` small below (muted, body font).
+- `quote`: `quote_text` large centered italic (~28pt, heading font), `attribution` smaller below right-aligned (muted, body font), optional decorative quote marks in primary color.
+- `comparison`: `headline` at top, two columns equal width. Each column has `<side>_label` (small, accent color, heading font) and `<side>_content` below (body font, text color). Vertical separator in muted color.
+- `gallery`: `headline` at top, 2×2 grid of `image_1`-`image_4` (each contained, equal box). Optional `caption` at bottom.
+- `fullbleed`: `image_full` covers entire slide. If `overlay_text`, overlay it bottom-third in white (or dark if image is light) with a semi-transparent dark band behind for legibility.
+- `closing`: `main_text` centered large (heading font, primary color), `contact_info` smaller below (muted, body font).
 
-**Step 3:** If yes:
-- Create backup: `cp docs/narrative.md docs/narrative.legacy-backup.md`
-- For each unknown Type, propose mapping based on semantic similarity:
-  - "bullets", "list" → `agenda` or `key-takeaway`
-  - "intro" → `title`
-  - "divider", "section" → `section-divider`
-  - "conclusion", "summary" → `key-takeaway`
-  - (catch-all) → ask user per slide
-- Show proposed changes as a table, ask for confirmation
-- Apply changes via Edit tool, line by line
+After validation, ALL image paths in the brief must be absolute paths.
 
-**Step 4:** If no → proceed with warning that some slides may fail variant selection.
+### Phase 4: Delegate to `document-skills:pptx`
 
----
+Invoke the `Skill` tool with `document-skills:pptx`. Pass the full brief from Phase 3 as the `args` parameter. The skill loads its `pptxgenjs.md` guidance into context.
 
-## Phase 3: Select Variants
+Following that guidance, write a per-deck build script (e.g., `_build/build.js`) using PptxGenJS. Apply the brief slide-by-slide, honoring design_tokens and the per-type rendering rules. For images, always compute width/height manually from source aspect ratio (use Pillow via the venv if needed) — never use pptxgenjs's broken `sizing` property.
 
-**Step 1:** Run selection logic:
+Run the build script:
 
 ```bash
-python3 -c "
-import sys, json, yaml
-sys.path.insert(0, '${CLAUDE_PLUGIN_ROOT}/assets/scripts')
-from select_variant import select_variant
-
-slides = json.load(open('/tmp/parsed_slides.json'))
-theme = yaml.safe_load(open('${THEME_PATH}'))['theme']
-total = len(slides)
-decisions = {}
-reasons = {}
-previous = None
-for s in slides:
-    # Respect user-locked variants (has Variant: but not # auto)
-    if s.get('variant') and not s.get('variant_is_auto'):
-        decisions[s['slide_number']] = s['variant']
-        reasons[s['slide_number']] = 'user-locked (manual override)'
-    else:
-        chosen, reason = select_variant(s, theme, previous, total)
-        decisions[s['slide_number']] = chosen
-        reasons[s['slide_number']] = reason
-    previous = decisions[s['slide_number']]
-
-json.dump({'decisions': decisions, 'reasons': reasons}, open('/tmp/variant_decisions.json', 'w'), indent=2)
-print(f'Selected {len(decisions)} variants')
-" 2>&1
+cd _build && node build.js
 ```
 
-**Step 2:** Show user a summary:
+Verify `presentation.pptx` exists at the expected absolute path:
 
-> "🎯 Variantes seleccionadas para {N} slides:
->
-> | # | Type | Variant | Reason |
-> |---|---|---|---|
-> | 1 | title | title.centered | auto: first slide, no image |
-> | 2 | ae | ae.image-right | auto: image + short text |
-> | 5 | ae | ae.image-left | auto: pacing alternation |
-> | 8 | compare | compare.two-col-image | user-locked |
->
-> ¿Aplicar estas decisiones al narrative.md? (yes/no/preview)"
-
-**Step 3:** If user approves, write back:
-
-```bash
-python3 -c "
-import sys, json
-sys.path.insert(0, '${CLAUDE_PLUGIN_ROOT}/assets/scripts')
-from update_narrative import update_narrative_variants
-data = json.load(open('/tmp/variant_decisions.json'))
-decisions = {int(k): v for k, v in data['decisions'].items() if v}
-update_narrative_variants('docs/narrative.md', decisions)
-print('narrative.md updated')
-"
-```
-
----
-
-## Phase 4: Quality Check (LLM review)
-
-**Goal:** Review the full mapping for issues the rubric may have missed.
-
-Read `/tmp/variant_decisions.json` and `/tmp/parsed_slides.json`. Look for:
-
-1. **Consecutive same variants**: 3+ slides in a row with identical variant → suggest breaking up
-2. **Content-variant mismatch**: e.g., `ae.image-right` but slide has no image; `chart.single-key` but no chart mentioned
-3. **Missing required fields**: variant requires `image` slot but slide has no `Image:`
-4. **Variety**: if only 1-2 variants used across all AE slides, suggest alternatives
-
-Report findings:
-
-> "🔍 Quality check:
-> - {count} issues found
-> - {details}
->
-> Sugerencias:
-> - Slide 7-9 usan todos `ae.image-right`. Considera alternar con `ae.image-left` para variedad visual.
-> - Slide 12 usa `chart.single-key` pero no hay imagen. Verifica que el slide tenga una imagen de chart.
->
-> ¿Aplicar sugerencias, ignorar, o dejar al usuario decidir? (apply/ignore/review)"
-
-If apply → update decisions and re-run write-back.
-If ignore → continue.
-If review → pause for user input per-issue.
-
----
-
-## Phase 5-preamble: Keynote Edit Protection
-
-**Before running the generator**, check if an existing `presentation.pptx` was edited in Keynote (modified after last generation).
-
-**Step 1:** Check file timestamps:
-
-```bash
-if [ -f presentation.pptx ] && [ -f _build/generate_presentation.js ]; then
-    PPTX_MTIME=$(stat -f %m presentation.pptx)
-    SCRIPT_MTIME=$(stat -f %m _build/generate_presentation.js)
-    if [ "$PPTX_MTIME" -gt "$SCRIPT_MTIME" ]; then
-        echo "WARNING: presentation.pptx modified after last generation"
-    fi
-fi
-```
-
-**Step 2:** If warning triggers, ask user:
-
-> "⚠️ `presentation.pptx` fue editado después de la última generación (probablemente en Keynote).
->
-> Regenerar lo va a sobrescribir. Opciones:
-> - **(a) Continuar** — regenerar (perdería ediciones Keynote)
-> - **(b) Backup primero** — copiar a `presentation.backup-YYYY-MM-DD-HHMM.pptx` y regenerar
-> - **(c) Cancelar** — no regenerar"
-
-**Step 3:** If backup:
-```bash
-TIMESTAMP=$(date +%Y-%m-%d-%H%M)
-cp presentation.pptx "presentation.backup-${TIMESTAMP}.pptx"
-echo "Backup: presentation.backup-${TIMESTAMP}.pptx"
-```
-
-Then proceed to generation.
-
----
-
-## Phase 5: Generate PPTX
-
-**Step 1:** Copy the generator template to `_build/`:
-
-```bash
-mkdir -p _build
-cp "${CLAUDE_PLUGIN_ROOT}/assets/scripts/generate_presentation_template.js" _build/generate_presentation.js
-```
-
-**Step 2:** Fill in the template variables. Use sed or manual Edit:
-
-```bash
-THEME_PATH="${user_config.assets_path}/themes/${THEME_ID}/theme.yaml"
-SLIDES_JSON="/tmp/parsed_slides.json"
-IMAGES_DIR="$(pwd)/images"
-OUTPUT="$(pwd)/presentation.pptx"
-
-# Use sed to substitute (backup first)
-sed -i.bak \
-  -e "s|\${THEME_PATH}|${THEME_PATH}|g" \
-  -e "s|\${SLIDES_JSON_PATH}|${SLIDES_JSON}|g" \
-  -e "s|\${IMAGES_DIR}|${IMAGES_DIR}|g" \
-  -e "s|\${OUTPUT_PATH}|${OUTPUT}|g" \
-  _build/generate_presentation.js
-rm _build/generate_presentation.js.bak
-```
-
-**Step 3:** Run the generator:
-
-```bash
-NODE_PATH="${CLAUDE_PLUGIN_DATA}/node_modules" node _build/generate_presentation.js
-```
-
-Expected output: `Generated: /path/to/presentation.pptx`
-
-If fails with module error → reinstall dependencies:
-```bash
-cd "${CLAUDE_PLUGIN_DATA}" && npm install
-```
-
-**Step 4:** Verify file exists:
 ```bash
 ls -la presentation.pptx
 ```
 
----
+### Phase 5: Optional visual QA
 
-## Phase 6: Final Report + layout-decisions.md
+Ask the user:
 
-**Step 1:** Write `docs/layout-decisions.md` with per-slide reasoning:
+> "✅ `presentation.pptx` generado.
+>  ¿Querés que corra una inspección visual ahora? El skill oficial convierte el deck a JPGs y un subagent revisa por overflow, overlap, low contrast, leftover placeholders. Toma 1-2 min adicionales."
 
-```bash
-python3 -c "
-import json
-decisions = json.load(open('/tmp/variant_decisions.json'))
-lines = ['# Layout Decisions', '', 'Auto-generated by talk-slides.', '']
-lines.append('| Slide | Variant | Reason |')
-lines.append('|---|---|---|')
-for sn in sorted(int(k) for k in decisions['decisions']):
-    v = decisions['decisions'][str(sn)]
-    r = decisions['reasons'][str(sn)]
-    lines.append(f'| {sn} | {v or \"—\"} | {r} |')
-open('docs/layout-decisions.md', 'w').write(chr(10).join(lines))
-print('Wrote docs/layout-decisions.md')
-"
+If yes, follow the QA loop in the official skill's `SKILL.md` ("QA (Required)" section): convert to PDF/JPG via `soffice` + `pdftoppm`, dispatch a subagent with the standard QA prompt to inspect each slide, report findings, iterate fixes if user requests.
+
+If no, skip.
+
+### Phase 6: Final report
+
+**Step 6.1:** Write `docs/slides-decisions.md`:
+
+```markdown
+# Slides Decisions
+
+Generated by `/talk-slides` on YYYY-MM-DD via document-skills:pptx.
+
+| Slide | Type | Key content |
+|---|---|---|
+| 1 | title | "<title>" |
+| 2 | assertion-evidence | "<headline>" + image |
+| ... |
 ```
 
-**Step 2:** Final summary to user:
+**Step 6.2:** Tell the user:
 
 > "🎉 Presentación generada:
+>  - `presentation.pptx` — deck generado por document-skills:pptx
+>  - `docs/slides-decisions.md` — resumen de tipos por slide
+>  - `_build/build.js` — script PptxGenJS regenerable (editable para tweaks de bajo nivel)
 >
-> **Archivos:**
-> - `presentation.pptx` — deck generado
-> - `docs/layout-decisions.md` — razonamiento de cada slide
-> - `_build/generate_presentation.js` — script de generación (regenerable)
+>  Abre `presentation.pptx` en Keynote para pulido final.
 >
-> **Variantes usadas:** {count distinct} de {count total} slides
-> **Roles cubiertos:** {list}
->
-> **Siguiente:** Abre `presentation.pptx` en Keynote para ajustes finales de:
-> - Posición/tamaño de imágenes
-> - Tipografía fina
-> - Reemplazo de placeholders
->
-> Si quieres regenerar con cambios de variantes, edita `docs/narrative.md` (quita `# auto` de variantes que quieres lockear, cambia las que quieres override), y corre `/talk-slides` de nuevo."
+>  Para regenerar tras cambios en narrative, corre `/talk-slides` de nuevo."
+
+## Valid types (canonical 12)
+
+`title`, `text-list`, `divider`, `assertion-evidence`, `assertion-evidence-left`, `chart`, `callout`, `quote`, `comparison`, `gallery`, `fullbleed`, `closing`.
+
+Any other value in `type:` is a legacy format — see CHANGELOG 2.0 for the mapping.
+
+## Field schema by type
+
+| Type | Required | Optional |
+|---|---|---|
+| `title` | `title`, `author`, `affiliation` | `subtitle`, `date` |
+| `text-list` | `title`, `items` (list) | — |
+| `divider` | `section_label`, `section_title` | `teaser` |
+| `assertion-evidence` | `headline`, `image` | `caption` |
+| `assertion-evidence-left` | `headline`, `image` | `caption` |
+| `chart` | `headline`, `chart_image` | `caption` |
+| `callout` | `big_text`, `sub_label` | — |
+| `quote` | `quote_text`, `attribution` | — |
+| `comparison` | `headline`, `left_label`, `left_content`, `right_label`, `right_content` | — |
+| `gallery` | `headline`, `image_1`, `image_2`, `image_3`, `image_4` | `caption` |
+| `fullbleed` | `image_full` | `overlay_text` |
+| `closing` | `main_text`, `contact_info` | — |
