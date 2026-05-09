@@ -134,3 +134,17 @@ If the user already provided useful information in their message (topic, duratio
 The assets path is configured via the plugin's `userConfig` system. When the user enables the plugin, Claude Code prompts for `assets_path`. This value is available as `${user_config.assets_path}` and persists across plugin updates.
 
 If the user needs to change the path later, they can update it in their plugin settings or run `/talk-builder:talk-setup` again.
+
+## Gotchas
+
+### `libcairo` is a library, not a binary — don't use `which`
+
+The environment check tests for libcairo with `[ -f /opt/homebrew/lib/libcairo.2.dylib ]` (and fallback paths), not `which libcairo`. Files like `.dylib` aren't on PATH; `which` always returns missing. The actual install: `brew install cairo`.
+
+### Phase detection is purely file-based — empty `images/` does NOT mark Assets done
+
+Phase Detection checks `images/` non-empty (via `ls`). If the user creates `images/` but adds files later, the phase only flips when at least one file appears. Watch for this when guiding the user — the orchestrator's "Next step" remains "Assets" until something is in `images/`.
+
+### Legacy `Type:` values from v1 will hard-fail in `talk-slides`
+
+If `docs/narrative.md` was authored with v1 (18-role taxonomy), `talk-slides` aborts with a list of legacy types and points at the CHANGELOG migration table. Don't try to "fix forward" silently — the failure is intentional. The user should manually map per the CHANGELOG.

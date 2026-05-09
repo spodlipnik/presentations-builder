@@ -280,6 +280,24 @@ Generate `docs/narrative.md`:
 [Visual representation of the emotional rhythm across all slides, showing IS/CB oscillations and STAR moment position]
 ```
 
+## Gotchas
+
+### v1 had two type systems — v2 uses ONLY the 12 canonical types
+
+v1 had `Type:` with 7 narrative types in one place AND 18 canonical roles in another (a real contradiction in the same file). v2 collapses both into the 12 types listed in this file's schema. If a user shows you v1 narrative.md, treat the 18-role list as legacy and require migration before `talk-slides` will accept it.
+
+### `Variant:` and `# auto` syntax are gone — do NOT write them
+
+Earlier versions used `Variant: ae.image-right # auto` for rubric-driven layout selection. v2 has one layout per type. Writing `Variant:` lines into narrative.md does nothing useful and will confuse `talk-slides`.
+
+### The `speaker` field is for the speaker, NOT for talk-slides
+
+`talk-slides` builds the brief from `headline`, `image`, `caption`, etc. — the *typed* fields per slide. `speaker`, `context`, `bridge`, `ref`, `section`, and `type_line` are read but never appear on the slide. They're the speaker's preparation material. Don't try to compress information into `headline:` that should live in `speaker:`.
+
+### Image paths are resolved relative to the project CWD, not the assets path
+
+When you write `image: images/foo.png` in narrative.md, that's relative to the project directory (where `docs/` and `presentation.pptx` live), not relative to the user's `${assets_path}`. `talk-slides` converts these to absolute paths before delegating.
+
 ## After completion
 
 Tell the user: "Narrative approved! Next phase: Assets — creating and extracting the visual elements for each slide. Continue with /talk or /talk-builder:talk-assets."

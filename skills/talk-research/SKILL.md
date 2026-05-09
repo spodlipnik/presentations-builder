@@ -356,6 +356,24 @@ Before finalizing, verify:
 - References section is complete with journal, volume, issue, pages
 - Figures table is complete for the assets phase
 
+## Gotchas
+
+### NEVER read PDF files directly with Read — use `pdfs/extracted/<paper>.md`
+
+Reading raw PDFs with the `Read` tool wastes thousands of tokens and risks context overflow. The Docling extraction (`extract_pdfs.py`) produces structured markdown in `pdfs/extracted/` — use that. The only exception is the `pages` parameter on Read for visual figure inspection (max 10-15 pages total per project).
+
+### NEVER fabricate references — mark `[DOI: UNVERIFIED]` if uncertain
+
+A wrong DOI in a medical talk damages the speaker's credibility with specialists who know the literature. If you can't confirm a citation, write `[DOI: UNVERIFIED — check manually]` rather than guessing. Missing citation > fake citation.
+
+### MCP tools (PubMed, Consensus) are recommended but optional — degrade gracefully
+
+If `mcp__claude_ai_PubMed__search_articles` is unavailable, fall back to WebSearch but tell the user explicitly which tools you're using. Don't silently downgrade quality.
+
+### The Visual Elements Catalog feeds two downstream skills
+
+`docs/research.md` includes a Visual Elements Catalog (figures, tables, diagrams from each paper). Both `talk-narrative` (slide planning) and `talk-assets` (extraction) read it. If incomplete, slide planning misses options.
+
 ## After completion
 
 Tell the user: "Research complete! Next phase: Narrative — designing the slide structure and storytelling arc. Continue with /talk or /talk-builder:talk-narrative."

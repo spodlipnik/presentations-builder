@@ -114,6 +114,20 @@ Generate `docs/vision.md` in the current working directory. Write it as a cohesi
 [What makes this talk unique — the specific perspective, experience, or insight that no other speaker would bring to this topic]
 ```
 
+## Gotchas
+
+### Generic answers must be challenged, not accepted
+
+The first answer to "what's the core message?" is almost always too broad ("AI is useful in dermatology"). Don't write that into vision.md and move on — push back with a concrete probe ("That's true but generic. What's YOUR specific take?"). The vision phase fails when answers stay abstract.
+
+### Story thread can be deferred — don't force one if the user has none
+
+If the user doesn't have a personal story, do NOT invent one or pressure them. Note in vision.md that one will be sought during research, then proceed. The research phase often surfaces a thread (a striking case in a paper, a counterintuitive finding) that becomes the talk's spine.
+
+### Language priority: user's writing language > config.language
+
+If the user writes in Spanish but config.language is "en", use Spanish. Config is fallback for ambiguous short messages only ("/talk-vision"). Never override the user's evident language.
+
 ## After completion
 
 Tell the user: "Vision captured! This will guide every decision from here — which papers to include, how to structure the narrative, and what emotional arc to build. Next phase: Research. Continue with /talk or /talk-builder:talk-research."

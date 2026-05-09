@@ -100,6 +100,16 @@ created: "<ISO date>"
 
 Also create `docs/`, `pdfs/`, and `images/` directories if they don't exist.
 
+## Gotchas
+
+### Re-asking questions the user already answered ruins trust
+
+If the user's first message contains topic, duration, audience — acknowledge what's already provided BEFORE asking the next question. Re-asking generates frustration that compounds. Always parse the initial message before starting the question flow.
+
+### `theme:` field is gone in v2 — don't add it back to talk.yaml
+
+talk.yaml schema dropped `theme:` in v2.0. Some users may have v1-era talk.yaml files with a stray `theme:` field — it's harmless (talk-slides ignores it) but don't write new ones.
+
 ## After completion
 
 Tell the user: "Briefing complete! Next phase: Vision — defining your personal angle and message. Continue with /talk or /talk-builder:talk-vision."

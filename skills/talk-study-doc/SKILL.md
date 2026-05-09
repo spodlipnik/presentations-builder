@@ -155,6 +155,24 @@ For each weak point: what to say if challenged, and what NOT to say.]
 - **Bullet lists ONLY for "Key data" sections** — the numbers the speaker must memorize. Everything else is prose.
 - **Honest about limitations.** If a study is weak, say so. The speaker's credibility depends on knowing their own weak points.
 
+## Gotchas
+
+### Output is review-article PROSE, not bullet lists
+
+Bulleted output is the easy default but wrong here. The study document should read like a medical journal review: paragraphs with transitions, mechanism explanations, controversies. The ONLY exception is the "Key data" sub-sections — there bullets are correct because the speaker must memorize specific numbers.
+
+### Length scales with talk duration — don't write a textbook
+
+Target: 2,500-4,000 words for a 20-minute talk. Scale roughly proportionally for shorter/longer (e.g., ~1,500 for a 10-min talk, ~6,000 for 40 min). Going past 6,000 words means the speaker won't actually re-read it — defeating the purpose.
+
+### Self-test answers must appear at the END, not next to questions
+
+The active recall mechanism only works if the speaker struggles to remember before checking. Inline answers turn it into passive re-reading. Group all self-test answers in a single "## Self-Test Answers" section at the document's end.
+
+### Be honest about evidence weak points
+
+If a study is monocentric, low-N, or controversial, say so in the "Evidence Weak Points" section. The speaker's credibility comes from KNOWING the limitations, not hiding them. Bluffing on stage is worse than acknowledging uncertainty.
+
 ## After completion
 
 Tell the user: "Study document generated! Use it to prepare — review one section per day starting 4 weeks before the talk, and do the self-tests without looking at the answers. Next phase: Speaker Script. Continue with /talk or /talk-builder:talk-script."

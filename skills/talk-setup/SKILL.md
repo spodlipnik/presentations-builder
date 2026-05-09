@@ -140,6 +140,20 @@ design_tokens:
 
 Show the user a summary of their configuration — the language, complexity level, narrative style, and design_tokens (primary/accent colors, heading/body fonts). Then suggest: "Configuración completa. Empezá una nueva presentación con `/talk-builder:talk`."
 
+## Gotchas
+
+### Empty `${user_config.assets_path}` blocks every other skill
+
+Every skill (including the orchestrator) bails out if `${user_config.assets_path}` is unset or its directory doesn't exist. If the user reports "every command says 'No assets path configured'", the fix is the plugin setting (`/plugin` UI) or running `/talk-builder:talk-setup` again.
+
+### Design tokens — empty answers should fall back to defaults, not blank values
+
+If the user just hits enter on a design_tokens question (e.g., text color), use the documented default (#1A1A1A, #FFFFFF, etc.) rather than writing an empty string. An empty `text:` field in config.yaml will silently fail rendering downstream.
+
+### v1 `themes/` directory is obsolete in v2.0+ — do NOT recreate it
+
+The v1 wizard created `${assets_path}/themes/`. v2 ignores it. If the user's assets dir already has a `themes/` directory from v1, leave it alone (it's harmless, but recreating it is misleading). All visual style now lives in `config.yaml > design_tokens`.
+
 ## Reconfiguration
 
 If the user already has a config and runs `/talk-setup` again, read the existing config first and show them their current settings. Ask which sections they want to update. Do not overwrite unchanged sections.

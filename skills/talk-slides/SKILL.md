@@ -203,3 +203,25 @@ Any other value in `type:` is a legacy format — see CHANGELOG 2.0 for the mapp
 | `gallery` | `headline`, `image_1`, `image_2`, `image_3`, `image_4` | `caption` |
 | `fullbleed` | `image_full` | `overlay_text` |
 | `closing` | `main_text`, `contact_info` | — |
+
+## Gotchas
+
+### `document-skills:pptx` is guidance-style, NOT a one-shot generator
+
+Invoking the skill returns its `pptxgenjs.md` tutorial in your context. YOU then write a per-deck `_build/build.js` following that guidance and run it via Node. Don't expect the skill to produce a `.pptx` autonomously from a single Skill call — that's not how it works.
+
+### Never use PptxGenJS `sizing: { type: 'cover' | 'contain' }` for images
+
+These options produce broken XML. Pre-compute width/height manually from the source aspect ratio (use Pillow via the venv: `from PIL import Image; w, h = Image.open(p).size`). Then pass exact `w, h` to `slide.addImage()`. Documented at length in the spike findings.
+
+### Legacy `Type:` values must hard-fail with the migration table
+
+If `narrative.md` contains v1 types like `patient-case`, `data-chart`, `quote-pullout` — list every offending slide and point at CHANGELOG 2.0's mapping table. Don't try to silently translate; the user's intent for borderline cases (e.g., `data-table` → `comparison` vs `chart`) requires their decision.
+
+### `LAYOUT_WIDE` is 13.333"×7.5" — coordinate ALL math to those dimensions
+
+PptxGenJS has multiple 16:9 layouts with different actual sizes. We standardize on `LAYOUT_WIDE` (13.333" × 7.5"). Mixing layouts within a single deck or using LAYOUT_16x9 dimensions inside a LAYOUT_WIDE deck causes off-center clipping with no visible warning.
+
+### The brief's image paths must be ABSOLUTE before delegation
+
+`narrative.md` uses paths relative to the project CWD (e.g., `images/foo.png`). The official skill needs absolute paths to find the files when `_build/build.js` runs. Phase 1.4 of this skill is the place to convert.

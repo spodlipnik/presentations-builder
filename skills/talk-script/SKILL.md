@@ -95,6 +95,24 @@ let it land.]
 - [ ] Language matches `docs/narrative.md`
 - [ ] No new content invented — only reformatted from narrative
 
+## Gotchas
+
+### This skill creates ZERO new content — it only reformats `speaker:` fields
+
+Every word in the teleprompter must come from `narrative.md > speaker:`. If a slide's speaker text is missing, fix that in narrative.md first. Never invent speaker dialogue at the script phase.
+
+### 5-7 words per line is for breathing rhythm, not for prose density
+
+Resist the urge to fit more text per line "to save space." The format exists so the speaker can scan one line at a glance and breathe. Cramming 10-12 words per line breaks the cadence.
+
+### `[PAUSE]` and `[LONG PAUSE]` are EARNED, not decorative
+
+Place pauses at: end of an emotionally weighted statement, before a STAR moment, after a rhetorical question. Don't sprinkle them every few lines — they lose effect.
+
+### `[STAR MOMENT]` marker goes ONCE, at the right slide
+
+The narrative.md Meta section identifies the STAR moment slide. Mark THAT slide with `[STAR MOMENT]` and slow down the lines before/after. Multiple `[STAR MOMENT]` markers across a deck dilute the device.
+
 ## After completion
 
 Tell the user: "Teleprompter script ready! Use it for rehearsal — practice reading it aloud at speaking pace. Next: slides generation. Continue with /talk or /talk-builder:talk-slides."

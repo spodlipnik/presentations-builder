@@ -222,6 +222,24 @@ Every visual created by this skill must pass these checks:
 - **16:9:** Correct aspect ratio for slide insertion
 - **High resolution:** 300dpi PNG minimum for print/projection quality
 
+## Gotchas
+
+### `cairosvg` silently fails on macOS without `DYLD_FALLBACK_LIBRARY_PATH`
+
+Even with `brew install cairo` done, the macOS Command-Line-Tools Python doesn't search `/opt/homebrew/lib`. Importing cairosvg raises `OSError: no library called "cairo-2"`. The fix is to prepend `DYLD_FALLBACK_LIBRARY_PATH=/opt/homebrew/lib:/usr/local/lib:/opt/local/lib` to EVERY cairosvg invocation (see CHART command in this file). Don't rely on the user's shell config — make it explicit.
+
+### Design tokens come from `config.yaml > design_tokens`, NOT from a theme file
+
+v1 had `theme.yaml` per-theme. v2 deleted the entire theme system. Visual style now lives in `${user_config.assets_path}/config.yaml` under the `design_tokens:` section. If the user asks "where's my theme?", point them at config.yaml.
+
+### Pre-extracted images from Docling beat `pdftoppm`
+
+When `talk-research` ran Docling on the PDFs, it left figure images at `pdfs/extracted/<paper_name>/fig-*.png`. Use those first — they're cleaner than `pdftoppm` rasters of full pages and don't require cropping. Only fall back to `pdftoppm` if Docling missed the figure.
+
+### "Quality over quantity" is the active filter — 100 images = failure
+
+A 20-minute talk needs ~10-15 visuals. If you've extracted 50, something went wrong. Every visual must be didactic. Decorative images dilute the message and should be cut.
+
 ## After completion
 
 Tell the user: "Visual assets complete! You have [N] visuals ready and [N] AI illustrations pending. Generate those with Gemini using the prompt files in `images/`, then continue with /talk or /talk-builder:talk-study-doc."
