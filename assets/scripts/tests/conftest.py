@@ -1,9 +1,9 @@
 """Pytest fixtures — generates real PPTX files for integration testing."""
+
 import pytest
-from pathlib import Path
 from pptx import Presentation
-from pptx.util import Inches, Pt
 from pptx.dml.color import RGBColor
+from pptx.util import Inches, Pt
 
 
 @pytest.fixture
@@ -70,7 +70,6 @@ def multi_slide_pptx(tmp_path):
 @pytest.fixture
 def grouped_shapes_pptx(tmp_path):
     """PPTX with a group shape containing nested text boxes."""
-    from pptx.util import Emu
     prs = Presentation()
     prs.slide_width = Inches(13.333)
     prs.slide_height = Inches(7.5)

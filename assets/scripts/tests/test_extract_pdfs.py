@@ -1,6 +1,5 @@
 """Tests for extract_pdfs.py — helper functions only (no Docling required)."""
 
-import os
 import sys
 import time
 from pathlib import Path
@@ -10,8 +9,7 @@ import yaml
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from extract_pdfs import sanitize_filename, calculate_workers, needs_extraction, write_index
-
+from extract_pdfs import calculate_workers, needs_extraction, sanitize_filename, write_index
 
 # ---------------------------------------------------------------------------
 # sanitize_filename
