@@ -25,8 +25,7 @@ The official skill is *guidance-style*: it returns PptxGenJS tutorials. After in
 
 - `docs/narrative.md` exists with slides using the 12 canonical types (see `talk-narrative` reference)
 - `${user_config.assets_path}/config.yaml` exists with a `design_tokens:` section
-- The `document-skills:pptx` skill is available in the session (ships with the `claude-plugins-official` `document-skills` plugin)
-- Node.js + globally installed `pptxgenjs` (per the official skill's setup: `npm install -g pptxgenjs`)
+- The `document-skills:pptx` skill is available in the session (ships with the `claude-plugins-official` `document-skills` plugin) — it brings its own Node + pptxgenjs requirement; see that skill's setup docs (`npm install -g pptxgenjs`). Talk Builder itself owns no Node dependencies.
 - `${CLAUDE_PLUGIN_DATA}/venv/bin/python3` available with `python-pptx` (used for output verification)
 
 ## Workflow
@@ -44,10 +43,20 @@ The official skill is *guidance-style*: it returns PptxGenJS tutorials. After in
 - typed content fields per type (see "Field schema by type")
 - speaker-facing fields (`speaker`, `context`, `bridge`, `ref`, `section`, `type_line`) — read but not used in the brief
 
-**Step 1.4:** Validate every slide:
-- `type` must be one of the 12 canonical types
+**Step 1.4:** Validate every slide. Run the executable guard first:
+
+```bash
+${CLAUDE_PLUGIN_DATA}/venv/bin/python3 "${CLAUDE_PLUGIN_ROOT}/tools/validate_narrative.py" docs/narrative.md
+```
+
+If it exits non-zero, surface its stderr verbatim to the user and abort — do not attempt to fix-forward.
+
+The validator checks:
+- `type` must be one of the 12 canonical types (legacy v1 types hard-fail with CHANGELOG pointer)
 - All required fields for that type must be present and non-empty
-- All `image` / `chart_image` / `image_*` / `image_full` paths must point to existing files (resolve relative to CWD, then convert to absolute paths for the brief)
+- All `image` / `chart_image` / `image_*` / `image_full` paths must point to existing files (resolved relative to the narrative's project root)
+
+After it passes, convert relative image paths to absolute paths for the brief.
 
 **If validation fails**, list every error grouped by slide and abort. Example:
 

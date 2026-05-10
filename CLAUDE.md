@@ -8,7 +8,7 @@ Source for the **Talk Builder** Claude Code plugin (`.claude-plugin/plugin.json`
 
 The plugin is loaded into a user's Claude Code session; its skills act on the user's *current working directory* (their presentation project), not on this repo.
 
-**As of v2.0** (May 2026), `talk-slides` no longer generates PPTX itself — it delegates to the official `document-skills:pptx` skill (Anthropic's marketplace plugin). All theme/role/variant complexity has been removed.
+**As of v2.0**, `talk-slides` no longer generates PPTX itself — it delegates to the official `document-skills:pptx` skill (Anthropic's marketplace plugin). All theme/role/variant complexity has been removed. See `CHANGELOG.md` for dates.
 
 ## Repo layout
 

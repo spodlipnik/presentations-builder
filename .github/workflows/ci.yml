@@ -16,11 +16,11 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.9"
+          python-version: "3.11"
           cache: pip
 
       - name: Install system deps
-        run: sudo apt-get update && sudo apt-get install -y libcairo2-dev poppler-utils
+        run: sudo apt-get update && sudo apt-get install -y libcairo2-dev libpango-1.0-0 libgdk-pixbuf2.0-0 poppler-utils
 
       - name: Install Python deps
         run: |
@@ -29,9 +29,7 @@ jobs:
           pip install -r assets/scripts/requirements-dev.txt
 
       - name: Run pytest
-        run: |
-          cd assets/scripts
-          python -m pytest tests/ -v
+        run: python -m pytest -v
 
   lint:
     name: ruff
@@ -42,7 +40,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.9"
+          python-version: "3.11"
           cache: pip
 
       - name: Install ruff
@@ -60,7 +58,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.9"
+          python-version: "3.11"
 
       - name: Install validator deps
         run: pip install PyYAML

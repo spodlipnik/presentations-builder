@@ -21,7 +21,7 @@ Generate a teleprompter-format script from the approved narrative. This is an op
 
 ## Teleprompter Format Rules
 
-Read `${CLAUDE_SKILL_DIR}/references/teleprompter-format.md` for the complete formatting specification.
+Read `${CLAUDE_PLUGIN_ROOT}/skills/talk-script/references/teleprompter-format.md` for the complete formatting specification.
 
 Key rules:
 - **5-7 words per line** — natural breath breaks

@@ -31,18 +31,22 @@ After loading config successfully, run a quick environment verification **before
 ### Checks to run
 
 ```bash
-# 1. Python venv (with cairosvg added in v2.0)
+# 1. System python3 (the venv's python3 is a symlink to it; if missing,
+#    the venv check below would produce confusing follow-on errors)
+which python3 >/dev/null 2>&1 && echo "PYTHON3_OK" || echo "PYTHON3_FAIL"
+
+# 2. Python venv (with cairosvg added in v2.0)
 VENV="${CLAUDE_PLUGIN_DATA}/venv/bin/python3"
 if [ -x "$VENV" ] && "$VENV" -c 'import pptx, yaml, lxml, cairosvg' 2>/dev/null; then
-  echo "PYTHON_OK"
+  echo "VENV_OK"
 else
-  echo "PYTHON_FAIL"
+  echo "VENV_FAIL"
 fi
 
-# 2. System deps
+# 3. System deps
 which pdftoppm >/dev/null 2>&1 && echo "POPPLER_OK" || echo "POPPLER_FAIL"
 
-# 3. document-skills:pptx availability (best-effort — the Skill tool will fail gracefully if missing)
+# 4. document-skills:pptx availability (best-effort — the Skill tool will fail gracefully if missing)
 # No reliable shell check exists; talk-slides handles this at delegation time.
 ```
 

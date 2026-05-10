@@ -1,6 +1,7 @@
 config.yaml
 .DS_Store
 docs/superpowers/
+.claude/settings.local.json
 
 # Local dev workspaces (agent sessions, evals, scratch)
 evals/

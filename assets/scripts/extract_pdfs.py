@@ -67,11 +67,11 @@ def extract_single_pdf(args: tuple) -> dict:
     md_path = extracted_dir / f"{safe_name}.md"
     images_dir = extracted_dir / safe_name
 
-    result = {
+    result: dict = {
         "filename": Path(pdf_path).name,
         "title": Path(pdf_path).stem,
         "pages": 0,
-        "sections": 0,
+        "sections": [],
         "tables": 0,
         "figures": 0,
         "images_extracted": 0,

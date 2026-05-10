@@ -1,6 +1,13 @@
 [tool.ruff]
+# py39 matches the lowest Python users get from system python3 on macOS.
+# CI runs on 3.11 for forward-looking validation, but the codebase must remain
+# valid 3.9 syntax — bumping this to py311 surfaces UP017 (datetime.UTC) which
+# would break user venvs created from /usr/bin/python3 on macOS.
 target-version = "py39"
 line-length = 100
+# Belt-and-suspenders excludes for local workspaces and worktrees.
+# These are also in .gitignore; listed here so ruff doesn't lint them when
+# invoked manually outside a git checkout (e.g., agent worktrees).
 extend-exclude = [
     ".claude/worktrees",
     "talk-workspace",
@@ -21,3 +28,9 @@ ignore = [
 [tool.ruff.lint.per-file-ignores]
 "assets/scripts/tests/*.py" = ["B011"]  # assert False is fine in tests
 "tools/*.py" = []
+
+[tool.pytest.ini_options]
+testpaths = [
+    "assets/scripts/tests",
+    "tools/tests",
+]
