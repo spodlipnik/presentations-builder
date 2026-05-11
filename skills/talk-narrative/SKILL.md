@@ -102,7 +102,7 @@ This is the most detailed step. For EACH slide, specify these fields:
 - **type_line** (optional metadata, not used by talk-slides) — combines section label, timing, sparkline: `evidence | SECTION · SUBTOPIC | 60s | CB`. For your own pacing notes only.
 - **typed content fields** — depend on the `type`. See the schema table below.
 - **Image paths** — reference specific files from `docs/research.md`'s Visual Elements Catalog, or `[GENERATE]` for assets to be created in `/talk-assets`, or `[SPEAKER ADDS IN KEYNOTE]` for clinical photos only the speaker has.
-- **Speaker** — actual draft dialogue. Write it as the speaker would say it on stage: conversational, with emotional cues (pause), (slow down), (eye contact), (dramatic). Include exact data points with numbers. This becomes the raw material for the speaker script phase.
+- **Speaker** — actual draft dialogue. **Open with a scene, character, or sensory anchor — not with a citation. Weave the bridge into the final beat so the speaker never "lifts the pen" between slides. Reference the narrative thread by allusion or directly in middle slides, not only at the opening and closing.** Write it as the speaker would say it on stage: conversational, with emotional cues (pause), (slow down), (eye contact), (dramatic). Include exact data points with numbers. Citation (author/year/journal) lives in `ref:` — it does not need to open the speech. See `${CLAUDE_PLUGIN_ROOT}/references/storytelling-guide.md` section 6b for full rules and worked examples. This becomes the raw material for the speaker script phase.
 - **Context** — the comprehensive backstory for this slide. Study design, N patients, exact results with p-values, mechanism, why it matters for the narrative, limitations, connections to other slides. The speaker should be able to read ONLY this field and fully understand everything behind the slide — without opening `docs/research.md` or any paper. Write 3-6 sentences minimum for evidence slides. This is what the speaker reads on the plane before the conference to refresh their knowledge.
 - **Ref** — author, journal, year, DOI if available. For the speaker to cite on stage.
 - **Bridge** — the exact transition sentence or question to the next slide. Must feel natural, not mechanical. Vary bridge types (narrative, rhetorical question, contrast, callback, dramatic pause).
@@ -195,6 +195,9 @@ Before presenting to user, verify:
 - [ ] Every word on every slide earns its place — text supports the message, doesn't decorate
 - [ ] Every slide's 'type:' is one of the 12 canonical types.
 - [ ] Every slide has all required fields for its type (no empty 'image:' on assertion-evidence, etc.).
+- [ ] Every `speaker:` field opens with a scene/character/anchor — never with a journal-first citation
+- [ ] Every `speaker:` field ends with a beat that bridges to the next slide; `bridge:` field documents but does not replace the woven transition
+- [ ] Recurring motifs from the Narrative Thread surface at least 4–5 times across the deck (not only at slides 1–2, STAR, and close)
 
 ### Step 8: Present and save for review
 
