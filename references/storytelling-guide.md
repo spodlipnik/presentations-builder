@@ -254,6 +254,64 @@ These physical signals tell the audience: something new is beginning. Pay attent
 
 ---
 
+## 6b. Writing the Speaker Field — Scenes, Not Citations
+
+The `speaker:` field is not a methods section read aloud. It is what the speaker actually says on stage. Three rules turn data-delivery into story.
+
+### Rule 1 — Open each speaker beat with a scene or character
+
+A citation-first opener tells the audience "here comes a study". A scene-first opener pulls them in. The citation still appears in the `ref:` field; it does not need to open the speech.
+
+**Citation-first (avoid):**
+> "Tekchandani et al., Cureus 2025. 15 cases of rare dermatology, head-to-head comparison of GPT-4o vs Claude 3.7 vs Gemini 2.0..."
+
+**Scene-first (preferred):**
+> "September of last year. A team in the UK decides to do something almost morbid: put the three big models head-to-head against 15 cases of the kind that make you doubt at 11 PM..."
+
+The numbers, the trial design, the exact authorship — those still need to be spoken. But they land harder when the scene frames them. Use a temporal anchor ("last September"), a place ("a team in the UK"), or a character ("a resident on call"). Avoid opening on the journal name.
+
+### Rule 2 — Weave the bridge into the speaker's final beat
+
+The `bridge:` field is metadata. The actual transition must live inside the spoken text — the speaker should never "lift the pen" between slides. End each speaker section with a hook that loads the next slide: a rhetorical question, a contrast, a narrative pivot, a callback. Then `bridge:` documents the intent for the speaker's reference.
+
+**Mechanical (avoid):**
+> Speaker ends: "...86.7% diagnostic coverage. Clinical reasoning, not classification."
+> Bridge: "But what about real-world settings?"
+
+**Woven (preferred):**
+> Speaker ends: "...86.7% diagnostic coverage. Clinical reasoning, not classification. But 15 book cases are not your Thursday at 4 PM. What happens when you take it out of the lab?"
+> Bridge: (rhetorical question + contrast — loads slide N+1: real-world data)
+
+Vary bridge types across the deck. A bridge inventory worth aiming for in a 20-slide deck:
+- 3–4 narrative carries ("and then...")
+- 2–3 contrasts ("but...")
+- 2–3 rhetorical questions ("what happens when...?")
+- 1–2 callbacks ("remember the patient from the start...")
+- 1 dramatic pause (the speaker stops, then asks)
+
+A deck where every bridge is "And then..." reads as flat as a deck with no bridges.
+
+### Rule 3 — Plant and recall the narrative thread
+
+The `Narrative Thread` declared in the meta block is a promise. Honour it. A thread that appears only at slides 2, N/2 and N is not a thread — it is three isolated mentions. Plant the motif early with subtle references, echo it in the middle slides, peak it where the structure calls for it.
+
+If the thread is "the dermatologist at 11 PM", that phrase or its imagery should surface — explicitly or by allusion — at least 4–5 times across the deck. Each recurrence accumulates weight on the final invocation. A pattern that works:
+
+- **Slide 2 (opening):** plant the motif explicitly. "I was working at 11 PM..."
+- **Slides 6–8 (middle, first echo):** allude without naming. "...the kind of case that makes you doubt at 11 PM."
+- **Slides 12–15 (middle, second echo):** reference indirectly. "...you don't have a board member next to you at that hour."
+- **Slide N–1 or N (peak):** invoke fully. "And that's the dermatologist at 11 PM. That's who this matters for."
+
+### Quick check before finalising any speaker field
+
+- Does the first sentence open with a scene, a character, or a sensory anchor? (Not a citation, not a stat.)
+- Does the last sentence pull the audience toward the next slide?
+- Is at least one recurring motif of the narrative thread present or audible by allusion?
+
+If all three answer "yes", the slide will read on stage. If any answer "no", rewrite that field — the slide design and evidence may be impeccable, but the speaker text is what the audience actually hears.
+
+---
+
 ## 7. Advanced Narrative Patterns
 
 ### Patient Story Bookend
