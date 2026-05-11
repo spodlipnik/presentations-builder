@@ -2,6 +2,30 @@
 
 All notable changes to Talk Builder will be documented in this file.
 
+## [2.1.0] - 2026-05-11
+
+### Added
+
+- **Optional `stat` and `stat_label` fields on `assertion-evidence` / `assertion-evidence-left`** — when both are present, `talk-slides` renders a big-number callout on the side opposite the image, in accent color. This gives evidence slides a visual anchor without doubling the headline text. Fully backward-compatible: slides without these fields render the simpler headline+image layout. Documented in `.claude/rules/canonical-types.md` and `skills/talk-narrative/SKILL.md`.
+- **`talk-slides` field-rendering rules now codify layout coordinates** for every type — fixed image sizes (assertion-evidence: 6.0"×4.0"; uniform 3:2 pre-crop), grid math (gallery: 4:3 pre-cropped uniform cells), row computation (text-list per-item addText pairs with hanging indent), and winner emphasis (comparison panel + bold + delta indicators). Coordinates are inline in `skills/talk-slides/SKILL.md` Phase 3.
+- **Pre-crop step**: `talk-slides` instructs Claude to pre-crop assertion-evidence (3:2) and gallery (4:3) images via Pillow center-crop into `images/cropped/` before placing them. The venv already ships Pillow.
+- **New gotchas in `skills/talk-slides/SKILL.md`** documenting failure modes discovered during the v2.1 layout eval:
+  - pptxgenjs `bullet: { type: 'number' }` does not auto-increment reliably — bake numbers manually
+  - text-list rich-text arrays lose hanging indent on wrap — render each row as two separate `addText` calls
+  - Pre-cropping is the only path to a clean `gallery`; `sizing: cover/contain` is broken
+  - `gallery` caption Y must be computed from grid bottom, not slide bottom
+
+### Changed
+
+- **`comparison` rendering** — always differentiates the winner via three layers (panel + value weight + delta indicator). Previously rendered both columns identically. Non-breaking; existing `comparison` slides will simply look better.
+- **`text-list` vertical anchoring** — block now anchors to the upper third instead of leaving 1.5" of dead space between title and items. Numbered items use accent color for the number glyph, which also brings accent presence to more slides.
+- **`assertion-evidence` empty-side handling** — the side opposite the image is no longer accidental whitespace; it's either a `stat` callout (if narrative provides one) or intentional breathing room. The image is now a fixed 6.0"×4.0" rectangle for visual consistency across slides.
+
+### Notes
+
+- No schema migration needed. Existing `narrative.md` files continue to validate. The optional fields and rendering improvements are opt-in (for `stat`) or automatic-on-regenerate (for layout).
+- For the most consistent look, regenerate decks with `/talk-builder:talk-slides` after upgrading to v2.1.
+
 ## [2.0.0] - 2026-05-09
 
 ### Removed (BREAKING)

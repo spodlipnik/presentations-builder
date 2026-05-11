@@ -117,20 +117,52 @@ Slides:
    ...
 ```
 
-**Field-rendering rules per type** (each type expands to instruction prose):
+**Field-rendering rules per type** — these are codified from a layout eval and represent the canonical render contract. Layout coordinates assume LAYOUT_WIDE (13.333" × 7.5") throughout.
 
-- `title`: instructions for a title slide with `title` (large, heading font, primary color), `author` (medium, text color, body font), `affiliation` (small, muted), optional `subtitle` (between title and author), optional `date` (small, muted, bottom).
-- `text-list`: a slide with `title` at top (heading font, primary color) and a numbered list of `items` below (body font, text color).
-- `divider`: dark background slide. `section_label` small at top (accent color, heading font, uppercase). `section_title` large centered (heading font, white or background-inverted color). Optional `teaser` smaller below in muted italic.
-- `assertion-evidence`: full-sentence `headline` at top (~32pt, heading font, text color), `image` on the right ~40% width (contained, no distortion, no stretching), optional `caption` below image (10pt, muted, body font).
-- `assertion-evidence-left`: same as above but image on the left.
-- `chart`: `headline` at top, `chart_image` fullwidth below (contained). Optional `caption`.
-- `callout`: `big_text` huge centered (60-80pt, heading font, accent or primary color), `sub_label` small below (muted, body font).
-- `quote`: `quote_text` large centered italic (~28pt, heading font), `attribution` smaller below right-aligned (muted, body font), optional decorative quote marks in primary color.
-- `comparison`: `headline` at top, two columns equal width. Each column has `<side>_label` (small, accent color, heading font) and `<side>_content` below (body font, text color). Vertical separator in muted color.
-- `gallery`: `headline` at top, 2×2 grid of `image_1`-`image_4` (each contained, equal box). Optional `caption` at bottom.
-- `fullbleed`: `image_full` covers entire slide. If `overlay_text`, overlay it bottom-third in white (or dark if image is light) with a semi-transparent dark band behind for legibility.
-- `closing`: `main_text` centered large (heading font, primary color), `contact_info` smaller below (muted, body font).
+- `title`: `title` (large ~48pt, heading font bold, primary color, left-aligned at y≈2.3); optional `subtitle` between title and author (medium ~22pt italic, muted); `author` (medium ~20pt, text color); `affiliation` (small ~14pt, muted); optional `date` near bottom (small ~11pt, muted).
+
+- `text-list`: anchor (title + items) as a block in the upper third — don't let dead space accumulate between them.
+  - Title at y≈1.4 (heading font ~40pt, primary color, left-aligned).
+  - Items start at y≈2.7, each row spaced ~0.85"–1.05" apart.
+  - **CRITICAL**: render each item as TWO `addText` calls — one for the number, one for the text — in separate boxes so wrapped lines indent correctly under the item start. NEVER use a single rich-text array with embedded numbers; the wrap breaks to the left margin.
+  - Number in accent color (heading font, bold, ~22pt) on the left (x≈0.9, w≈0.55).
+  - Text in text color (body font, ~22pt) on the right (x≈1.45, w spans remainder).
+  - **NEVER use pptxgenjs `bullet: { type: 'number' }`** — it doesn't auto-increment reliably; the items either all show "1" or only the first gets numbered. Bake the numbers into your code (`${i+1}`).
+
+- `divider`: dark background (primary color). `section_label` small at top-third (accent, heading font, uppercase, `charSpacing: 6-8`). `section_title` large centered (heading font white, autosize so two-line titles don't visually outweigh single-line ones — clamp to a max ~48pt for long titles, ~54pt for short). Optional `teaser` smaller below (light gray for legibility on dark, italic body font).
+
+- `assertion-evidence` / `assertion-evidence-left`: workhorse with optional stat callout.
+  - **Pre-crop the image to 3:2 with Pillow center-crop** before placing (use the venv: `${CLAUDE_PLUGIN_DATA}/venv/bin/python3`). Save to `images/cropped/`. This keeps visual weight consistent across slides regardless of source aspect.
+  - Image at fixed **6.0" × 4.0"** (3:2). On `assertion-evidence`: right side (`x = 13.333 - 0.7 - 6.0 = 6.633`, `y ≈ 2.4`). On `-left`: left side (`x = 0.7`).
+  - Headline at top, full-width: `y ≈ 0.55`, `h ≈ 1.2`, ~24pt heading font bold, text color.
+  - Optional `caption` below image (10pt italic, muted).
+  - **If `stat` AND `stat_label` are both present**: render a callout on the side opposite the image. Big number ~130pt heading font bold in accent color (`y ≈ 2.6`, vertically centered with the image). Below it, `stat_label` in ~16pt body font, muted, single line. This callout pulls the eye and anchors the slide's message.
+  - If only one (or neither) of `stat`/`stat_label` is present, omit the callout. Just headline + image, with the free side as intentional whitespace.
+
+- `chart`: `headline` at top (heading font ~28pt, text color, full width at y≈0.6). `chart_image` centered, contained within an area ~11.5" × 4.4" below. Optional `caption` centered below in 10pt italic muted body font.
+
+- `callout`: `big_text` huge centered (~140-200pt depending on length, heading font bold, accent color). `sub_label` below in body font ~18pt, muted, centered, can wrap to a max of two lines. Background light.
+
+- `quote`: `quote_text` large centered italic (~28pt heading font), `attribution` smaller below right-aligned (~14pt body, muted). Optional decorative opening quote-mark glyph in primary color at high transparency (~85%) at top-left as visual texture.
+
+- `comparison`: emphasize the winner — never render two columns identically.
+  - `headline` at top (heading font ~30pt, text color, left-aligned).
+  - Subtle accent panel behind the winner column (transparency ~92, very low alpha) so the difference is visible without being garish.
+  - Vertical separator at x = slide_width/2 in muted, thin (0.75pt).
+  - Both labels in heading font ~13pt bold uppercase with `charSpacing: 6` — loser in muted gray, winner in accent.
+  - Render each row as a triplet: small label (body 13pt) + big value (heading 30-32pt) + delta indicator. On the loser side: muted color for both label and value, no delta. On the winner side: text color + bold for the value, accent color for the delta indicator (`▲ +13 pp`). If a "delta" represents a cost not a win (e.g., `+7s` more time), keep that one in muted to honestly signal the tradeoff.
+  - Today the canonical schema gives this content as flat `left_content` / `right_content` strings. If they contain newline-separated `label: value` pairs, split them into rows; otherwise render as-is.
+
+- `gallery`: 2×2 grid with UNIFORM cells — never let mixed source aspect ratios break the grid.
+  - **Pre-crop all 4 images to a single aspect ratio** (default 4:3) via Pillow center-crop. Save to `images/cropped/`. This is non-negotiable; without uniform crops the grid reads as four random photos.
+  - Cells at fixed size (e.g., `cellH = 2.35`, `cellW = cellH × 4/3 = 3.13`, `gap = 0.25`). Grid centered horizontally on the slide.
+  - Place each cropped image at the exact cell rectangle — `w` and `h` equal cell size — so the image fills the cell with no padding and no distortion (aspect already matches).
+  - **Caption position is computed from the grid bottom**, NOT a fixed slide-bottom Y — otherwise it overlaps images when the grid is sized differently. Use `captionY = gridY + 2*cellH + gap + 0.2`.
+  - `headline` at top (heading font ~24pt, text color), `caption` below grid (10pt italic muted, centered).
+
+- `fullbleed`: `image_full` covers the entire slide (`x:0, y:0, w:13.333, h:7.5`). If aspect doesn't match 16:9 exactly, accept letterboxing rather than distorting. If `overlay_text` present: render a semi-transparent dark rectangle (rgba ≈ 0,0,0,0.55 via `transparency: 45`) across the bottom ~1.5" of the slide, then `overlay_text` over it in white (~28pt heading font bold, left-aligned with 0.8" margin).
+
+- `closing`: `main_text` centered large (heading font ~80pt bold, primary color, at y≈2.4). `contact_info` smaller centered below (~18pt body, muted) using `breakLine` between fields.
 
 After validation, ALL image paths in the brief must be absolute paths.
 
@@ -234,3 +266,39 @@ PptxGenJS has multiple 16:9 layouts with different actual sizes. We standardize 
 ### The brief's image paths must be ABSOLUTE before delegation
 
 `narrative.md` uses paths relative to the project CWD (e.g., `images/foo.png`). The official skill needs absolute paths to find the files when `_build/build.js` runs. Phase 1.4 of this skill is the place to convert.
+
+### Numbered lists are unreliable in pptxgenjs — bake the numbers manually
+
+PptxGenJS `bullet: { type: 'number' }` does NOT auto-increment correctly across multiple items in a rich-text array. Behavior observed:
+- Per-item `options: { bullet: { type: 'number' } }` → every item renders as "1." (each starts a new list).
+- Top-level `bullet: { type: 'number' }` on the `addText` call → only the FIRST item gets numbered; rest have no number at all.
+
+For any numbered list (text-list slides, comparison row labels, etc.), bake the numbers into the code: `s.addText(\`\${i+1}\`, {...})` in a separate addText call per row. Don't rely on the bullet system for numbering.
+
+### Text-list wraps lose their hanging indent in rich-text arrays
+
+When using `addText([{...}, {...}])` with embedded "1.   ", "2.   " number prefixes in the same text run, wrapped lines reset to the leftmost text-box x (`x=0.9`), NOT under the start of the item text. This looks broken on items longer than one line.
+
+Fix: render each list item as TWO separate `addText` calls — one for the number (small left-side box), one for the text (wider right-side box that wraps within itself). Each item sits on its own row computed by `y = baseY + i * rowSpacing`.
+
+### Gallery requires pre-cropped images — there is no good in-place workaround
+
+PptxGenJS `sizing: { type: 'cover' | 'contain' }` produces broken XML and is forbidden (see gotcha above). Centering a contain-fit image inside a cell with mixed source aspect ratios produces a chaotic grid where each image floats at a different visible size — even with identical cell rectangles.
+
+The only path that yields a clean 2×2 gallery is **pre-cropping all 4 images to the same aspect ratio** via Pillow center-crop, then placing them at the exact cell rectangle (image fills cell, no distortion because aspect already matches). Default cell aspect: 4:3. Output to `images/cropped/` (gitignore-able). The venv has Pillow.
+
+### Caption Y on gallery must be computed from the grid bottom
+
+A fixed `captionY = 7.05` was the original (broken) approach — it overlapped the bottom row of images whenever the grid extended past that Y. Compute it from the actual grid layout: `captionY = gridY0 + 2*cellH + gap + 0.2`. This makes the caption follow wherever the grid actually ends.
+
+### Pre-crop assertion-evidence images to 3:2 — visual weight must be uniform
+
+Assertion-evidence is the workhorse type and gets used 5-15 times per deck. If the images have varying aspect ratios, the rendered image area varies too (slide N shows a 5.5×3.7 image, slide N+1 shows a 4×4 image), and the hierarchy reads inconsistently. Same fix as gallery: Pillow center-crop to 3:2 before placing, then use a FIXED 6.0"×4.0" rectangle on every assertion-evidence slide.
+
+### `stat` callout is opt-in via narrative.md fields
+
+The big-number callout on the side opposite the image is rendered ONLY when both `stat:` and `stat_label:` are present in the slide's narrative.md entry. If only one is present, ignore both (fall back to plain headline+image). This keeps the rule explicit and gives the narrative writer control over when the callout fires — for slides whose headline doesn't pivot on a single number, the callout would be artificial.
+
+### Comparison MUST differentiate the winner
+
+Two identical-looking columns defeat the purpose of `comparison`. Always render three layers of differentiation: (1) subtle accent panel behind the winner column, (2) winner values in bold + text color (loser values in muted), (3) per-row delta indicator in accent for wins, muted for cost-tradeoffs. A "+7s more time" delta should not visually celebrate itself the way a "+13 pp accuracy" delta does.

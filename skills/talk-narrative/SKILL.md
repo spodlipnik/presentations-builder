@@ -125,8 +125,8 @@ Every slide must have a `type:` set to one of these 12 values. Each type defines
 | `title` | Opening slide | `title`, `author`, `affiliation` | `subtitle`, `date` |
 | `text-list` | Disclosure / agenda / takeaways | `title`, `items` (list) | — |
 | `divider` | Section transition (dark bg) | `section_label`, `section_title` | `teaser` |
-| `assertion-evidence` | Headline + image right (workhorse) | `headline`, `image` | `caption` |
-| `assertion-evidence-left` | Headline + image left (variety) | `headline`, `image` | `caption` |
+| `assertion-evidence` | Headline + image right (workhorse) | `headline`, `image` | `caption`, `stat`, `stat_label` |
+| `assertion-evidence-left` | Headline + image left (variety) | `headline`, `image` | `caption`, `stat`, `stat_label` |
 | `chart` | Headline + chart fullwidth | `headline`, `chart_image` | `caption` |
 | `callout` | Big stat / number | `big_text`, `sub_label` | — |
 | `quote` | Pullout quote with attribution | `quote_text`, `attribution` | — |
@@ -134,6 +134,25 @@ Every slide must have a `type:` set to one of these 12 values. Each type defines
 | `gallery` | 2×2 image grid | `headline`, `image_1`, `image_2`, `image_3`, `image_4` | `caption` |
 | `fullbleed` | Single dominant image | `image_full` | `overlay_text` |
 | `closing` | Q&A / thanks / contact | `main_text`, `contact_info` | — |
+
+#### Stat extraction on assertion-evidence (recommended when headline carries a number)
+
+When an `assertion-evidence` or `assertion-evidence-left` slide's headline pivots on a single dominant number (e.g. `"miss roughly 15% of melanomas..."`, `"drops 22% under time pressure"`), extract it into two optional fields:
+
+- `stat`: the bare number, including unit. Examples: `"15%"`, `"22%"`, `"4-6"`, `"95%"`, `"$2.3M"`.
+- `stat_label`: one short line (≤ 60 chars) explaining what it counts. Examples: `"of melanomas missed in routine screening"`, `"drop in accuracy under time pressure"`.
+
+When both are present, `talk-slides` renders the number huge in accent color on the side opposite the image, giving the slide a visual anchor. The headline shrinks to a supporting role. **Reword the headline to drop the number when `stat` is set** — let the callout carry it. Example:
+
+```
+- **type:** assertion-evidence
+- **headline:** "Experienced dermatologists miss melanomas during routine screening"   # ← number removed
+- **stat:** "15%"
+- **stat_label:** "of melanomas missed in routine screening"
+- **image:** images/...
+```
+
+If the headline has no single dominant number (e.g. a structural claim, a qualitative finding), omit `stat`/`stat_label` and the slide renders the simpler headline+image layout.
 
 #### Choosing a type
 

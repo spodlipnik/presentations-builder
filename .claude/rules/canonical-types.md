@@ -20,8 +20,8 @@ The contract between `talk-narrative` (writer) and `talk-slides` (reader) is the
 | `title` | `title`, `author`, `affiliation` | `subtitle`, `date` |
 | `text-list` | `title`, `items` (list) | — |
 | `divider` | `section_label`, `section_title` | `teaser` |
-| `assertion-evidence` | `headline`, `image` | `caption` |
-| `assertion-evidence-left` | `headline`, `image` | `caption` |
+| `assertion-evidence` | `headline`, `image` | `caption`, `stat`, `stat_label` |
+| `assertion-evidence-left` | `headline`, `image` | `caption`, `stat`, `stat_label` |
 | `chart` | `headline`, `chart_image` | `caption` |
 | `callout` | `big_text`, `sub_label` | — |
 | `quote` | `quote_text`, `attribution` | — |
@@ -29,6 +29,10 @@ The contract between `talk-narrative` (writer) and `talk-slides` (reader) is the
 | `gallery` | `headline`, `image_1`, `image_2`, `image_3`, `image_4` | `caption` |
 | `fullbleed` | `image_full` | `overlay_text` |
 | `closing` | `main_text`, `contact_info` | — |
+
+### Optional `stat` / `stat_label` on assertion-evidence
+
+When the headline contains a single dominant number (`"miss roughly 15% of melanomas..."`), `talk-narrative` may extract it as `stat` (the number, e.g. `"15%"`) and a `stat_label` (one short line explaining what it counts, e.g. `"of melanomas missed in routine screening"`). Both fields together unlock the stat-callout rendering in `talk-slides`: the number renders huge in accent color on the side opposite the image, giving the slide a visual anchor without doubling the headline text. If only one of the two is provided, the field is ignored and the slide falls back to the simpler headline+image layout. When `stat` is used, rewrite the headline to NOT repeat the same number — let the callout carry it.
 
 ## Speaker-facing fields (NOT used by talk-slides)
 
